@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>과학탐구실험 교과 홈</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .nav-back {
+            margin-bottom: 20px;
+        }
+        .nav-back a {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 1.1em;
+        }
+        .nav-back a:hover {
+            text-decoration: underline;
+        }
+        .updates-section {
+            background-color: #e8f5e8;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 5px solid #27ae60;
+        }
+        .activities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .activity-card {
+            background-color: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .activity-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .activity-card h3 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+        .activity-card a {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 15px;
+            transition: background-color 0.3s;
+        }
+        .activity-card a:hover {
+            background-color: #0056b3;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .status.active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status.upcoming {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-back">
+            <a href="../">← 메인 포털로 돌아가기</a>
+        </div>
+        
+        <h1>🔬 과학탐구실험</h1>
+        
+        <div class="updates-section">
+            <h2>📋 최근 업데이트</h2>
+            <ul>
+                <li><strong>[2024-01-15]</strong> 수행평가 2차 일정 및 주제 공지</li>
+                <li><strong>[2024-01-10]</strong> 수행평가 1차 결과 발표</li>
+                <li><strong>[2024-01-05]</strong> 실험실 안전수칙 업데이트</li>
+            </ul>
+        </div>
+
+        <div class="activities-grid">
+            <div class="activity-card">
+                <h3>📊 수행평가 1차</h3>
+                <p>실험 설계 및 데이터 분석 활동</p>
+                <div class="status active">진행 완료</div>
+                <a href="assess-1/">결과 확인하기</a>
+            </div>
+            
+            <div class="activity-card">
+                <h3>🧪 수행평가 2차</h3>
+                <p>창의적 실험 프로젝트</p>
+                <div class="status upcoming">준비 중</div>
+                <a href="assess-2/">상세 정보</a>
+            </div>
+        </div>
+
+        <div style="margin-top: 40px; padding: 20px; background-color: #f1f3f4; border-radius: 10px;">
+            <h3>📚 학습 자료</h3>
+            <ul>
+                <li>실험 보고서 작성 가이드</li>
+                <li>안전 수칙 및 주의사항</li>
+                <li>과학 탐구 방법론</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

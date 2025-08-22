@@ -1,0 +1,230 @@
+/* 과학탐구실험 수행평가 1차 스타일 */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.nav-back {
+    background-color: #2d3436;
+    padding: 15px 30px;
+}
+
+.nav-back a {
+    color: #74b9ff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.nav-back a:hover {
+    color: #0984e3;
+}
+
+h1 {
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    color: white;
+    padding: 30px;
+    margin: 0;
+    text-align: center;
+    font-size: 2.2em;
+}
+
+.info-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 30px;
+    background-color: #f8f9fa;
+}
+
+.info-card {
+    background-color: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.info-card h2 {
+    color: #2d3436;
+    margin-bottom: 15px;
+    font-size: 1.3em;
+}
+
+.info-card ul {
+    list-style: none;
+}
+
+.info-card li {
+    padding: 8px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.info-card li:last-child {
+    border-bottom: none;
+}
+
+.status {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: bold;
+}
+
+.status.completed {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.experiment-details {
+    padding: 30px;
+}
+
+.experiment-details h2 {
+    color: #2d3436;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+}
+
+.experiment-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.materials, .procedure {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.materials h3, .procedure h3 {
+    color: #6c5ce7;
+    margin-bottom: 15px;
+}
+
+.materials ul, .procedure ol {
+    padding-left: 20px;
+}
+
+.materials li, .procedure li {
+    margin-bottom: 8px;
+}
+
+.results-section {
+    padding: 30px;
+    background-color: #f1f3f4;
+}
+
+.results-section h2 {
+    color: #2d3436;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.results-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.result-card {
+    background-color: white;
+    padding: 25px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.result-card h3 {
+    color: #6c5ce7;
+    margin-bottom: 15px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #74b9ff, #0984e3);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 500;
+    margin-top: 15px;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(116, 185, 255, 0.4);
+}
+
+.resources {
+    padding: 30px;
+}
+
+.resources h2 {
+    color: #2d3436;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.resource-links {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.resource-link {
+    display: inline-block;
+    padding: 12px 20px;
+    background-color: #00b894;
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.resource-link:hover {
+    background-color: #00a085;
+    transform: translateY(-2px);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .info-section,
+    .experiment-content,
+    .results-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .resource-links {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    h1 {
+        font-size: 1.8em;
+        padding: 20px;
+    }
+}
