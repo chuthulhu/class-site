@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>첨단 과학 기술 인포그래픽 활동 허브</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- ZIP 생성을 위한 라이브러리 추가 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- Google Fonts: Noto Sans KR -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* 기본 폰트 및 배경색 설정 */
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f3f4f6; /* light gray background */
+        }
+        /* --- 탭 버튼 스타일 (개선) --- */
+        .tab-button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem; /* 8px */
+            background-color: #e5e7eb; /* gray-200 */
+            padding: 0.5rem;
+            border-radius: 0.75rem; /* 12px */
+        }
+        .tab-button {
+            flex-grow: 1;
+            text-align: center;
+            padding: 0.75rem 0.5rem;
+            border-radius: 0.5rem; /* 8px */
+            font-weight: 500;
+            color: #4b5563; /* gray-600 */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .tab-button:hover {
+            background-color: #f9fafb; /* gray-50 */
+            color: #1f2937; /* gray-800 */
+        }
+        .tab-button.active {
+            background-color: #ffffff;
+            color: #3b82f6; /* blue-500 */
+            font-weight: 700;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        /* 탭 컨텐츠 보이기/숨기기 */
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        /* 아코디언(가이드) 스타일 */
+        .accordion-header button.open {
+            background-color: #eff6ff; /* blue-50 */
+            color: #2563eb; /* blue-600 */
+        }
+        .accordion-content {
+            transition: max-height 0.4s ease-out, padding 0.4s ease-out;
+            max-height: 0;
+            overflow: hidden;
+        }
+        .accordion-content.open {
+            max-height: 2000px; /* 충분한 높이 */
+        }
+        /* 활동지 입력 필드 스타일 */
+        .worksheet-container textarea, .worksheet-container input[type="text"], .worksheet-container select {
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .worksheet-container textarea:focus, .worksheet-container input[type="text"]:focus, .worksheet-container select:focus {
+            border-color: #3b82f6; /* blue-500 */
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+            outline: none;
+        }
+        /* 미리보기(리포트) 스타일 */
+        .report-page {
+            background-color: white;
+            padding: 2.5cm 2cm;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            color: #1f2937;
+        }
+        .report-main-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #111827;
+            padding-bottom: 1rem;
+        }
+        .report-section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111827;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #d1d5db;
+        }
+        .preview-text {
+            white-space: pre-wrap;
+            word-break: break-word;
+            min-height: 2.5em;
+            line-height: 1.8;
+            color: #374151;
+        }
+        .preview-placeholder {
+            color: #9ca3af;
+            font-style: italic;
+        }
+        /* 인쇄 설정 */
+        @page {
+            size: A4 portrait; /* A4 용지, 세로 방향 기본값 권장 */
+            margin: 2cm;      /* 모든 방향 여백 2cm 권장 */
+        }
+        @media print {
+            body * { visibility: hidden; }
+            .printable-area, .printable-area * { visibility: visible; }
+            .printable-area {
+                position: absolute; left: 0; top: 0;
+                width: 100%; padding: 0; margin: 0;
+                box-shadow: none; border: none;
+            }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+
+    <div class="max-w-5xl mx-auto">
+        <!-- 헤더 -->
+        <header class="text-center bg-white p-6 sm:p-8 rounded-xl shadow-lg mb-6 no-print">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">첨단 과학 기술 인포그래픽 활동 허브</h1>
+            <p class="text-lg text-gray-600 mt-2">세상을 바꾸는 기술, 명확한 정보 전달로 완성됩니다.</p>
+        </header>
+
+        <!-- 학생 정보 및 제출 기능 -->
+        <div class="bg-white p-6 sm:p-8 rounded-lg shadow-md mb-6 no-print">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex items-center space-x-2 flex-wrap justify-center">
+                     <input type="text" id="student_class" class="w-20 p-2 border border-gray-300 rounded-md text-center" placeholder="반">
+                    <label for="student_class" class="font-semibold">반</label>
+                    <input type="text" id="student_number" class="w-20 p-2 border border-gray-300 rounded-md text-center" placeholder="번호">
+                    <label for="student_number" class="font-semibold">번</label>
+                    <input type="text" id="student_name" class="w-32 p-2 border border-gray-300 rounded-md" placeholder="이름">
+                </div>
+                <div class="flex space-x-2 flex-wrap justify-center">
+                    <button id="download_zip_btn" class="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition text-sm">📦 ZIP으로 다운로드</button>
+                    <button id="delete_all_btn" class="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition text-sm">🗑️ 작성 내용 삭제</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 탭 네비게이션 -->
+        <div class="mb-8 no-print">
+            <div class="tab-button-group" aria-label="Tabs">
+                <button class="tab-button active" data-tab="tab1">1. 활동 소개</button>
+                <button class="tab-button" data-tab="tab2">2. 활동 개요</button>
+                <button class="tab-button" data-tab="tab3">3. 활동 가이드</button>
+                <button class="tab-button" data-tab="tab4">4. 활동지 작성</button>
+                <button class="tab-button" data-tab="tab5">5. 미리보기 및 제출</button>
+            </div>
+        </div>
+
+        <!-- 탭 컨텐츠 -->
+        <main>
+            <!-- Tab 1: 활동 소개 -->
+            <div id="tab1" class="tab-content active bg-white p-6 sm:p-8 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">🔬 활동 허브 이용 방법</h2>
+                <p class="text-gray-700 leading-relaxed mb-8">
+                    이 활동 허브는 여러분이 복잡한 '첨단 과학 기술' 지식을 효과적인 '인포그래픽'으로 구성하는 전 과정을 돕기 위해 만들어졌습니다. 아래의 흐름에 따라 활동을 진행해 보세요.
+                </p>
+                <!-- 활동 흐름 인포그래픽 -->
+                <div class="flex flex-col md:flex-row items-center justify-between text-center gap-4 text-sm sm:text-base">
+                    <div class="flex flex-col items-center">
+                        <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center text-3xl">🖥️</div>
+                        <p class="font-bold mt-2">1. 활동 허브 접속</p>
+                        <p class="text-gray-600">안내 확인</p>
+                    </div>
+                    <div class="text-blue-300 font-bold text-2xl transform rotate-90 md:rotate-0">→</div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center text-3xl">📝</div>
+                        <p class="font-bold mt-2">2. 탭 순서대로 활동</p>
+                        <p class="text-gray-600">가이드 확인 및 작성</p>
+                    </div>
+                    <div class="text-blue-300 font-bold text-2xl transform rotate-90 md:rotate-0">→</div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center text-3xl">💾</div>
+                        <p class="font-bold mt-2">3. 자동 저장</p>
+                        <p class="text-gray-600">내용 안전하게 보관</p>
+                    </div>
+                    <div class="text-blue-300 font-bold text-2xl transform rotate-90 md:rotate-0">→</div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center text-3xl">📄</div>
+                        <p class="font-bold mt-2">4. 결과물 제출</p>
+                        <p class="text-gray-600">ZIP/PDF로 저장</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: 활동 개요 -->
+            <div id="tab2" class="tab-content bg-white p-6 sm:p-8 rounded-lg shadow-md space-y-10">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- 활동 목표 카드 -->
+                    <div class="bg-blue-50 border-l-4 border-blue-400 p-6 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-blue-400 text-white rounded-full flex items-center justify-center text-2xl mr-4 flex-shrink-0">🎯</div>
+                            <div>
+                                <h3 class="text-xl font-bold text-blue-800">활동 목표</h3>
+                                <p class="text-blue-700 mt-1">과학 지식을 쉽고 정확하게 전달하는 '과학 커뮤니케이터' 역량 기르기</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 인포그래픽 정의 카드 -->
+                    <div class="bg-green-50 border-l-4 border-green-400 p-6 rounded-lg">
+                         <div class="flex items-center">
+                            <div class="w-12 h-12 bg-green-400 text-white rounded-full flex items-center justify-center text-2xl mr-4 flex-shrink-0">📊</div>
+                            <div>
+                                <h3 class="text-xl font-bold text-green-800">인포그래픽이란?</h3>
+                                <p class="text-green-700 mt-1">정보, 데이터, 지식을 시각적으로 표현하여 정보를 빠르고 쉽게 전달하는 방법</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">참고 예시</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="border rounded-lg p-4 text-center bg-gray-50">
+                            <h4 class="font-semibold mb-2">전문적인 디자인 예시</h4>
+                            <img src="https://64.media.tumblr.com/b1fd7907a0e364fb5a0d2a6e9066c93d/a81902e0def03720-2d/s500x750/12903d244bf578bac44ff6f3fd4a282f878a0e35.pnj" alt="코로나19 디지털전환 인포그래픽" class="w-full rounded-md shadow-sm mb-4" onerror="this.onerror=null;this.src='https://placehold.co/500x750/E2E8F0/4A5568?text=Image+Not+Found';">
+                            <img src="https://64.media.tumblr.com/19295466e898d4fdc267875a6fb2cf99/a81902e0def03720-c1/s640x960/6cbaa1db78c21ee0ca96a54f5e939bbc8b551b00.pnj" alt="자율주행 인공지능 인포그래픽" class="w-full rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/640x960/E2E8F0/4A5568?text=Image+Not+Found';">
+                        </div>
+                        <div class="border rounded-lg p-4 text-center bg-gray-50">
+                            <h4 class="font-semibold mb-2">창의적인 손그림 예시</h4>
+                            <img src="https://64.media.tumblr.com/64b2d71659e0d330f2be88e3e3e98eb7/a81902e0def03720-29/s1280x1920/823142b2335d59d98ea4dfef7791a3db972e27b4.pnj" alt="태양계 인포그래픽" class="w-full rounded-md shadow-sm mb-4" onerror="this.onerror=null;this.src='https://placehold.co/600x400/E2E8F0/4A5568?text=Image+Not+Found';">
+                            <img src="https://64.media.tumblr.com/dd194f5d185038b7a8d8b8830fa12387/a81902e0def03720-48/s1280x1920/d1b61dbcb7c91f127bca93de25ccbcf3ce7dceef.pnj" alt="생명의 진화 인포그래픽" class="w-full rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/600x400/E2E8F0/4A5568?text=Image+Not+Found';">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: 활동 가이드 -->
+            <div id="tab3" class="tab-content bg-white p-6 sm:p-8 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold text-gray-800 mb-8 text-center">체계적인 활동을 위한 4단계 전략</h2>
+                <!-- 4단계 전략 카드 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                    <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                        <div class="w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-4xl mx-auto">💡</div>
+                        <h3 class="font-bold text-lg mt-4">질문 만들기</h3>
+                        <p class="text-gray-600 text-sm mt-1">탐구의 방향 설정</p>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                        <div class="w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-4xl mx-auto">📚</div>
+                        <h3 class="font-bold text-lg mt-4">정보 수집</h3>
+                        <p class="text-gray-600 text-sm mt-1">신뢰도 있는 자료 탐색</p>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                        <div class="w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-4xl mx-auto">🧩</div>
+                        <h3 class="font-bold text-lg mt-4">스토리 구성</h3>
+                        <p class="text-gray-600 text-sm mt-1">정보를 논리적으로 구조화</p>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                        <div class="w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-4xl mx-auto">🎨</div>
+                        <h3 class="font-bold text-lg mt-4">설계도 구체화</h3>
+                        <p class="text-gray-600 text-sm mt-1">아이디어 스케치</p>
+                    </div>
+                </div>
+                <div class="mt-12 space-y-2">
+                    <!-- Accordion Items -->
+                    <div class="accordion-item border rounded-lg">
+                        <div class="accordion-header"><button class="w-full text-left p-4 font-semibold text-lg text-gray-800 hover:bg-gray-50 flex justify-between items-center"><span>💡 1단계: 탐구의 시작: 구체적인 '질문' 만들기</span><svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button></div>
+                        <div class="accordion-content"><div class="p-4 pt-0 text-gray-700 space-y-4 text-base">
+                            <p>좋은 탐구는 명확하고 흥미로운 질문에서 시작됩니다. '인공지능'처럼 광범위한 주제보다는, 여러분의 흥미를 끄는 구체적인 '탐구 질문'을 만들어 보세요.</p>
+                            <div class="bg-gray-50 p-4 rounded-lg border">
+                                <h4 class="font-semibold text-gray-800">🔎 예시) 주제를 질문으로 바꾸기</h4>
+                                <p class="mt-2 text-gray-600">'유전자 편집 기술' ➡️ "유전자 가위 기술을 이용한 질병 치료의 잠재성과 윤리적 쟁점은 무엇일까?"</p>
+                            </div>
+                        </div></div>
+                    </div>
+                    
+                    <div class="my-2">
+                        <details class="bg-gray-50 rounded-lg border">
+                            <summary class="p-4 font-semibold cursor-pointer list-none flex justify-between items-center text-lg text-gray-800 hover:bg-gray-100">
+                                <span>주제 선정에 도움이 필요하다면? (예시 주제 목록)</span>
+                                <svg class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </summary>
+                            <div class="p-4 border-t grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-gray-600 text-base">
+                                <p>• 인공지능(AI)의 원리와 활용: AI와 인간 두뇌 비교, 분야별 AI활용 아이콘</p>
+                                <p>• 스마트폰 속 과학 기술: 스마트폰 내부 구조 일러스트, 기능별 기술 분해도</p>
+                                <p>• 재생에너지(태양광, 풍력 등)의 종류와 장단점</p>
+                                <p>• 우주 탐사의 역사: 시대별 우주선 그림, 각 탐사 기술의 성과 정리</p>
+                                <p>• 사물 인터넷(IoT)의 원리와 활용: 집 안에 있는 IoT 기기 지도, 작동 원리 순서도</p>
+                                <p>• 재난 대응 과학 기술: 재난 발생-&gt; 기술 대응 순서도, 기술별 특징 비교 도표</p>
+                                <p>• 탄소 중립을 위한 과학 기술: 탄소 배출 경로, 저감 기술 연결도, 기술별 탄소 저감 효과 그래프</p>
+                                <p>• 유전자 편집 기술(CRISPR): 유전자 편집 순서도, 기술 장단점 표</p>
+                                <p>• 로봇의 진화: 로봇 신체 구조와 센서 표시, 로봇 종류별 역할 나열</p>
+                                <p>• 전기차 vs 내연기관차 비교: 배출가스 비교, 연료 효율 도표</p>
+                                <p>• 대중교통의 지속 가능성: 교통수단별 탄소 배출량 그래프</p>
+                                <p>• 풍력 에너지의 작동 원리: 풍차 내부 구조, 지형별 바람 강도 비교</p>
+                                <p>• 태양광 발전의 원리와 장단점: 태양광 패널 구조, 전력 생산 비교 그래프</p>
+                                <p>• 스마트 그리드 시스템: 전력 흐름도, 일반 그리드와 비교</p>
+                                <p>• 에너지 효율 건축 기술: 단열 기술, 에너지 소비 전/후 비교</p>
+                                <p>• 탄소 포집 및 저장 기술(CCS): 탄소 흐름도, 저장 방식 비교</p>
+                                <p>• 해수면 상승을 막는 과학 기술: 해양 장벽 구조, 시나리오별 해수면 변화</p>
+                                <p>• 세포 배양육 vs 일반 축산: 환경 영향 비교, 생산 방식 그림</p>
+                                <p>• 수경재배와 스마트농업: 센서, 물 소비량 비교</p>
+                            </div>
+                        </details>
+                    </div>
+
+                    <div class="accordion-item border rounded-lg">
+                        <div class="accordion-header"><button class="w-full text-left p-4 font-semibold text-lg text-gray-800 hover:bg-gray-50 flex justify-between items-center"><span>📚 2단계: 신뢰도 있는 정보 수집하기</span><svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button></div>
+                        <div class="accordion-content"><div class="p-4 pt-0 text-gray-700 space-y-4 text-base">
+                            <p>정확하고 신뢰할 수 있는 정보는 인포그래픽의 설득력을 높이는 핵심 요소입니다. 아래와 같은 정보원을 활용하고, 출처를 꼭 기록하세요.</p>
+                            <div class="space-y-3">
+                                <div class="flex items-start"><span class="mr-3 text-2xl">🏛️</span><div><h4 class="font-semibold">정부 출연 연구기관</h4><p class="text-gray-600 text-sm"><a href="https://www.kist.re.kr" target="_blank" class="text-blue-600 hover:underline">KIST</a>, <a href="https://www.etri.re.kr" target="_blank" class="text-blue-600 hover:underline">ETRI</a> 등</p></div></div>
+                                <div class="flex items-start"><span class="mr-3 text-2xl">📖</span><div><h4 class="font-semibold">학술 정보 사이트</h4><p class="text-gray-600 text-sm"><a href="http://www.riss.kr" target="_blank" class="text-blue-600 hover:underline">RISS</a>, <a href="https://www.dbpia.co.kr" target="_blank" class="text-blue-600 hover:underline">DBpia</a></p></div></div>
+                                <div class="flex items-start"><span class="mr-3 text-2xl">📰</span><div><h4 class="font-semibold">공신력 있는 과학 매체</h4><p class="text-gray-600 text-sm"><a href="https://www.dongascience.com" target="_blank" class="text-blue-600 hover:underline">동아사이언스</a>, <a href="https://scent.kisti.re.kr" target="_blank" class="text-blue-600 hover:underline">KISTI의 과학향기</a>, <a href="https://www.nature.com" target="_blank" class="text-blue-600 hover:underline">Nature</a>, <a href="https://www.science.org" target="_blank" class="text-blue-600 hover:underline">Science</a></p></div></div>
+                            </div>
+                        </div></div>
+                    </div>
+                    <div class="accordion-item border rounded-lg">
+                        <div class="accordion-header"><button class="w-full text-left p-4 font-semibold text-lg text-gray-800 hover:bg-gray-50 flex justify-between items-center"><span>🧩 3단계: 정보를 구조화하여 '스토리'로 만들기</span><svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button></div>
+                        <div class="accordion-content"><div class="p-4 pt-0 text-gray-700 space-y-4 text-base">
+                            <p>조사한 정보들을 논리적으로 연결하여 하나의 흐름을 가진 '스토리'로 구성해야 합니다. 어떤 이야기 구조가 효과적일지 생각해보세요.</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div class="bg-gray-50 p-4 rounded-lg border text-center"><span class="text-3xl">🤔 ➡️💡</span><h4 class="font-semibold mt-2">문제 해결 구조</h4><p class="text-sm text-gray-600">문제점과 해결책 제시</p></div>
+                                <div class="bg-gray-50 p-4 rounded-lg border text-center"><span class="text-3xl">⏳ ➡️ 🚀</span><h4 class="font-semibold mt-2">시간적 변화 구조</h4><p class="text-sm text-gray-600">과거-현재-미래 흐름</p></div>
+                                <div class="bg-gray-50 p-4 rounded-lg border text-center"><span class="text-3xl">🅰️ vs 🅱️</span><h4 class="font-semibold mt-2">비교 대조 구조</h4><p class="text-sm text-gray-600">두 대상의 차이점 부각</p></div>
+                            </div>
+                        </div></div>
+                    </div>
+                    <div class="accordion-item border rounded-lg">
+                        <div class="accordion-header"><button class="w-full text-left p-4 font-semibold text-lg text-gray-800 hover:bg-gray-50 flex justify-between items-center"><span>🎨 4단계: 아이디어를 '설계도'로 구체화하기</span><svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button></div>
+                        <div class="accordion-content"><div class="p-4 pt-0 text-gray-700 space-y-4 text-base">
+                            <p>본격적인 제작에 앞서 그리는 스케치는 완성도를 높이고 시행착오를 줄이는 중요한 과정입니다. 아래 디자인 원칙을 참고하여 활동지에 스케치를 해보세요.</p>
+                            <div class="bg-gray-50 p-4 rounded-lg border space-y-2">
+                                <p class="flex items-center"><span class="text-2xl mr-2">✨</span> <b>간결성:</b> 핵심 내용에 집중하고 과감히 덜어내기</p>
+                                <p class="flex items-center"><span class="text-2xl mr-2">🎨</span> <b>통일성:</b> 주제에 맞는 2~3가지 주요 색상 정하기</p>
+                                <p class="flex items-center"><span class="text-2xl mr-2">👓</span> <b>가독성:</b> 제목, 소제목, 본문의 글자 크기를 다르게 하여 중요도 표시하기</p>
+                            </div>
+                            <div class="mt-4 bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                                <p class="font-semibold text-blue-800">🤝 (Tip) 친구와 아이디어 공유하기</p>
+                                <p class="text-blue-700 mt-1">기획이 막히거나 아이디어를 더 발전시키고 싶다면, 친구와 완성된 활동지를 가볍게 공유하고 의견을 나눠보세요. 미처 생각하지 못했던 새로운 관점을 얻을 수 있습니다.</p>
+                            </div>
+                        </div></div>
+                    </div>
+                </div>
+                <div class="mt-6 bg-green-50 border border-green-200 p-4 rounded-lg text-center">
+                    <h4 class="font-bold text-green-800">🛠️ 디자인이 막막하다면? (유용한 도구 추천)</h4>
+                    <p class="text-green-700 text-sm mt-1">
+                        'Canva(캔바)', '미리캔버스' 같은 무료 디자인 툴을 이용하면 누구나 쉽게 멋진 인포그래픽을 만들 수 있습니다.
+                    </p>
+                </div>
+            </div>
+
+            <div id="tab4" class="tab-content worksheet-container">
+                <div class="bg-white p-6 sm:p-8 rounded-lg shadow-md space-y-8">
+                    <section>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">1. 주제 설정: 탐구의 첫걸음, 좋은 질문하기</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="field_topic" class="font-semibold text-gray-700 block mb-1">탐구 주제 (분야)</label>
+                                <input type="text" id="field_topic" class="w-full p-2 border border-gray-300 rounded-md" placeholder="예: 인공지능, 탄소 중립 기술, 유전자 편집 기술 등">
+                            </div>
+                            <div>
+                                <label for="field_question" class="font-semibold text-gray-700 block mb-1">탐구 질문 (내가 진짜 알고 싶은 것)</label>
+                                <textarea id="field_question" rows="2" class="w-full p-2 border border-gray-300 rounded-md" placeholder="위 분야와 관련하여, 구체적이고 명확한 질문을 작성하세요."></textarea>
+                            </div>
+                        </div>
+                    </section>
+                    <section>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">2. 정보 조사 및 분석: 신뢰할 수 있는 정보로 깊이 더하기</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="field_principle" class="font-semibold text-gray-700 block mb-1">정의 및 핵심 원리</label>
+                                <textarea id="field_principle" rows="4" class="w-full p-2 border border-gray-300 rounded-md" placeholder="이 기술은 무엇이며, 어떤 과학적 원리로 작동하나요?"></textarea>
+                            </div>
+                            <div>
+                                <label for="field_cases" class="font-semibold text-gray-700 block mb-1">주요 활용 사례</label>
+                                <textarea id="field_cases" rows="3" class="w-full p-2 border border-gray-300 rounded-md" placeholder="우리 생활 속 어디에서, 어떻게 사용되고 있나요? 구체적인 예시 2~3가지"></textarea>
+                            </div>
+                             <div>
+                                <label for="field_pros" class="font-semibold text-gray-700 block mb-1">긍정적 영향 (장점)</label>
+                                <textarea id="field_pros" rows="3" class="w-full p-2 border border-gray-300 rounded-md" placeholder="이 기술이 가져오는 이점이나 사회/과학적 의의는 무엇인가요?"></textarea>
+                            </div>
+                            <div>
+                                <label for="field_cons" class="font-semibold text-gray-700 block mb-1">한계 및 과제</label>
+                                <textarea id="field_cons" rows="3" class="w-full p-2 border border-gray-300 rounded-md" placeholder="이 기술의 문제점은 무엇인가요? (예: 현재의 기술적 한계, 예상치 못한 사회적·윤리적 문제 등)"></textarea>
+                            </div>
+                            <div>
+                                <label class="font-semibold text-gray-700 block mb-1">정보 출처</label>
+                                <div id="sources_container" class="space-y-4">
+                                    </div>
+                                <button id="add_source_btn" class="mt-4 bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition text-sm">+ 출처 추가</button>
+                            </div>
+                        </div>
+                    </section>
+                     <section>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">3. 인포그래픽 기획: 흩어진 정보를 하나의 이야기로 엮기</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="font-semibold text-gray-700 block mb-2">어떤 이야기 구조로 만들까요?</label>
+                                <div id="story_structure_options" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <label class="border p-4 rounded-md hover:bg-gray-50 has-[:checked]:bg-blue-50 has-[:checked]:border-blue-400">
+                                        <div class="flex items-center">
+                                            <input type="radio" name="story_structure" value="문제 해결 구조" class="mr-3 h-4 w-4">
+                                            <div>
+                                                <h4 class="font-semibold">문제 해결 구조</h4>
+                                                <p class="text-sm text-gray-600">문제점과 그에 대한 기술적 해결책을 제시하는 방식</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <label class="border p-4 rounded-md hover:bg-gray-50 has-[:checked]:bg-blue-50 has-[:checked]:border-blue-400">
+                                        <div class="flex items-center">
+                                            <input type="radio" name="story_structure" value="시간적 변화 구조" class="mr-3 h-4 w-4">
+                                            <div>
+                                                <h4 class="font-semibold">시간적 변화 구조</h4>
+                                                <p class="text-sm text-gray-600">과거-현재-미래의 흐름에 따라 기술의 발전을 보여주는 방식</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <label class="border p-4 rounded-md hover:bg-gray-50 has-[:checked]:bg-blue-50 has-[:checked]:border-blue-400">
+                                        <div class="flex items-center">
+                                            <input type="radio" name="story_structure" value="비교 대조 구조" class="mr-3 h-4 w-4">
+                                            <div>
+                                                <h4 class="font-semibold">비교 대조 구조</h4>
+                                                <p class="text-sm text-gray-600">기존 기술과 새로운 기술의 차이점을 부각하는 방식</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <label class="border p-4 rounded-md hover:bg-gray-50 has-[:checked]:bg-blue-50 has-[:checked]:border-blue-400">
+                                        <div class="flex items-center">
+                                            <input type="radio" name="story_structure" value="마인드맵 구조" class="mr-3 h-4 w-4">
+                                            <div>
+                                                <h4 class="font-semibold">마인드맵 구조</h4>
+                                                <p class="text-sm text-gray-600">중심 주제에서 파생되는 정보들을 방사형으로 보여주는 방식</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <label class="border p-4 rounded-md hover:bg-gray-50 has-[:checked]:bg-blue-50 has-[:checked]:border-blue-400 col-span-1 md:col-span-2">
+                                        <div class="flex items-center">
+                                            <input type="radio" name="story_structure" value="기타" class="mr-3 h-4 w-4">
+                                            <h4 class="font-semibold">기타 (직접 입력)</h4>
+                                        </div>
+                                        <textarea id="story_structure_other" rows="2" class="w-full p-2 mt-2 border border-gray-300 rounded-md hidden" placeholder="자신만의 이야기 구조를 작성해 보세요."></textarea>
+                                    </label>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="field_visualization" class="font-semibold text-gray-700 block mb-1">시각 자료 표현 계획</label>
+                                <textarea id="field_visualization" rows="3" class="w-full p-2 border border-gray-300 rounded-md" placeholder="선택한 이야기 구조에 맞춰, 조사한 내용을 어떤 그래픽으로 표현할지 구체적으로 계획해 보세요."></textarea>
+                            </div>
+                            <div>
+                                <label for="field_message" class="font-semibold text-gray-700 block mb-1">강조하고 싶은 메시지 (인포그래픽 제목)</label>
+                                <textarea id="field_message" rows="2" class="w-full p-2 border border-gray-300 rounded-md" placeholder="이 인포그래픽의 제목이 될, 가장 강력하고 매력적인 한 문장 메시지는 무엇인가요?"></textarea>
+                            </div>
+                        </div>
+                    </section>
+                    <section>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">4. 성찰 및 계획: 아이디어를 설계도로 구체화하기</h2>
+                         <div class="space-y-4">
+                            <div>
+                                <label for="field_reflection" class="font-semibold text-gray-700 block mb-1">활동을 통해 느낀 점</label>
+                                <textarea id="field_reflection" rows="3" class="w-full p-2 border border-gray-300 rounded-md" placeholder="새롭게 알게 된 점, 더 궁금해진 점, 어려웠던 점 등을 자유롭게 작성하세요."></textarea>
+                            </div>
+                            <div>
+                                <label for="field_sketch" class="font-semibold text-gray-700 block mb-1">아이디어 스케치 (글 또는 그림)</label>
+                                <textarea id="field_sketch" rows="5" class="w-full p-2 border border-gray-300 rounded-md" placeholder="인포그래픽의 전체적인 구도, 정보 배치, 사용할 시각 자료 등을 자유롭게 그려보거나 글로 묘사해 보세요."></textarea>
+                            </div>
+                        </div>
+                    </section>
+                     <section>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">🚀 잠깐! 미래 생각해 보기 (선택)</h2>
+                         <div>
+                            <label for="field_future" class="font-semibold text-gray-700 block mb-1">10년 후, 이 기술은 우리 사회를 어떻게 바꿀까요?</label>
+                            <textarea id="field_future" rows="3" class="w-full p-2 border border-gray-300 rounded-md" placeholder="어떤 새로운 직업이 생겨날 수 있을지 자유롭게 상상해 보세요."></textarea>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <div id="tab5" class="tab-content">
+                 <div class="bg-white p-6 sm:p-8 rounded-lg shadow-md mb-6 no-print">
+                    <div class="text-center">
+                        <button id="print_btn" class="bg-gray-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-800 transition text-base">
+                            🖨️ PDF로 저장
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-gray-200 p-4 sm:p-8 rounded-lg">
+                    <div class="printable-area report-page" id="report-content">
+                        <h1 id="preview_message" class="report-main-title"><span class="preview-placeholder">[인포그래픽 제목]</span></h1>
+                        <p class="text-right text-gray-600 mb-10">1학년 <span id="preview_student_class">0</span>반 <span id="preview_student_number">00</span>번 이름: <span id="preview_student_name">ㅇㅇㅇ</span></p>
+                        
+                        <h2 class="report-section-title">1. 탐구 주제</h2>
+                        <p class="font-bold text-lg" id="preview_topic"><span class="preview-placeholder">[탐구 주제]</span></p>
+                        <p class="mt-2 text-lg" id="preview_question"><span class="preview-placeholder">[탐구 질문]</span></p>
+
+                        <h2 class="report-section-title">2. 탐구 내용</h2>
+                        <h3 class="font-semibold mt-4 mb-2">가. 정의 및 핵심 원리</h3>
+                        <p class="preview-text" id="preview_principle"><span class="preview-placeholder">내용을 입력하세요...</span></p>
+                        <h3 class="font-semibold mt-4 mb-2">나. 주요 활용 사례</h3>
+                        <p class="preview-text" id="preview_cases"><span class="preview-placeholder">내용을 입력하세요...</span></p>
+                        <h3 class="font-semibold mt-4 mb-2">다. 긍정적 영향 및 한계</h3>
+                        <p class="preview-text" id="preview_pros_cons"><span class="preview-placeholder">내용을 입력하세요...</span></p>
+                        <h3 class="font-semibold mt-4 mb-2">라. 정보 출처</h3>
+                        <div class="preview-text" id="preview_sources"><span class="preview-placeholder">내용을 입력하세요...</span></div>
+
+                        <h2 class="report-section-title">3. 인포그래픽 기획</h2>
+                        <h3 class="font-semibold mt-4 mb-2">가. 스토리텔링 구조</h3>
+                        <p class="preview-text" id="preview_story_structure"><span class="preview-placeholder">내용을 입력하세요...</span></p>
+                        <h3 class="font-semibold mt-4 mb-2">나. 시각화 계획</h3>
+                        <p class="preview-text" id="preview_visualization"><span class="preview-placeholder">내용을 입력하세요...</span></p>
+
+                        <h2 class="report-section-title">4. 성찰 및 계획</h2>
+                        <p class="preview-text" id="preview_reflection_sketch"><span class="preview-placeholder">내용을 입력하세요...</span></p>
+                        
+                        <h2 class="report-section-title">5. 미래 전망 (선택)</h2>
+                        <p class="preview-text" id="preview_future"><span class="preview-placeholder">내용을 입력하세요...</span></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast-notification" class="fixed bottom-5 right-5 bg-gray-800 text-white py-3 px-5 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 no-print">
+        저장되었습니다!
+    </div>
+    
+    <div id="delete-confirm-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 no-print">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm">
+            <h3 class="text-lg font-bold text-gray-800">작성한 내용을 삭제하시겠습니까?</h3>
+            <p class="text-gray-600 mt-2">입력한 모든 내용이 사라지며, 브라우저에 저장된 데이터도 함께 삭제됩니다. 이 작업은 되돌릴 수 없습니다.</p>
+            <div class="mt-6 flex justify-end space-x-4">
+                <button id="cancel-delete-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">취소</button>
+                <button id="confirm-delete-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">삭제</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Element Constants ---
+            const dom = {
+                tabs: document.querySelectorAll('.tab-button'),
+                tabContents: document.querySelectorAll('.tab-content'),
+                accordions: document.querySelectorAll('.accordion-header button'),
+                deleteAllBtn: document.getElementById('delete_all_btn'),
+                deleteModal: document.getElementById('delete-confirm-modal'),
+                confirmDeleteBtn: document.getElementById('confirm-delete-btn'),
+                cancelDeleteBtn: document.getElementById('cancel-delete-btn'),
+                downloadHtmlBtn: document.getElementById('download_zip_btn'),
+                printBtn: document.getElementById('print_btn'),
+                addSourceBtn: document.getElementById('add_source_btn'),
+                sourcesContainer: document.getElementById('sources_container'),
+                toast: document.getElementById('toast-notification'),
+                allInputs: document.querySelectorAll('#tab4 input, #tab4 textarea, input#student_class, input#student_number, input#student_name'),
+                storyStructureRadios: document.querySelectorAll('input[name="story_structure"]'),
+                storyStructureOther: document.getElementById('story_structure_other')
+            };
+
+            // --- Field Mapping ---
+            const fields = {
+                'student_class': 'preview_student_class', 'student_number': 'preview_student_number', 'student_name': 'preview_student_name',
+                'field_topic': 'preview_topic', 'field_question': 'preview_question',
+                'field_principle': 'preview_principle', 'field_cases': 'preview_cases',
+                'field_visualization': 'preview_visualization', 'field_message': 'preview_message',
+                'field_future': 'preview_future',
+            };
+            
+            // --- Source Configuration ---
+            const sourceConfig = {
+                '논문': {'저자':true, '연도':true, '논문 제목':true, '학술지명':false, '권':false, '호':false, '페이지':false},
+                '도서': {'저자':true, '도서명':true, '출판사':true, '연도':false},
+                '학술잡지': {'잡지명':true, '기사 제목':true, '기자명':true, '발행일':false},
+                '인터넷 URL': {'웹사이트명':true, '글 제목':true, '작성자(기자)':true, 'URL':true}
+            };
+
+            // --- Event Listeners ---
+            dom.tabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+            dom.accordions.forEach(button => button.addEventListener('click', toggleAccordion));
+            dom.allInputs.forEach(input => input.addEventListener('input', updatePreviewAndSave));
+            dom.storyStructureRadios.forEach(radio => radio.addEventListener('change', updatePreviewAndSave));
+            
+            dom.addSourceBtn.addEventListener('click', () => addSourceElement());
+            dom.sourcesContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('delete_source_btn')) {
+                    e.target.closest('.source-entry').remove();
+                    updatePreviewAndSave();
+                }
+            });
+            dom.sourcesContainer.addEventListener('change', (e) => {
+                if (e.target.classList.contains('source-type-select')) {
+                    updateSourceInputs(e.target);
+                    updatePreviewAndSave();
+                }
+            });
+            dom.sourcesContainer.addEventListener('input', updatePreviewAndSave);
+            
+            dom.deleteAllBtn.addEventListener('click', () => dom.deleteModal.classList.remove('hidden'));
+            dom.cancelDeleteBtn.addEventListener('click', () => dom.deleteModal.classList.add('hidden'));
+            dom.confirmDeleteBtn.addEventListener('click', deleteAllContent);
+            dom.downloadHtmlBtn.addEventListener('click', downloadAsZIP);
+            if (dom.printBtn) dom.printBtn.addEventListener('click', printReport);
+
+            // --- Initialization ---
+            loadFromBrowser();
+            switchTab('tab1');
+            updatePreview();
+
+            // --- Functions ---
+            function switchTab(targetTabId) {
+                dom.tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === targetTabId));
+                dom.tabContents.forEach(content => content.classList.toggle('active', content.id === targetTabId));
+                window.scrollTo(0, 0);
+            }
+
+            function toggleAccordion(event) {
+                const button = event.currentTarget;
+                const content = button.parentElement.nextElementSibling;
+                const isOpen = !content.style.maxHeight;
+                button.classList.toggle('open', isOpen);
+                content.style.maxHeight = isOpen ? content.scrollHeight + 'px' : null;
+                content.style.paddingTop = isOpen ? '1rem' : '0';
+                const icon = button.querySelector('svg');
+                if(icon) icon.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+            }
+
+            function updatePreviewAndSave() {
+                updatePreview();
+                saveToBrowser();
+            }
+
+            function updatePreview() {
+                Object.entries(fields).forEach(([fieldId, previewId]) => {
+                    const inputEl = document.getElementById(fieldId);
+                    const previewEl = document.getElementById(previewId);
+                    if (!inputEl || !previewEl) return;
+                    const value = inputEl.value.trim();
+                    const placeholder = previewEl.querySelector('.preview-placeholder')?.textContent || `[${fieldId}]`;
+                    previewEl.textContent = value || placeholder;
+                    if (!value) previewEl.innerHTML = `<span class="preview-placeholder">${placeholder}</span>`;
+                });
+
+                updateComplexPreview('preview_pros_cons', ['field_pros', 'field_cons'], ['긍정적 영향', '한계 및 과제']);
+                updateComplexPreview('preview_reflection_sketch', ['field_reflection', 'field_sketch'], ['느낀 점', '아이디어 스케치']);
+                updateStoryStructurePreview();
+                updateSourcesPreview();
+            }
+
+            function updateComplexPreview(previewId, fieldIds, labels) {
+                const previewEl = document.getElementById(previewId);
+                let content = '';
+                fieldIds.forEach((id, index) => {
+                    const value = document.getElementById(id).value.trim();
+                    if (value) content += `[${labels[index]}]\n${value}\n\n`;
+                });
+                previewEl.textContent = content.trim() || '';
+                if (!previewEl.textContent) previewEl.innerHTML = `<span class="preview-placeholder">내용을 입력하세요...</span>`;
+            }
+
+            function updateStoryStructurePreview() {
+                const storyRadio = document.querySelector('input[name="story_structure"]:checked');
+                const storyPreview = document.getElementById('preview_story_structure');
+                if (storyRadio) {
+                    let storyValue = storyRadio.value;
+                    if (storyValue === '기타') {
+                        const otherText = dom.storyStructureOther.value.trim();
+                        storyValue = otherText ? `기타: ${otherText}` : '기타';
+                    }
+                    storyPreview.textContent = storyValue;
+                } else {
+                    storyPreview.innerHTML = `<span class="preview-placeholder">내용을 입력하세요...</span>`;
+                }
+                dom.storyStructureOther.classList.toggle('hidden', !(storyRadio && storyRadio.value === '기타'));
+            }
+
+            function updateSourcesPreview() {
+                const sourcesPreview = document.getElementById('preview_sources');
+                const sourceEntries = document.querySelectorAll('.source-entry');
+                if (sourceEntries.length === 0) {
+                    sourcesPreview.innerHTML = `<span class="preview-placeholder">내용을 입력하세요...</span>`;
+                    return;
+                }
+                let sourcesText = '<ol class="list-decimal list-inside">';
+                sourceEntries.forEach(entry => {
+                    const values = Array.from(entry.querySelectorAll('input')).map(i => i.value.trim());
+                    let liContent = '';
+                    let parts = [];
+                    switch(entry.dataset.type) {
+                        case '논문': // 저자*, 연도*, 제목*, 학술지명, 권, 호, 페이지
+                            if(values[0]) parts.push(values[0]);
+                            if(values[1]) parts.push(`(${values[1]})`);
+                            if(values[2]) parts.push(`${values[2]}.`);
+                            if(values[3]) parts.push(values[3]);
+                            if(values[4] || values[5]) {
+                                if(values[3]) parts.push(`, ${values[4] || ''}(${values[5] || ''})`);
+                                else parts.push(`${values[4] || ''}(${values[5] || ''})`);
+                            }
+                            if(values[6]) parts.push(`, ${values[6]}`);
+                            liContent = parts.join(' ').replace(/\s\./g,'.').replace(/\s,/g,',');
+                            break;
+                        case '도서': // 저자*, 도서명*, 출판사*, 연도
+                            if(values[0]) parts.push(values[0]);
+                            if(values[3]) parts.push(`(${values[3]})`);
+                            if(values[1]) parts.push(`${values[1]}.`);
+                            if(values[2]) parts.push(values[2]);
+                            liContent = parts.join(' ').replace(/\s\./g,'.').replace(/\s,/g,',');
+                            break;
+                        case '학술잡지': // 잡지명*, 기사제목*, 기자명*, 발행일
+                            if(values[2]) parts.push(values[2]);
+                            if(values[3]) parts.push(`(${values[3]})`);
+                            if(values[1]) parts.push(`${values[1]}.`);
+                            if(values[0]) parts.push(values[0]);
+                            liContent = parts.join(' ').replace(/\s\./g,'.').replace(/\s,/g,',');
+                            break;
+                        case '인터넷 URL':
+                            if(values[2]) parts.push(values[2]); // 작성자
+                            if(values[0]) parts.push(values[0]); // 웹사이트명
+                            if(values[1]) parts.push(`'${values[1]}'.`); // 글제목
+                            
+                            let textPart = parts.join(' ').replace(/\s\./g,'.').replace(/\s,/g,',');
+                            if (values[3]) { // URL
+                                let properUrl = values[3];
+                                if (!/^https?:\/\//i.test(properUrl)) {
+                                    properUrl = 'https://' + properUrl;
+                                }
+                                textPart += ` URL: <a href="${properUrl}" target="_blank" class="text-blue-600 hover:underline">${values[3]}</a>`;
+                            }
+                            liContent = textPart;
+                            break;
+                    }
+                    sourcesText += `<li>${liContent}</li>`;
+                });
+                sourcesText += '</ol>';
+                sourcesPreview.innerHTML = sourcesText;
+            }
+
+            function getFormData() {
+                const data = {};
+                dom.allInputs.forEach(input => {
+                    if (input.type === 'radio') {
+                        if (input.checked) data[input.name] = input.value;
+                    } else {
+                        data[input.id] = input.value;
+                    }
+                });
+                data.sources = Array.from(document.querySelectorAll('.source-entry')).map(entry => ({
+                    type: entry.dataset.type,
+                    values: Array.from(entry.querySelectorAll('input')).map(input => input.value)
+                }));
+                return data;
+            }
+
+            function saveToBrowser() {
+                localStorage.setItem('scienceHubData', JSON.stringify(getFormData()));
+            }
+
+            function loadFromBrowser() {
+                const savedData = localStorage.getItem('scienceHubData');
+                if (!savedData) return;
+                const data = JSON.parse(savedData);
+                Object.entries(data).forEach(([key, value]) => {
+                    if (key === 'story_structure') {
+                        const radio = document.querySelector(`input[name="story_structure"][value="${value}"]`);
+                        if (radio) radio.checked = true;
+                    } else if (key === 'sources') {
+                        value.forEach(source => addSourceElement(source));
+                    } else {
+                        const el = document.getElementById(key);
+                        if (el) el.value = value;
+                    }
+                });
+            }
+            
+            function deleteAllContent() {
+                dom.allInputs.forEach(input => input.value = '');
+                dom.storyStructureRadios.forEach(radio => radio.checked = false);
+                dom.sourcesContainer.innerHTML = '';
+                localStorage.removeItem('scienceHubData');
+                updatePreview();
+                dom.deleteModal.classList.add('hidden');
+                showToast('모든 내용이 삭제되었습니다.', 'bg-red-500');
+            }
+
+            function addSourceElement(sourceData = null) {
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'source-entry border p-4 rounded-md bg-gray-50 space-y-3';
+                const type = sourceData?.type || '논문';
+                entryDiv.dataset.type = type;
+
+                entryDiv.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <select class="source-type-select p-2 border border-gray-300 rounded-md bg-white">
+                            ${Object.keys(sourceConfig).map(option => `<option ${type === option ? 'selected' : ''}>${option}</option>`).join('')}
+                        </select>
+                        <button class="delete_source_btn bg-red-500 text-white font-bold py-1 px-3 rounded-lg hover:bg-red-600 text-sm">삭제</button>
+                    </div>
+                    <div class="source-inputs grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+                `;
+                dom.sourcesContainer.appendChild(entryDiv);
+                updateSourceInputs(entryDiv.querySelector('.source-type-select'), sourceData?.values);
+            }
+
+            function updateSourceInputs(selectElement, values = null) {
+                const inputsContainer = selectElement.closest('.source-entry').querySelector('.source-inputs');
+                const type = selectElement.value;
+                selectElement.closest('.source-entry').dataset.type = type;
+                const fields = sourceConfig[type];
+                
+                let i = 0;
+                inputsContainer.innerHTML = Object.entries(fields).map(([field, isRequired]) => {
+                    const value = values?.[i] || '';
+                    i++;
+                    return `
+                        <label class="block">
+                            <span class="text-gray-700 text-sm">${field}${isRequired ? '<span class="text-red-500">*</span>' : ''}</span>
+                            <input type="text" placeholder="${field}" value="${value}" class="w-full p-2 mt-1 border border-gray-300 rounded-md text-sm">
+                        </label>
+                    `;
+                }).join('');
+            }
+
+            function getReportFilename() {
+                const studentClass = (document.getElementById('student_class').value || '0').padStart(2, '0');
+                const studentNumber = (document.getElementById('student_number').value || '0').padStart(2, '0');
+                const studentId = `1${studentClass}${studentNumber}`;
+                const studentName = document.getElementById('student_name').value.trim() || '이름없음';
+                const infographicTitle = document.getElementById('field_message').value.trim() || '인포그래픽_기획안';
+                return `${studentId}_${studentName}_${infographicTitle}`;
+            }
+
+            function printReport() {
+                const originalTitle = document.title;
+                document.title = getReportFilename();
+                window.print();
+                setTimeout(() => {
+                    document.title = originalTitle;
+                }, 500);
+            }
+
+            function downloadAsZIP() {
+                const studentIdentifier = getReportFilename();
+                const htmlFileName = `${studentIdentifier}.html`;
+                const zipFileName = `${studentIdentifier}.zip`;
+
+                const reportContent = document.getElementById('report-content').innerHTML;
+                const styles = document.querySelector('style').innerHTML;
+                const htmlContent = `
+                    <!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
+                    <title>${studentIdentifier}</title>
+                    <script src="https://cdn.tailwindcss.com"><\/script>
+                    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+                    <style>${styles}</style>
+                    </head>
+                    <body class="bg-gray-200 p-8"><div class="report-page printable-area">${reportContent}</div></body></html>`;
+                
+                const zip = new JSZip();
+                zip.file(htmlFileName, htmlContent);
+
+                zip.generateAsync({type:"blob"})
+                .then(function(content) {
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(content);
+                    a.download = zipFileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(a.href);
+                });
+            }
+            
+            function showToast(message, bgColor = 'bg-gray-800') {
+                const toast = dom.toast;
+                toast.textContent = message;
+                toast.className = 'fixed bottom-5 right-5 text-white py-3 px-5 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 no-print ' + bgColor;
+                toast.style.opacity = 1;
+                setTimeout(() => { toast.style.opacity = 0; }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>

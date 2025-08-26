@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>연구 윤리 탐구 활동 안내</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f7fafc;
+        }
+        .header-gradient { background: linear-gradient(90deg, #3b82f6, #1e40af); }
+        .full-screen-card {
+            width: 90%;
+            max-width: 1600px; /* 16:9 대형 디스플레이 대응 */
+            min-height: 95vh;
+            margin-left: auto;
+            margin-right: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background-color: white;
+            border-radius: 24px;
+            padding: 4rem;
+            margin-bottom: 4rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        }
+        .section-title {
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        .section-title svg {
+            margin-right: 1rem;
+            color: #3b82f6;
+        }
+        .interactive-tab {
+            cursor: pointer;
+            padding: 0.75rem 1.5rem;
+            border-radius: 999px;
+            background-color: #eef2ff;
+            color: #4338ca;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .interactive-tab.active, .interactive-tab:hover {
+            background-color: #4338ca;
+            color: white;
+            transform: scale(1.05);
+        }
+        .tab-content {
+            display: none;
+            padding: 2rem;
+            margin-top: 1.5rem;
+            background-color: #f8fafc;
+            border-left: 5px solid #6366f1;
+            border-radius: 12px;
+        }
+        .tab-content.active { display: block; }
+        .infographic-brick {
+            transition: all 0.5s ease-in-out;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .infographic-brick.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .nav-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: #3b82f6;
+            color: white;
+            font-weight: 700;
+            border-radius: 999px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+            font-size: 1.125rem;
+        }
+        .nav-button:hover {
+            background-color: #2563eb;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+        }
+        .nav-button.prev { background-color: #6b7280; }
+        .nav-button.prev:hover { background-color: #4b5563; }
+        .report-guide-item {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Main Content View -->
+    <div id="main-view">
+        <header class="header-gradient text-white p-8 md:p-12 text-center rounded-b-3xl mb-12">
+            <h1 class="text-4xl md:text-5xl font-black">연구 윤리 탐구 활동 안내</h1>
+            <p class="mt-4 text-lg text-blue-200">과학탐구실험 II - 과학 기술의 윤리적 발전 방향</p>
+        </header>
+
+        <main class="container mx-auto">
+            <!-- 1단계: 공감대 형성하기 -->
+            <section class="full-screen-card fade-in">
+                <h2 class="section-title text-4xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    1단계: 공감대 형성하기 - 우리의 경험과 연결하기
+                </h2>
+                <p class="text-gray-600 mb-8 text-xl">연구 윤리는 어려운 규칙이 아닙니다. 우리의 일상 속 경험에서 그 중요성을 발견할 수 있습니다.</p>
+                
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <div class="flex space-x-4 mb-4">
+                            <button class="interactive-tab active text-lg" onclick="showTab(event, 'tab1')">공동 과제</button>
+                            <button class="interactive-tab text-lg" onclick="showTab(event, 'tab2')">창작 활동</button>
+                        </div>
+                        <div id="tab1" class="tab-content active"><h3 class="font-bold text-xl mb-2 text-gray-800">조별 과제를 할 때,</h3><p class="text-lg">나는 열심히 자료를 찾고 보고서를 작성했는데, 별다른 기여 없이 이름만 올린 조원이 같은 점수를 받는다면 불공평하다고 느낄 겁니다. 나의 노력이 정당하게 인정받기를 바라는 마음은 당연합니다.</p></div>
+                        <div id="tab2" class="tab-content"><h3 class="font-bold text-xl mb-2 text-gray-800">SNS에 창작물을 올렸을 때,</h3><p class="text-lg">내가 시간과 노력을 들여 만든 그림이나 영상을 다른 사람이 출처 표시 없이 자신이 만든 것처럼 공유한다면 어떨까요? 나의 아이디어와 노력을 존중받지 못했다는 생각이 들 겁니다.</p></div>
+                    </div>
+                    <div class="p-8 bg-blue-50 rounded-2xl text-center">
+                         <p class="text-2xl font-bold mb-4">핵심 가치</p>
+                         <div class="space-y-4">
+                            <div class="p-6 bg-white rounded-xl shadow-sm"><p class="text-3xl font-bold text-blue-700">정직</p><p class="text-gray-600 mt-1">나의 노력에 대한<br>정당한 인정</p></div>
+                            <div class="p-6 bg-white rounded-xl shadow-sm"><p class="text-3xl font-bold text-indigo-700">존중</p><p class="text-gray-600 mt-1">타인의 노력과 성과에 대한<br>기본적인 예의</p></div>
+                         </div>
+                    </div>
+                </div>
+                 <p class="mt-10 text-center text-xl">연구 윤리 역시, 함께 지식을 만들어가는 동료 연구자와 사회에 대한 <span class="font-bold text-blue-800">정직과 존중의 약속</span>에서 시작됩니다.</p>
+            </section>
+
+            <!-- 2단계: 필요성 인식하기 -->
+            <section class="full-screen-card fade-in">
+                <h2 class="section-title text-4xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    2단계: 필요성 인식하기 - 과학 지식의 형성 과정
+                </h2>
+                <p class="text-gray-600 mb-8 text-xl">연구 윤리는 왜 과학 발전에 필수적일까요? 과학 지식이 만들어지고 사회에 영향을 미치는 과정을 통해 알아봅시다.</p>
+                <div id="infographic" class="p-8 border-2 border-dashed border-blue-200 rounded-2xl">
+                    <h3 class="text-center text-3xl font-bold text-blue-800 mb-8">과학: 신뢰의 탑</h3>
+                    <div class="space-y-3 text-center max-w-lg mx-auto">
+                        <div class="infographic-brick bg-blue-500 text-white p-5 rounded-lg shadow-lg text-xl"><p class="font-bold">현대 과학 기술 (신약, AI, 우주 탐사)</p></div>
+                        <div class="infographic-brick bg-blue-400 text-white p-5 rounded-lg shadow-md text-lg" style="transition-delay: 0.1s;"><p class="font-bold">후속 연구</p></div>
+                        <div class="infographic-brick bg-red-500 text-white p-5 rounded-lg shadow-xl relative text-lg"><p class="font-bold">🚨 불량 벽돌 (조작된 연구) 🚨</p><p class="text-base">이 벽돌 하나가 탑 전체를 무너뜨릴 수 있습니다.</p></div>
+                        <div class="infographic-brick bg-blue-300 text-blue-900 p-5 rounded-lg shadow-md text-lg" style="transition-delay: 0.2s;"><p class="font-bold">선행 연구</p></div>
+                        <div class="infographic-brick bg-blue-200 text-blue-800 p-5 rounded-lg shadow-md text-lg" style="transition-delay: 0.3s;"><p class="font-bold">기초 이론</p></div>
+                    </div>
+                    <p class="mt-8 text-center text-lg text-gray-700">과학 지식은 선행 연구라는 벽돌 위에 새로운 연구를 쌓아 올리는 과정입니다. 만약 중간에 조작된 연구(불량 벽돌)가 있다면, 그 위에 쌓인 모든 연구가 무너질 수 있습니다. 과학 공동체 내의 '신뢰'는 과학 발전을 위한 필수적인 토대입니다.</p>
+                </div>
+            </section>
+
+            <!-- 3단계: 탐구 활동 안내 -->
+            <section class="full-screen-card fade-in">
+                <h2 class="section-title text-4xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                    3단계: 탐구 활동 안내 - 과학사 사례 분석하기
+                </h2>
+                <p class="text-gray-600 mb-8 text-xl">이제 과학사에서 실제로 있었던 사례를 깊이 있게 탐구하며 연구 윤리의 중요성을 구체적으로 확인해 보겠습니다. 보고서는 아래 5가지 항목으로 구성됩니다.</p>
+                <div class="text-center mt-12">
+                    <button class="nav-button" onclick="showReportView()">
+                        보고서 문항 작성하기
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Report View (New Tab) -->
+    <div id="report-view" style="display: none;">
+         <header class="header-gradient text-white p-8 md:p-12 text-center rounded-b-3xl mb-12">
+            <h1 class="text-4xl md:text-5xl font-black">보고서 문항 작성</h1>
+            <p class="mt-4 text-lg text-blue-200">탐구한 내용을 바탕으로 보고서를 작성해 보세요.</p>
+        </header>
+        <main class="w-11/12 max-w-7xl mx-auto">
+            <section class="full-screen-card !py-12">
+                <h2 class="section-title text-4xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    📝 보고서 작성을 위한 생각의 흐름
+                </h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 text-center my-10">
+                    <div class="p-6 bg-gray-50 rounded-xl border"><div class="flex items-center justify-center h-20 w-20 mx-auto rounded-full bg-blue-100 text-blue-600 mb-4"><svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div><h4 class="text-xl font-bold text-gray-800">Step 1: 사례 선정</h4><p class="text-gray-500 mt-2">가장 흥미롭고 탐구하고 싶은 사례를 선택합니다.</p></div>
+                    <div class="p-6 bg-gray-50 rounded-xl border"><div class="flex items-center justify-center h-20 w-20 mx-auto rounded-full bg-blue-100 text-blue-600 mb-4"><svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" /></svg></div><h4 class="text-xl font-bold text-gray-800">Step 2: 정보 탐색</h4><p class="text-gray-500 mt-2">신뢰할 수 있는 다양한 자료를 찾아 교차 확인합니다.</p></div>
+                    <div class="p-6 bg-gray-50 rounded-xl border"><div class="flex items-center justify-center h-20 w-20 mx-auto rounded-full bg-blue-100 text-blue-600 mb-4"><svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div><h4 class="text-xl font-bold text-gray-800">Step 3: 분석 및 정리</h4><p class="text-gray-500 mt-2">5가지 문항에 맞춰 찾은 정보를 분류하고 핵심을 정리합니다.</p></div>
+                    <div class="p-6 bg-gray-50 rounded-xl border"><div class="flex items-center justify-center h-20 w-20 mx-auto rounded-full bg-blue-100 text-blue-600 mb-4"><svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></div><h4 class="text-xl font-bold text-gray-800">Step 4: 논리적 서술</h4><p class="text-gray-500 mt-2">자신의 생각을 근거와 함께 명확하고 논리적으로 작성합니다.</p></div>
+                </div>
+                
+                <div class="space-y-6 mt-12">
+                    <div class="report-guide-item"><div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 text-blue-600 font-bold text-xl">1</div><div><h4 class="font-bold text-xl text-blue-800">사례 소개</h4><p class="text-gray-600 mt-1">단순 사실 나열을 넘어, '왜 이런 일이 일어났을까?' 배경에 초점을 맞춰 육하원칙에 따라 구체적으로 서술해 보세요.</p></div></div>
+                    <div class="report-guide-item"><div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 text-blue-600 font-bold text-xl">2</div><div><h4 class="font-bold text-xl text-blue-800">윤리적 문제 분석</h4><p class="text-gray-600 mt-1">'위조', '표절', '피험자 인권' 등 연구 윤리의 핵심 개념어를 사용하여 어떤 원칙이 어떻게 지켜지지 않았는지 분석해 보세요.</p></div></div>
+                    <div class="report-guide-item"><div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 text-blue-600 font-bold text-xl">3</div><div><h4 class="font-bold text-xl text-blue-800">파급 효과 서술</h4><p class="text-gray-600 mt-1">'연구자 개인', '과학 공동체', '사회 전체' 세 가지 차원으로 나누어 사건이 미친 영향을 다각도로 서술해 보세요.</p></div></div>
+                    <div class="report-guide-item"><div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 text-blue-600 font-bold text-xl">4</div><div><h4 class="font-bold text-xl text-blue-800">핵심 원칙 도출</h4><p class="text-gray-600 mt-1">사건의 가장 본질적인 문제를 관통하는, 이 사건이 우리에게 주는 가장 중요한 교훈(원칙)이 무엇인지 한 문장으로 정의해 보세요.</p></div></div>
+                    <div class="report-guide-item"><div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 text-blue-600 font-bold text-xl">5</div><div><h4 class="font-bold text-xl text-blue-800">준수 방안 제시</h4><p class="text-gray-600 mt-1">'법/제도', '교육', '연구 문화' 등 다양한 측면에서 창의적이고 실현 가능한 해결책을 자유롭게 제안해 보세요.</p></div></div>
+                </div>
+
+                <div class="text-center mt-12">
+                    <button class="nav-button prev" onclick="showMainView()">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18" /></svg>
+                        활동 안내로 돌아가기
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Tab functionality
+        function showTab(event, tabID) {
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            const tabs = document.querySelectorAll('.interactive-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabID).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // View transition
+        function showReportView() {
+            document.getElementById('main-view').style.display = 'none';
+            document.getElementById('report-view').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        function showMainView() {
+            document.getElementById('report-view').style.display = 'none';
+            document.getElementById('main-view').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Scroll animation functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const fadeElems = document.querySelectorAll('.fade-in');
+            const infographicBricks = document.querySelectorAll('.infographic-brick');
+
+            const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        if (entry.target.id === 'infographic') {
+                             infographicBricks.forEach(brick => brick.classList.add('visible'));
+                        }
+                    }
+                });
+            }, observerOptions);
+            
+            fadeElems.forEach(el => observer.observe(el));
+            const infographicSection = document.getElementById('infographic');
+            if(infographicSection) observer.observe(infographicSection);
+        });
+    </script>
+</body>
+</html>
