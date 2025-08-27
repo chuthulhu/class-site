@@ -23,7 +23,7 @@
         h1 {
             color: #2c3e50;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             font-size: 2.5em;
         }
         .nav-back {
@@ -37,6 +37,9 @@
         .nav-back a:hover {
             text-decoration: underline;
         }
+        .container h3 {
+            margin-top: 0;
+        }
         .updates-section {
             background-color: #e8f5e8;
             padding: 20px;
@@ -46,15 +49,15 @@
         }
         .activities-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: 1fr;
+            gap: 24px;
             margin-top: 30px;
         }
         .activity-card {
             background-color: #f8f9fa;
             padding: 25px;
             border-radius: 10px;
-            border: 2px solid #e9ecef;
+            border: 1px solid #e5e7eb;
             transition: transform 0.3s, box-shadow 0.3s;
         }
         .activity-card:hover {
@@ -63,7 +66,10 @@
         }
         .activity-card h3 {
             color: #495057;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+        }
+        .activity-card p {
+            margin: 0 0 12px;
         }
         .activity-card a {
             display: inline-block;
@@ -72,28 +78,13 @@
             padding: 10px 20px;
             text-decoration: none;
             border-radius: 5px;
-            margin-top: 15px;
+            margin-top: 12px;
             transition: background-color 0.3s;
         }
         .activity-card a:hover {
             background-color: #0056b3;
         }
-        .status {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-        .status.active {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .status.upcoming {
-            background-color: #fff3cd;
-            color: #856404;
-        }
+        
     </style>
 </head>
 <body>
@@ -104,41 +95,30 @@
         
         <h1>🔬 과학탐구실험</h1>
         
-        <div class="updates-section">
-            <h2>📋 최근 업데이트</h2>
-            <ul>
-                <li><strong>[2024-01-15]</strong> 수행평가 2차 일정 및 주제 공지</li>
-                <li><strong>[2024-01-10]</strong> 수행평가 1차 결과 발표</li>
-                <li><strong>[2024-01-05]</strong> 실험실 안전수칙 업데이트</li>
-            </ul>
-        </div>
+        
 
         <div class="activities-grid">
             <div class="activity-card">
                 <h3>📘 안내자료</h3>
                 <p>과학 탐구 프로젝트 전체 안내 및 가이드</p>
-                <div class="status active">바로 이동</div>
                 <a href="guide/">열람하기</a>
             </div>
 
             <div class="activity-card">
                 <h3>🧭 수행 1: 연구윤리</h3>
                 <p>연구 윤리 탐구 활동 안내 및 보고서</p>
-                <div class="status active">진행 중</div>
                 <a href="suhaeng1/">활동 시작</a>
             </div>
 
             <div class="activity-card">
                 <h3>📊 수행 2: 인포그래픽</h3>
                 <p>첨단 과학 기술 인포그래픽 활동 허브</p>
-                <div class="status active">진행 중</div>
                 <a href="suhaeng2/">활동 시작</a>
             </div>
 
             <div class="activity-card">
                 <h3>🚀 수행 3: 프로젝트</h3>
                 <p>첫걸음, 마지막 걸음 프로젝트 허브</p>
-                <div class="status active">진행 중</div>
                 <a href="suhaeng3/">활동 시작</a>
             </div>
         </div>
@@ -146,9 +126,7 @@
         <div style="margin-top: 40px; padding: 20px; background-color: #f1f3f4; border-radius: 10px;">
             <h3>📚 학습 자료</h3>
             <ul>
-                <li>실험 보고서 작성 가이드</li>
-                <li>안전 수칙 및 주의사항</li>
-                <li>과학 탐구 방법론</li>
+                
             </ul>
         </div>
     </div>
