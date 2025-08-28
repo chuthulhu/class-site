@@ -1,5 +1,3 @@
-# project structure: repo root = C:\git, site = class-site/
-# Node & tool caches
 class-site/node_modules/
 class-site/.eslintcache
 class-site/.parcel-cache/
@@ -7,9 +5,5 @@ class-site/.vite/
 class-site/dist/
 class-site/build/
 class-site/.cache/
-
-# env / logs / OS junk
-class-site/.env*
-*.log
 .DS_Store
 Thumbs.db
