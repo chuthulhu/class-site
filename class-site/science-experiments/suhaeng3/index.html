@@ -169,9 +169,9 @@
             <p class="text-lg text-gray-600 mt-2">S-BRT와 공유 PM 연계를 위한 종합 안내</p>
         </header>
         
-        <!-- 학생 정보 및 제출 기능 (from index.html) -->
+        <!-- 학생 정보 및 제출 기능 -->
         <div class="bg-white p-6 sm:p-8 rounded-lg shadow-md mb-6 no-print">
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-6">
                 <div class="flex items-center space-x-2 flex-wrap justify-center">
                      <input type="text" id="student_class" class="w-20 p-2 border border-gray-300 rounded-md text-center" placeholder="반">
                     <label for="student_class" class="font-semibold">반</label>
@@ -179,14 +179,16 @@
                     <label for="student_number" class="font-semibold">번</label>
                     <input type="text" id="student_name" class="w-32 p-2 border border-gray-300 rounded-md" placeholder="이름">
                 </div>
+                <!-- 기능 버튼 그룹 -->
                 <div class="flex space-x-2 flex-wrap justify-center">
-                    <button id="download_zip_btn" class="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition text-sm">📦 ZIP으로 다운로드</button>
-                    <button id="delete_all_btn" class="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition text-sm">🗑️ 작성 내용 삭제</button>
+                    <button id="import_data_btn" class="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition text-sm">📥 데이터 가져오기</button>
+                    <button id="export_data_btn" class="bg-purple-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-purple-600 transition text-sm">📤 데이터 내보내기</button>
+                    <button id="delete_all_btn" class="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition text-sm">🗑️ 내용 삭제</button>
                 </div>
             </div>
         </div>
 
-        <!-- Tab Navigation (from index.html) -->
+        <!-- Tab Navigation -->
         <div class="mb-8 no-print">
             <div class="tab-button-group" aria-label="Tabs">
                 <button class="tab-button active" data-tab="tab1">1. 배경 및 현황</button>
@@ -280,7 +282,7 @@
                     <div class="space-y-6">
                         <h3 class="text-xl font-bold text-indigo-700 border-b-2 border-indigo-200 pb-3">프로젝트 과제: 스마트 모빌리티 허브 아이디어 제안</h3>
                         <p class="text-gray-600">
-                            <strong>과제 목표:</strong> '스마트 모빌리티 허브' 시범사업을 성공시키기 위해, <strong>현실적인 문제 상황을 분석</strong>하고, <strong>'대상지 선정을 위한 고려사항'</strong>을 2가지 이상 제안하며, 이를 바탕으로 구체적인 솔루션과 기대효과를 작성합니다.
+                            <strong>과제 목표:</strong> '스마트 모빌리티 허브' 시범사업을 성공시키기 위해, **현실적인 문제 상황을 분석**하고, **'대상지 선정을 위한 고려사항'**을 2가지 이상 제안하며, 이를 바탕으로 구체적인 솔루션과 기대효과를 작성합니다.
                         </p>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center mt-4">
                             <div class="bg-gray-50 p-4 rounded-lg">
@@ -452,7 +454,11 @@
             <!-- Tab 5: 미리보기 및 제출 -->
             <div id="tab5" class="tab-content">
                  <div class="bg-white p-6 sm:p-8 rounded-lg shadow-md mb-6 no-print">
-                    <div class="text-center">
+                    <!-- [MODIFIED] Button container -->
+                    <div class="flex justify-center items-center gap-4 flex-wrap">
+                        <button id="download_zip_btn" class="bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition text-base">
+                            📦 ZIP으로 다운로드
+                        </button>
                         <button id="print_btn" class="bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition text-base">
                             🖨️ PDF로 저장
                         </button>
@@ -494,20 +500,33 @@
         </main>
     </div>
 
-    <!-- Modals and Toasts (from index.html) -->
+    <!-- Modals and Toasts -->
     <div id="toast-notification" class="fixed bottom-5 right-5 bg-gray-800 text-white py-3 px-5 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 no-print">
         저장되었습니다!
     </div>
     <div id="delete-confirm-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 no-print">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm">
             <h3 class="text-lg font-bold text-gray-800">작성한 내용을 삭제하시겠습니까?</h3>
-            <p class="text-gray-600 mt-2">입력한 모든 내용이 사라지며, 브라우저에 저장된 데이터도 함께 삭제됩니다. 이 작업은 되돌릴 수 없습니다.</p>
+            <p class="text-gray-600 mt-2">이 작업은 되돌릴 수 없습니다.</p>
             <div class="mt-6 flex justify-end space-x-4">
                 <button id="cancel-delete-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">취소</button>
                 <button id="confirm-delete-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">삭제</button>
             </div>
         </div>
     </div>
+    <!-- [NEW] Import Modal -->
+    <div id="import-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 no-print">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
+            <h3 class="text-lg font-bold text-gray-800">데이터 가져오기</h3>
+            <p class="text-gray-600 mt-2">'데이터 내보내기'로 복사한 텍스트를 아래에 붙여넣고 '불러오기' 버튼을 누르세요.</p>
+            <textarea id="import_textarea" class="w-full h-32 p-2 mt-4 border border-gray-300 rounded-md"></textarea>
+            <div class="mt-6 flex justify-end space-x-4">
+                <button id="cancel-import-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">취소</button>
+                <button id="confirm-import-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">불러오기</button>
+            </div>
+        </div>
+    </div>
+
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -526,6 +545,13 @@
             sourcesContainer: document.getElementById('sources_container'),
             toast: document.getElementById('toast-notification'),
             allInputs: document.querySelectorAll('#tab4 input, #tab4 textarea, input#student_class, input#student_number, input#student_name'),
+            // [NEW] Import/Export elements
+            importDataBtn: document.getElementById('import_data_btn'),
+            exportDataBtn: document.getElementById('export_data_btn'),
+            importModal: document.getElementById('import-modal'),
+            importTextarea: document.getElementById('import_textarea'),
+            confirmImportBtn: document.getElementById('confirm-import-btn'),
+            cancelImportBtn: document.getElementById('cancel-import-btn'),
         };
 
         // --- Field Mapping for Preview ---
@@ -547,24 +573,16 @@
             '인터넷 URL': {'웹사이트명':true, '글 제목':true, '작성자(기자)':true, 'URL':true}
         };
 
+        const storageKey = 'firstLastMileProjectData';
+
         // --- Event Listeners ---
         dom.tabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
         dom.accordions.forEach(button => button.addEventListener('click', toggleAccordion));
         dom.allInputs.forEach(input => input.addEventListener('input', updatePreviewAndSave));
         
         dom.addSourceBtn.addEventListener('click', () => addSourceElement());
-        dom.sourcesContainer.addEventListener('click', (e) => {
-            if (e.target.classList.contains('delete_source_btn')) {
-                e.target.closest('.source-entry').remove();
-                updatePreviewAndSave();
-            }
-        });
-        dom.sourcesContainer.addEventListener('change', (e) => {
-            if (e.target.classList.contains('source-type-select')) {
-                updateSourceInputs(e.target);
-                updatePreviewAndSave();
-            }
-        });
+        dom.sourcesContainer.addEventListener('click', (e) => { if (e.target.classList.contains('delete_source_btn')) { e.target.closest('.source-entry').remove(); updatePreviewAndSave(); } });
+        dom.sourcesContainer.addEventListener('change', (e) => { if (e.target.classList.contains('source-type-select')) { updateSourceInputs(e.target); updatePreviewAndSave(); } });
         dom.sourcesContainer.addEventListener('input', updatePreviewAndSave);
         
         dom.deleteAllBtn.addEventListener('click', () => dom.deleteModal.classList.remove('hidden'));
@@ -573,240 +591,106 @@
         dom.downloadZipBtn.addEventListener('click', downloadAsZIP);
         if (dom.printBtn) dom.printBtn.addEventListener('click', printReport);
 
+        // [NEW] Import/Export event listeners
+        dom.importDataBtn.addEventListener('click', () => dom.importModal.classList.remove('hidden'));
+        dom.exportDataBtn.addEventListener('click', exportData);
+        dom.cancelImportBtn.addEventListener('click', () => dom.importModal.classList.add('hidden'));
+        dom.confirmImportBtn.addEventListener('click', importData);
+
+
         // --- Initialization ---
         loadFromBrowser();
         switchTab('tab1');
         updatePreview();
 
         // --- Main Functions ---
-        function switchTab(targetTabId) {
-            dom.tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === targetTabId));
-            dom.tabContents.forEach(content => content.classList.toggle('active', content.id === targetTabId));
-            window.scrollTo(0, 0);
-        }
-        
-        function toggleAccordion(event) {
-            const button = event.currentTarget;
-            const content = button.parentElement.nextElementSibling;
-            const icon = button.querySelector('svg');
-            const isOpen = button.classList.toggle('open');
-            content.classList.toggle('open', isOpen);
-            
-            if (isOpen) {
-                content.style.maxHeight = content.scrollHeight + 'px';
-                content.style.paddingTop = '1rem';
-                content.style.paddingBottom = '1rem';
-                if(icon) icon.style.transform = 'rotate(180deg)';
-            } else {
-                content.style.maxHeight = '0';
-                content.style.paddingTop = '0';
-                content.style.paddingBottom = '0';
-                if(icon) icon.style.transform = 'rotate(0deg)';
-            }
-        }
+        function switchTab(targetTabId) { /* ... (no changes) ... */ }
+        function toggleAccordion(event) { /* ... (no changes) ... */ }
+        function updatePreviewAndSave() { updatePreview(); saveToBrowser(); }
+        function updatePreview() { /* ... (no changes) ... */ }
+        function updateSourcesPreview() { /* ... (no changes) ... */ }
+        function getFormData() { /* ... (no changes) ... */ }
+        function saveToBrowser() { /* ... (no changes) ... */ }
+        function loadFromBrowser() { /* ... (no changes) ... */ }
+        function deleteAllContent() { /* ... (no changes) ... */ }
+        function addSourceElement(sourceData = null) { /* ... (no changes) ... */ }
+        function updateSourceInputs(selectElement, values = null) { /* ... (no changes) ... */ }
+        function getReportFilename() { /* ... (no changes) ... */ }
+        function printReport() { /* ... (no changes) ... */ }
+        function downloadAsZIP() { /* ... (no changes) ... */ }
+        let toastTimer;
+        function showToast(message, bgColor = 'bg-gray-800') { /* ... (no changes) ... */ }
 
-        function updatePreviewAndSave() {
-            updatePreview();
-            saveToBrowser();
-        }
-
-        function updatePreview() {
-            Object.entries(fields).forEach(([fieldId, previewId]) => {
-                const inputEl = document.getElementById(fieldId);
-                const previewEl = document.getElementById(previewId);
-                if (!inputEl || !previewEl) return;
-                
-                const value = inputEl.value.trim();
-                const placeholderSpan = previewEl.querySelector('.preview-placeholder');
-                const placeholderText = placeholderSpan ? placeholderSpan.textContent : `[${fieldId}]`;
-
-                if (value) {
-                    previewEl.textContent = value;
-                } else {
-                    previewEl.innerHTML = `<span class="preview-placeholder">${placeholderText}</span>`;
-                }
-            });
-            updateSourcesPreview();
-        }
-
-        function updateSourcesPreview() {
-            const sourcesPreview = document.getElementById('preview_sources');
-            const sourceEntries = document.querySelectorAll('.source-entry');
-            if (sourceEntries.length === 0) {
-                sourcesPreview.innerHTML = `<span class="preview-placeholder">내용을 입력하세요...</span>`;
+        // --- [NEW] Import/Export Functions ---
+        function exportData() {
+            const dataString = localStorage.getItem(storageKey);
+            if (!dataString) {
+                showToast('저장된 데이터가 없습니다.', 'bg-red-500');
                 return;
             }
-            let sourcesText = '<ol class="list-decimal list-inside" style="line-height: 1.8;">';
-            sourceEntries.forEach(entry => {
-                const values = Array.from(entry.querySelectorAll('input')).map(i => i.value.trim());
-                let liContent = '';
-                let parts = [];
-                switch(entry.dataset.type) {
-                    case '논문':
-                        if(values[0]) parts.push(values[0]);
-                        if(values[1]) parts.push(`(${values[1]})`);
-                        if(values[2]) parts.push(`${values[2]}.`);
-                        if(values[3]) parts.push(values[3]);
-                        if(values[4] || values[5]) parts.push(`, ${values[4] || ''}(${values[5] || ''})`);
-                        if(values[6]) parts.push(`, ${values[6]}`);
-                        break;
-                    case '도서':
-                        if(values[0]) parts.push(values[0]);
-                        if(values[3]) parts.push(`(${values[3]})`);
-                        if(values[1]) parts.push(`${values[1]}.`);
-                        if(values[2]) parts.push(values[2]);
-                        break;
-                    case '학술잡지':
-                        if(values[2]) parts.push(values[2]);
-                        if(values[3]) parts.push(`(${values[3]})`);
-                        if(values[1]) parts.push(`${values[1]}.`);
-                        if(values[0]) parts.push(values[0]);
-                        break;
-                    case '인터넷 URL':
-                        if(values[2]) parts.push(values[2]);
-                        if(values[0]) parts.push(values[0]);
-                        if(values[1]) parts.push(`'${values[1]}'.`);
-                        if (values[3]) parts.push(`URL: ${values[3]}`);
-                        break;
-                }
-                liContent = parts.join(' ').replace(/\s\./g,'.').replace(/\s,/g,',');
-                sourcesText += `<li>${liContent}</li>`;
-            });
-            sourcesText += '</ol>';
-            sourcesPreview.innerHTML = sourcesText;
+            // Copy to clipboard
+            const tempTextarea = document.createElement('textarea');
+            tempTextarea.value = dataString;
+            document.body.appendChild(tempTextarea);
+            tempTextarea.select();
+            try {
+                document.execCommand('copy');
+                showToast('데이터가 클립보드에 복사되었습니다.');
+            } catch (err) {
+                showToast('복사에 실패했습니다. 직접 복사해주세요.', 'bg-red-500');
+                prompt('아래 텍스트를 직접 복사하세요:', dataString);
+            }
+            document.body.removeChild(tempTextarea);
         }
 
-        // --- Data Handling ---
-        function getFormData() {
-            const data = {};
-            dom.allInputs.forEach(input => data[input.id] = input.value);
-            data.sources = Array.from(document.querySelectorAll('.source-entry')).map(entry => ({
-                type: entry.dataset.type,
-                values: Array.from(entry.querySelectorAll('input')).map(input => input.value)
-            }));
-            return data;
+        function importData() {
+            const dataString = dom.importTextarea.value;
+            if (!dataString.trim()) {
+                showToast('붙여넣을 데이터가 없습니다.', 'bg-red-500');
+                return;
+            }
+            try {
+                const data = JSON.parse(dataString);
+                // Clear existing content before loading
+                dom.allInputs.forEach(input => input.value = '');
+                dom.sourcesContainer.innerHTML = '';
+
+                // Load new data
+                Object.entries(data).forEach(([key, value]) => {
+                    if (key === 'sources' && Array.isArray(value)) {
+                        value.forEach(source => addSourceElement(source));
+                    } else {
+                        const el = document.getElementById(key);
+                        if (el) el.value = value;
+                    }
+                });
+                
+                updatePreviewAndSave(); // Save imported data to the current browser and update preview
+                dom.importModal.classList.add('hidden');
+                dom.importTextarea.value = '';
+                showToast('데이터를 성공적으로 불러왔습니다.');
+
+            } catch (error) {
+                showToast('데이터 형식이 올바르지 않습니다.', 'bg-red-500');
+            }
         }
 
-        function saveToBrowser() {
-            localStorage.setItem('firstLastMileProjectData', JSON.stringify(getFormData()));
-            showToast('자동 저장되었습니다.');
-        }
+        // --- Unchanged Functions (for brevity in this view, but they are in the full code) ---
+        function switchTab(targetTabId) { dom.tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === targetTabId)); dom.tabContents.forEach(content => content.classList.toggle('active', content.id === targetTabId)); window.scrollTo(0, 0); }
+        function toggleAccordion(event) { const button = event.currentTarget; const content = button.parentElement.nextElementSibling; const icon = button.querySelector('svg'); const isOpen = button.classList.toggle('open'); content.classList.toggle('open', isOpen); if (isOpen) { content.style.maxHeight = content.scrollHeight + 'px'; content.style.paddingTop = '1rem'; content.style.paddingBottom = '1rem'; if(icon) icon.style.transform = 'rotate(180deg)'; } else { content.style.maxHeight = '0'; content.style.paddingTop = '0'; content.style.paddingBottom = '0'; if(icon) icon.style.transform = 'rotate(0deg)'; } }
+        function updatePreview() { Object.entries(fields).forEach(([fieldId, previewId]) => { const inputEl = document.getElementById(fieldId); const previewEl = document.getElementById(previewId); if (!inputEl || !previewEl) return; const value = inputEl.value.trim(); const placeholderSpan = previewEl.querySelector('.preview-placeholder'); const placeholderText = placeholderSpan ? placeholderSpan.textContent : `[${fieldId}]`; if (value) { previewEl.textContent = value; } else { previewEl.innerHTML = `<span class="preview-placeholder">${placeholderText}</span>`; } }); updateSourcesPreview(); }
+        function updateSourcesPreview() { const sourcesPreview = document.getElementById('preview_sources'); const sourceEntries = document.querySelectorAll('.source-entry'); if (sourceEntries.length === 0) { sourcesPreview.innerHTML = `<span class="preview-placeholder">내용을 입력하세요...</span>`; return; } let sourcesText = '<ol class="list-decimal list-inside" style="line-height: 1.8;">'; sourceEntries.forEach(entry => { const values = Array.from(entry.querySelectorAll('input')).map(i => i.value.trim()); let liContent = ''; let parts = []; switch(entry.dataset.type) { case '논문': if(values[0]) parts.push(values[0]); if(values[1]) parts.push(`(${values[1]})`); if(values[2]) parts.push(`${values[2]}.`); if(values[3]) parts.push(values[3]); if(values[4] || values[5]) parts.push(`, ${values[4] || ''}(${values[5] || ''})`); if(values[6]) parts.push(`, ${values[6]}`); break; case '도서': if(values[0]) parts.push(values[0]); if(values[3]) parts.push(`(${values[3]})`); if(values[1]) parts.push(`${values[1]}.`); if(values[2]) parts.push(values[2]); break; case '학술잡지': if(values[2]) parts.push(values[2]); if(values[3]) parts.push(`(${values[3]})`); if(values[1]) parts.push(`${values[1]}.`); if(values[0]) parts.push(values[0]); break; case '인터넷 URL': if(values[2]) parts.push(values[2]); if(values[0]) parts.push(values[0]); if(values[1]) parts.push(`'${values[1]}'.`); if (values[3]) parts.push(`URL: ${values[3]}`); break; } liContent = parts.join(' ').replace(/\s\./g,'.').replace(/\s,/g,','); sourcesText += `<li>${liContent}</li>`; }); sourcesText += '</ol>'; sourcesPreview.innerHTML = sourcesText; }
+        function getFormData() { const data = {}; dom.allInputs.forEach(input => data[input.id] = input.value); data.sources = Array.from(document.querySelectorAll('.source-entry')).map(entry => ({ type: entry.dataset.type, values: Array.from(entry.querySelectorAll('input')).map(input => input.value) })); return data; }
+        function saveToBrowser() { localStorage.setItem(storageKey, JSON.stringify(getFormData())); showToast('자동 저장되었습니다.'); }
+        function loadFromBrowser() { const savedData = localStorage.getItem(storageKey); if (!savedData) return; const data = JSON.parse(savedData); Object.entries(data).forEach(([key, value]) => { if (key === 'sources' && Array.isArray(value)) { value.forEach(source => addSourceElement(source)); } else { const el = document.getElementById(key); if (el) el.value = value; } }); }
+        function deleteAllContent() { dom.deleteModal.classList.add('hidden'); dom.allInputs.forEach(input => input.value = ''); dom.sourcesContainer.innerHTML = ''; localStorage.removeItem(storageKey); updatePreview(); showToast('모든 내용이 삭제되었습니다.', 'bg-red-500'); }
+        function addSourceElement(sourceData = null) { const entryDiv = document.createElement('div'); entryDiv.className = 'source-entry border p-4 rounded-md bg-gray-50 space-y-3'; const type = sourceData?.type || '논문'; entryDiv.dataset.type = type; entryDiv.innerHTML = `<div class="flex justify-between items-center"><select class="source-type-select p-2 border border-gray-300 rounded-md bg-white">${Object.keys(sourceConfig).map(option => `<option ${type === option ? 'selected' : ''}>${option}</option>`).join('')}</select><button class="delete_source_btn bg-red-500 text-white font-bold py-1 px-3 rounded-lg hover:bg-red-600 text-sm">삭제</button></div><div class="source-inputs grid grid-cols-1 sm:grid-cols-2 gap-2"></div>`; dom.sourcesContainer.appendChild(entryDiv); updateSourceInputs(entryDiv.querySelector('.source-type-select'), sourceData?.values); }
+        function updateSourceInputs(selectElement, values = null) { const inputsContainer = selectElement.closest('.source-entry').querySelector('.source-inputs'); const type = selectElement.value; selectElement.closest('.source-entry').dataset.type = type; const fields = sourceConfig[type]; let i = 0; inputsContainer.innerHTML = Object.entries(fields).map(([field, isRequired]) => { const value = values?.[i] || ''; i++; return `<label class="block"><span class="text-gray-700 text-sm">${field}${isRequired ? '<span class="text-red-500">*</span>' : ''}</span><input type="text" placeholder="${field}" value="${value}" class="w-full p-2 mt-1 border border-gray-300 rounded-md text-sm"></label>`; }).join(''); }
+        function getReportFilename() { const studentClass = (document.getElementById('student_class').value || '0').padStart(2, '0'); const studentNumber = (document.getElementById('student_number').value || '0').padStart(2, '0'); const studentId = `1${studentClass}${studentNumber}`; const studentName = document.getElementById('student_name').value.trim() || '이름없음'; return `${studentId}_${studentName}_스마트모빌리티_제안서`; }
+        function printReport() { const originalTitle = document.title; document.title = getReportFilename(); window.print(); setTimeout(() => { document.title = originalTitle; }, 500); }
+        function downloadAsZIP() { const filename = getReportFilename(); const reportContent = document.getElementById('report-content').innerHTML; const styles = document.querySelector('style').innerHTML; const htmlContent = `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>${filename}</title><script src="https://cdn.tailwindcss.com"><\/script><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet"><style>${styles}</style></head><body class="bg-gray-200 p-8"><div class="report-page printable-area">${reportContent}</div></body></html>`; const zip = new JSZip(); zip.file(`${filename}.html`, htmlContent); zip.generateAsync({type:"blob"}).then(content => { const a = document.createElement('a'); a.href = URL.createObjectURL(content); a.download = `${filename}.zip`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href); }); }
+        function showToast(message, bgColor = 'bg-gray-800') { clearTimeout(toastTimer); const toast = dom.toast; toast.textContent = message; toast.className = 'fixed bottom-5 right-5 text-white py-3 px-5 rounded-lg shadow-lg transition-opacity duration-300 no-print ' + bgColor; toast.style.opacity = 1; toastTimer = setTimeout(() => { toast.style.opacity = 0; }, 2000); }
 
-        function loadFromBrowser() {
-            const savedData = localStorage.getItem('firstLastMileProjectData');
-            if (!savedData) return;
-            const data = JSON.parse(savedData);
-            Object.entries(data).forEach(([key, value]) => {
-                if (key === 'sources' && Array.isArray(value)) {
-                    value.forEach(source => addSourceElement(source));
-                } else {
-                    const el = document.getElementById(key);
-                    if (el) el.value = value;
-                }
-            });
-        }
-        
-        function deleteAllContent() {
-            dom.deleteModal.classList.add('hidden');
-            dom.allInputs.forEach(input => input.value = '');
-            dom.sourcesContainer.innerHTML = '';
-            localStorage.removeItem('firstLastMileProjectData');
-            updatePreview();
-            showToast('모든 내용이 삭제되었습니다.', 'bg-red-500');
-        }
-
-        // --- Source Management ---
-        function addSourceElement(sourceData = null) {
-            const entryDiv = document.createElement('div');
-            entryDiv.className = 'source-entry border p-4 rounded-md bg-gray-50 space-y-3';
-            const type = sourceData?.type || '논문';
-            entryDiv.dataset.type = type;
-
-            entryDiv.innerHTML = `
-                <div class="flex justify-between items-center">
-                    <select class="source-type-select p-2 border border-gray-300 rounded-md bg-white">
-                        ${Object.keys(sourceConfig).map(option => `<option ${type === option ? 'selected' : ''}>${option}</option>`).join('')}
-                    </select>
-                    <button class="delete_source_btn bg-red-500 text-white font-bold py-1 px-3 rounded-lg hover:bg-red-600 text-sm">삭제</button>
-                </div>
-                <div class="source-inputs grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
-            `;
-            dom.sourcesContainer.appendChild(entryDiv);
-            updateSourceInputs(entryDiv.querySelector('.source-type-select'), sourceData?.values);
-        }
-
-        function updateSourceInputs(selectElement, values = null) {
-            const inputsContainer = selectElement.closest('.source-entry').querySelector('.source-inputs');
-            const type = selectElement.value;
-            selectElement.closest('.source-entry').dataset.type = type;
-            const fields = sourceConfig[type];
-            
-            let i = 0;
-            inputsContainer.innerHTML = Object.entries(fields).map(([field, isRequired]) => {
-                const value = values?.[i] || '';
-                i++;
-                return `
-                    <label class="block">
-                        <span class="text-gray-700 text-sm">${field}${isRequired ? '<span class="text-red-500">*</span>' : ''}</span>
-                        <input type="text" placeholder="${field}" value="${value}" class="w-full p-2 mt-1 border border-gray-300 rounded-md text-sm">
-                    </label>
-                `;
-            }).join('');
-        }
-
-        // --- File & Print ---
-        function getReportFilename() {
-            const studentClass = (document.getElementById('student_class').value || '0').padStart(2, '0');
-            const studentNumber = (document.getElementById('student_number').value || '0').padStart(2, '0');
-            const studentId = `1${studentClass}${studentNumber}`;
-            const studentName = document.getElementById('student_name').value.trim() || '이름없음';
-            return `${studentId}_${studentName}_스마트모빌리티_제안서`;
-        }
-
-        function printReport() {
-            const originalTitle = document.title;
-            document.title = getReportFilename();
-            window.print();
-            setTimeout(() => { document.title = originalTitle; }, 500);
-        }
-
-        function downloadAsZIP() {
-            const filename = getReportFilename();
-            const reportContent = document.getElementById('report-content').innerHTML;
-            const styles = document.querySelector('style').innerHTML;
-            const htmlContent = `
-                <!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
-                <title>${filename}</title>
-                <script src="https://cdn.tailwindcss.com"><\/script>
-                <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
-                <style>${styles}</style>
-                </head>
-                <body class="bg-gray-200 p-8"><div class="report-page printable-area">${reportContent}</div></body></html>`;
-            
-            const zip = new JSZip();
-            zip.file(`${filename}.html`, htmlContent);
-
-            zip.generateAsync({type:"blob"}).then(content => {
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(content);
-                a.download = `${filename}.zip`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(a.href);
-            });
-        }
-        
-        // --- UI Feedback ---
-        let toastTimer;
-        function showToast(message, bgColor = 'bg-gray-800') {
-            clearTimeout(toastTimer);
-            const toast = dom.toast;
-            toast.textContent = message;
-            toast.className = 'fixed bottom-5 right-5 text-white py-3 px-5 rounded-lg shadow-lg transition-opacity duration-300 no-print ' + bgColor;
-            toast.style.opacity = 1;
-            toastTimer = setTimeout(() => { toast.style.opacity = 0; }, 2000);
-        }
     });
     </script>
 </body>
