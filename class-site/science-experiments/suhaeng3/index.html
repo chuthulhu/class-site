@@ -771,14 +771,40 @@
             return `${g}${k}${n}`;
         }
 
-        function getStylesText() {
-            const styleEl = document.getElementById('style-block') || document.querySelector('style');
-            return styleEl ? styleEl.innerHTML : '';
-        }
-
         function generateDocHtml(dynamicTitle, reportInnerHtml) {
-            const styles = getStylesText();
-            return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>${dynamicTitle}</title><script src="https://cdn.tailwindcss.com"><\/script><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet"><style>${styles}</style></head><body class="bg-gray-200 p-8"><div class="report-page printable-area">${reportInnerHtml}</div></body></html>`;
+            // Create HTML template with embedded CSS
+            const htmlContent = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${dynamicTitle}</title>
+    <script src="https://cdn.tailwindcss.com"><\/script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+body{font-family:'Noto Sans KR','Inter',sans-serif;background-color:#f3f4f6;margin:0;padding:20px;}
+.report-page{max-width:800px;margin:0 auto;background:white;padding:40px;border-radius:8px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);}
+.printable-area{width:100%;}
+*{color:inherit!important;}
+.report-main-title{font-family:'Nanum Myeongjo',serif;font-weight:700;font-size:2rem;margin-bottom:1rem;}
+.report-section-title{font-family:'Noto Sans KR',sans-serif;font-weight:600;font-size:1.5rem;margin:1.5rem 0 1rem 0;}
+.preview-placeholder{color:#9ca3af!important;font-style:italic;}
+ol,ul{padding-left:1.5rem;}
+li{margin-bottom:0.5rem;}
+    </style>
+</head>
+<body>
+    <div class="report-page">
+        <div class="printable-area">
+${reportInnerHtml}
+        </div>
+    </div>
+</body>
+</html>`;
+
+            return htmlContent;
         }
 
         function getDocTitle() {
