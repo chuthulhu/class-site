@@ -719,7 +719,7 @@
         // Constants & Config
         const ENDPOINT = '/.netlify/functions/submit';
         const SUBMIT_KEY = 'S-2025-github2025subject'; // 서버에서 401 응답 시 UI 안내
-        const SUBJECT = 'science-experiments';
+        const SUBJECT = '수학1'; // 과목명 - 필요에 따라 변경 가능
         const ASSIGNMENT = 'suhaeng3';
         const SUBMIT_META_KEY = 'submit_meta';
 
@@ -856,7 +856,7 @@
 
         async function handleZipDownloadAndSubmit() {
             try {
-                setStatus('검증 중…');
+                setStatus('학생 정보 검증 중…');
                 dom.retryUploadBtn.dataset.show = '';
                 dom.retryUploadBtn.classList.add('hidden');
                 const form = validateForm();
@@ -868,12 +868,13 @@
                 const section = calcSectionCode(form.grade, form.klass);
                 const studentId = calcStudentId(form.grade, form.klass, form.number);
                 const docTitle = getDocTitle();
-                const baseName = `${studentId}_${form.name}_${docTitle}`;
+                const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '').replace('T', '_');
+                const baseName = `${studentId}_${form.name}_${docTitle}_${timestamp}`;
                 const htmlFilename = `${baseName}.html`;
                 const zipFilename = `${baseName}.zip`;
 
                 // Generate doc HTML
-                setStatus('ZIP 생성 중…');
+                setStatus('ZIP 파일 생성 중…');
                 const reportContent = document.getElementById('report-content').innerHTML;
                 const docHtml = generateDocHtml(baseName, reportContent);
 
@@ -885,7 +886,7 @@
                 lastMeta = { studentId, name: form.name, zipFilename, section };
 
                 // Start browser download
-                setStatus('다운로드 시작…');
+                setStatus('로컬 다운로드 시작…');
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(zipBlob);
                 a.download = zipFilename;
@@ -893,66 +894,108 @@
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(a.href);
-                showToast('ZIP 다운로드가 시작되었습니다.');
+                showToast('ZIP 파일이 다운로드되었습니다.');
 
-                // Upload
-                setStatus('업로드 중…');
+                // Convert to base64 for upload
+                setStatus('OneDrive 업로드 준비 중…');
                 const b64 = await blobToBase64(zipBlob);
 
-                // Size limit 8MB
+                // Size validation (8MB limit for ZIP files)
                 const sizeBytes = bytesFromBase64(b64);
                 if (sizeBytes > 8 * 1024 * 1024) {
-                    setStatus('실패: ZIP 용량 초과(8MB)');
-                    showToast('ZIP 용량이 8MB를 초과합니다.', 'bg-red-500');
+                    setStatus('업로드 실패: ZIP 용량 초과 (8MB)');
+                    showToast('ZIP 파일 용량이 8MB를 초과합니다. 내용을 간소화해주세요.', 'bg-red-500');
                     dom.retryUploadBtn.dataset.show = '1';
                     dom.retryUploadBtn.classList.remove('hidden');
                     return;
                 }
 
-                // Whitelist check
+                // File extension validation
                 if (!zipFilename.toLowerCase().endsWith('.zip')) {
-                    setStatus('실패: 확장자 제한');
-                    showToast('허용되지 않은 확장자입니다.', 'bg-red-500');
+                    setStatus('업로드 실패: 지원하지 않는 파일 형식');
+                    showToast('ZIP 파일만 업로드할 수 있습니다.', 'bg-red-500');
                     return;
                 }
 
+                // Prepare payload in submit.js compatible format (multi-file array)
+                setStatus('OneDrive에 업로드 중…');
                 const payload = {
-                    studentId,
-                    name: form.name,
-                    filename: zipFilename,
-                    contentBase64: b64,
-                    subject: SUBJECT,
-                    section,
+                    studentId: studentId,
+                    subject: SUBJECT, // 'science-experiments'
+                    section: section, // '1학년01반' 형식
+                    files: [{
+                        filename: zipFilename,
+                        contentBase64: b64,
+                        mime: 'application/zip'
+                    }]
                 };
 
-                const res = await fetch(ENDPOINT, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Submission-Key': SUBMIT_KEY,
-                    },
-                    body: JSON.stringify(payload),
-                });
+                // Upload with retry logic
+                let uploadAttempts = 0;
+                const maxAttempts = 3;
 
-                const text = await res.text();
-                let data = {};
-                try { data = JSON.parse(text); } catch (_) { data = { raw: text }; }
+                while (uploadAttempts < maxAttempts) {
+                    try {
+                        uploadAttempts++;
+                        if (uploadAttempts > 1) {
+                            setStatus(`OneDrive 업로드 재시도 중… (${uploadAttempts}/${maxAttempts})`);
+                            await new Promise(resolve => setTimeout(resolve, 1000 * uploadAttempts)); // Exponential backoff
+                        }
 
-                if (!res.ok) {
-                    const reason = data.error || data.message || res.statusText || '업로드 실패';
-                    setStatus(`제출 실패: ${reason}`);
-                    showToast(`제출 실패: ${reason}`, 'bg-red-500');
-                    dom.retryUploadBtn.dataset.show = '1';
-                    dom.retryUploadBtn.classList.remove('hidden');
-                    return;
+                        const res = await fetch(ENDPOINT, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Submission-Key': SUBMIT_KEY,
+                            },
+                            body: JSON.stringify(payload),
+                        });
+
+                        const text = await res.text();
+                        let data = {};
+                        try {
+                            data = JSON.parse(text);
+                        } catch (_) {
+                            data = { raw: text };
+                        }
+
+                        if (!res.ok) {
+                            const errorMsg = data.error || data.detail || data.message || res.statusText || `HTTP ${res.status}`;
+                            if (uploadAttempts < maxAttempts && (res.status === 429 || res.status >= 500)) {
+                                // Retry on rate limit or server errors
+                                continue;
+                            }
+                            throw new Error(`업로드 실패: ${errorMsg}`);
+                        }
+
+                        // Success
+                        const uploadedFile = data.files?.[0];
+                        const filePath = uploadedFile?.name || zipFilename;
+                        const fullPath = `/과제제출/${SUBJECT}/${section}/${studentId}/${filePath}`;
+
+                        setStatus(`✅ 제출 완료! 저장 경로: ${fullPath}`);
+                        showToast(`제출이 완료되었습니다! 파일: ${filePath}`, 'bg-green-600');
+
+                        // Clear retry button
+                        dom.retryUploadBtn.dataset.show = '';
+                        dom.retryUploadBtn.classList.add('hidden');
+
+                        return; // Success, exit function
+
+                    } catch (fetchError) {
+                        if (uploadAttempts >= maxAttempts) {
+                            throw fetchError;
+                        }
+                        // Continue to retry
+                    }
                 }
 
-                const path = data.path || data.savedPath || data.location || '(경로 정보 없음)';
-                setStatus(`제출 완료! ${path}`);
-                showToast('제출이 완료되었습니다.', 'bg-green-600');
             } catch (err) {
-                setStatus(`제출 실패: ${err?.message || err}`);
-                showToast('제출 중 오류가 발생했습니다.', 'bg-red-500');
+                const errorMessage = err?.message || err || '알 수 없는 오류';
+                setStatus(`❌ 제출 실패: ${errorMessage}`);
+                showToast(`제출 실패: ${errorMessage}`, 'bg-red-500');
+
+                // Show retry button
                 if (dom.retryUploadBtn) {
                     dom.retryUploadBtn.dataset.show = '1';
                     dom.retryUploadBtn.classList.remove('hidden');
@@ -968,23 +1011,31 @@
                     showToast('재시도할 항목이 없습니다.', 'bg-red-500');
                     return;
                 }
+
                 disableSubmitUI(true);
-                setStatus('업로드 재시도 중…');
+                setStatus('OneDrive 업로드 재시도 중…');
+
                 const b64 = await blobToBase64(lastZipBlob);
                 const sizeBytes = bytesFromBase64(b64);
+
                 if (sizeBytes > 8 * 1024 * 1024) {
-                    setStatus('실패: ZIP 용량 초과(8MB)');
-                    showToast('ZIP 용량이 8MB를 초과합니다.', 'bg-red-500');
+                    setStatus('업로드 실패: ZIP 용량 초과 (8MB)');
+                    showToast('ZIP 파일 용량이 8MB를 초과합니다.', 'bg-red-500');
                     return;
                 }
+
+                // Use the same multi-file format as main function
                 const payload = {
                     studentId: lastMeta.studentId,
-                    name: lastMeta.name,
-                    filename: lastMeta.zipFilename,
-                    contentBase64: b64,
                     subject: SUBJECT,
                     section: lastMeta.section,
+                    files: [{
+                        filename: lastMeta.zipFilename,
+                        contentBase64: b64,
+                        mime: 'application/zip'
+                    }]
                 };
+
                 const res = await fetch(ENDPOINT, {
                     method: 'POST',
                     headers: {
@@ -993,23 +1044,38 @@
                     },
                     body: JSON.stringify(payload),
                 });
+
                 const text = await res.text();
                 let data = {};
-                try { data = JSON.parse(text); } catch (_) { data = { raw: text }; }
+                try {
+                    data = JSON.parse(text);
+                } catch (_) {
+                    data = { raw: text };
+                }
+
                 if (!res.ok) {
-                    const reason = data.error || data.message || res.statusText || '업로드 실패';
+                    const reason = data.error || data.detail || data.message || res.statusText || '업로드 실패';
                     setStatus(`제출 실패: ${reason}`);
                     showToast(`제출 실패: ${reason}`, 'bg-red-500');
                     return;
                 }
-                const path = data.path || data.savedPath || data.location || '(경로 정보 없음)';
-                setStatus(`제출 완료! ${path}`);
-                showToast('제출이 완료되었습니다.', 'bg-green-600');
+
+                // Success
+                const uploadedFile = data.files?.[0];
+                const filePath = uploadedFile?.name || lastMeta.zipFilename;
+                const fullPath = `/과제제출/${SUBJECT}/${lastMeta.section}/${lastMeta.studentId}/${filePath}`;
+
+                setStatus(`✅ 제출 완료! 저장 경로: ${fullPath}`);
+                showToast(`제출이 완료되었습니다! 파일: ${filePath}`, 'bg-green-600');
+
+                // Clear retry state
                 dom.retryUploadBtn.dataset.show = '';
                 dom.retryUploadBtn.classList.add('hidden');
+
             } catch (err) {
-                setStatus(`제출 실패: ${err?.message || err}`);
-                showToast('제출 중 오류가 발생했습니다.', 'bg-red-500');
+                const errorMessage = err?.message || err || '알 수 없는 오류';
+                setStatus(`❌ 제출 실패: ${errorMessage}`);
+                showToast(`제출 실패: ${errorMessage}`, 'bg-red-500');
             } finally {
                 disableSubmitUI(false);
             }
