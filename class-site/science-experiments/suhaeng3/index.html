@@ -719,7 +719,7 @@
         // Constants & Config
         const ENDPOINT = '/.netlify/functions/submit';
         const SUBMIT_KEY = 'S-2025-github2025subject'; // 서버에서 401 응답 시 UI 안내
-        const SUBJECT = 'science';
+        const SUBJECT = 'science-experiments';
         const ASSIGNMENT = 'suhaeng3';
         const SUBMIT_META_KEY = 'submit_meta';
 
@@ -779,6 +779,12 @@
         function generateDocHtml(dynamicTitle, reportInnerHtml) {
             const styles = getStylesText();
             return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>${dynamicTitle}</title><script src="https://cdn.tailwindcss.com"><\/script><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet"><style>${styles}</style></head><body class="bg-gray-200 p-8"><div class="report-page printable-area">${reportInnerHtml}</div></body></html>`;
+        }
+
+        function getDocTitle() {
+            const titleEl = document.getElementById('preview_main_title');
+            const t = (titleEl?.textContent || '').trim();
+            return t || '보고서';
         }
 
         function validateForm() {
@@ -861,9 +867,8 @@
                 // Build filenames & meta
                 const section = calcSectionCode(form.grade, form.klass);
                 const studentId = calcStudentId(form.grade, form.klass, form.number);
-                const now = new Date();
-                const ts = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
-                const baseName = `${SUBJECT}-${ASSIGNMENT}-${section}-${studentId}-${form.name}-${ts}`;
+                const docTitle = getDocTitle();
+                const baseName = `${studentId}_${form.name}_${docTitle}`;
                 const htmlFilename = `${baseName}.html`;
                 const zipFilename = `${baseName}.zip`;
 
