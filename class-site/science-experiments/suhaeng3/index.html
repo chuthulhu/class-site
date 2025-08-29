@@ -712,7 +712,23 @@
             return `${studentId}_${studentName}_스마트모빌리티_제안서`;
         }
         function printReport() { const originalTitle = document.title; document.title = getReportFilename(); window.print(); setTimeout(() => { document.title = originalTitle; }, 500); }
-        function downloadAsZIP() { const filename = getReportFilename(); const reportContent = document.getElementById('report-content').innerHTML; const styles = document.querySelector('style').innerHTML; const htmlContent = `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>${filename}</title><script src="https://cdn.tailwindcss.com"><\/script><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet"><style>${styles}</style></head><body class="bg-gray-200 p-8"><div class="report-page printable-area">${reportContent}</div></body></html>`; const zip = new JSZip(); zip.file(`${filename}.html`, htmlContent); zip.generateAsync({type:"blob"}).then(content => { const a = document.createElement('a'); a.href = URL.createObjectURL(content); a.download = `${filename}.zip`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href); }); }
+        function downloadAsZIP() {
+            const filename = getReportFilename();
+            const reportContent = document.getElementById('report-content').innerHTML;
+            // Use the same HTML generator as preview to ensure identical layout/styles
+            const htmlContent = generateDocHtml(filename, reportContent);
+            const zip = new JSZip();
+            zip.file(`${filename}.html`, htmlContent);
+            zip.generateAsync({ type: "blob" }).then(content => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(content);
+                a.download = `${filename}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(a.href);
+            });
+        }
         function showToast(message, bgColor = 'bg-gray-800') { clearTimeout(toastTimer); const toast = dom.toast; toast.textContent = message; toast.className = 'fixed bottom-5 right-5 text-white py-3 px-5 rounded-lg shadow-lg transition-opacity duration-300 no-print ' + bgColor; toast.style.opacity = 1; toastTimer = setTimeout(() => { toast.style.opacity = 0; }, 2000); }
 
         // SUBMIT MODULE START
@@ -783,17 +799,65 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-body{font-family:'Noto Sans KR','Inter',sans-serif;background-color:#f3f4f6;margin:0;padding:20px;}
-.report-page{max-width:800px;margin:0 auto;background:white;padding:40px;border-radius:8px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);}
-.printable-area{width:100%;}
-*{color:inherit!important;}
-.report-main-title{font-family:'Nanum Myeongjo',serif;font-weight:700;font-size:2rem;margin-bottom:1rem;}
-.report-section-title{font-family:'Noto Sans KR',sans-serif;font-weight:600;font-size:1.5rem;margin:1.5rem 0 1rem 0;}
-.preview-placeholder{color:#9ca3af!important;font-style:italic;}
-ol,ul{padding-left:1.5rem;}
-li{margin-bottom:0.5rem;}
-    </style>
+        <style>
+/* Base */
+body { font-family: 'Noto Sans KR','Inter',sans-serif; background-color: #f3f4f6; margin:0; }
+* { color: inherit !important; }
+
+/* Report page layout */
+.report-page {
+    background-color: #ffffff;
+    padding: 2.5cm 2cm;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    color: #1f2937; /* gray-800 */
+}
+.printable-area { width: 100%; }
+
+/* Typography */
+.report-main-title {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 2.25rem; /* text-3xl */
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #111827; /* gray-900 */
+    padding-bottom: 1rem;
+}
+.report-section-title {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700; /* bold */
+    color: #111827; /* gray-900 */
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #d1d5db; /* gray-300 */
+}
+.preview-text {
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 2.5em;
+    line-height: 1.8;
+    color: #374151; /* gray-700 */
+    font-family: 'Nanum Myeongjo', serif; /* 본문은 명조체 유지 */
+}
+.preview-placeholder { color: #9ca3af !important; font-style: italic; }
+ol, ul { padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+
+/* Print */
+@page { size: A4 portrait; margin: 2cm; }
+@media print {
+    body * { visibility: hidden; }
+    .printable-area, .printable-area * { visibility: visible; }
+    .printable-area {
+        position: absolute; left: 0; top: 0;
+        width: 100%; padding: 0; margin: 0;
+        box-shadow: none; border: none;
+    }
+    .no-print { display: none; }
+}
+        </style>
 </head>
 <body>
     <div class="report-page">
