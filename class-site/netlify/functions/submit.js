@@ -7,6 +7,7 @@
 //  - (선택) LOG_LEVEL: debug|info (기본 info)
 
 import { google } from 'googleapis';
+import { Readable } from 'node:stream';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -166,6 +167,7 @@ export async function handler(event) {
     // 업로드(multipart)
     const buffer = Buffer.from(contentBase64, 'base64');
     const mimeType = detectMime(finalName);
+    const stream = Readable.from(buffer);
 
     const created = await drive.files.create({
       requestBody: {
@@ -174,7 +176,7 @@ export async function handler(event) {
       },
       media: {
         mimeType,
-        body: buffer,
+        body: stream,
       },
       fields: 'id,name,webViewLink,webContentLink,parents',
     });
