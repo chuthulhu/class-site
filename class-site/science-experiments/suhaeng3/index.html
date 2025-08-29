@@ -538,6 +538,25 @@
         </div>
     </div>
 
+    <!-- [NEW] iOS Save Help Modal -->
+    <div id="ios-help-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 no-print">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
+            <h3 class="text-lg font-bold text-gray-800">iOS에서 ZIP 파일 저장하기</h3>
+            <ol class="text-gray-700 mt-3 list-decimal list-inside space-y-2">
+                <li>아래 "파일에 저장(공유 시트)" 버튼을 눌러 공유 시트를 여세요.</li>
+                <li>공유 시트에서 "파일에 저장"을 선택하세요.</li>
+                <li>원하는 저장 위치(예: iCloud Drive 또는 내 iPhone)와 폴더를 선택하고 저장하세요.</li>
+            </ol>
+            <p class="text-gray-500 text-sm mt-3">팁: 저장 후 "파일" 앱에서 방금 저장한 위치로 이동해 확인할 수 있어요.</p>
+            <div class="mt-6 flex flex-col sm:flex-row justify-end gap-3">
+                <button id="ios-help-download-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">대신 바로 다운로드</button>
+                <div class="flex-1"></div>
+                <button id="ios-help-close-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">닫기</button>
+                <button id="ios-help-confirm-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">파일에 저장(공유 시트)</button>
+            </div>
+        </div>
+    </div>
+
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -567,6 +586,11 @@
             cancelImportBtn: document.getElementById('cancel-import-btn'),
             // Submit status
             submitStatus: document.getElementById('submit_status'),
+            // iOS Help Modal
+            iosHelpModal: document.getElementById('ios-help-modal'),
+            iosHelpConfirmBtn: document.getElementById('ios-help-confirm-btn'),
+            iosHelpCloseBtn: document.getElementById('ios-help-close-btn'),
+            iosHelpDownloadBtn: document.getElementById('ios-help-download-btn'),
         };
 
         // --- Field Mapping for Preview ---
@@ -610,6 +634,15 @@
         if (dom.previewNewTabBtn) dom.previewNewTabBtn.addEventListener('click', openPreviewInNewTab);
         if (dom.retryUploadBtn) dom.retryUploadBtn.addEventListener('click', retryLastUpload);
 
+        // iOS Help Modal events
+        if (dom.iosHelpCloseBtn) dom.iosHelpCloseBtn.addEventListener('click', () => dom.iosHelpModal.classList.add('hidden'));
+        if (dom.iosHelpDownloadBtn) dom.iosHelpDownloadBtn.addEventListener('click', () => {
+            // Fallback direct download
+            if (lastZipBlob && lastMeta?.zipFilename) triggerBlobDownload(lastZipBlob, lastMeta.zipFilename);
+            dom.iosHelpModal.classList.add('hidden');
+        });
+        if (dom.iosHelpConfirmBtn) dom.iosHelpConfirmBtn.addEventListener('click', openIOSShare);
+
         // [NEW] Import/Export event listeners
         dom.importDataBtn.addEventListener('click', () => dom.importModal.classList.remove('hidden'));
         dom.exportDataBtn.addEventListener('click', exportData);
@@ -621,6 +654,11 @@
         loadFromBrowser();
         switchTab('tab1');
         updatePreview();
+
+        // Hide PDF print button on iOS devices
+        if (isIOS() && dom.printBtn) {
+            dom.printBtn.classList.add('hidden');
+        }
 
         // --- Main Functions ---
         function switchTab(targetTabId) { /* ... (no changes) ... */ }
@@ -732,6 +770,49 @@
             });
         }
         function showToast(message, bgColor = 'bg-gray-800') { clearTimeout(toastTimer); const toast = dom.toast; toast.textContent = message; toast.className = 'fixed bottom-5 right-5 text-white py-3 px-5 rounded-lg shadow-lg transition-opacity duration-300 no-print ' + bgColor; toast.style.opacity = 1; toastTimer = setTimeout(() => { toast.style.opacity = 0; }, 2000); }
+
+        // --- Helpers for iOS detection & download/share ---
+        function isIOS() {
+            const ua = navigator.userAgent || navigator.vendor || '';
+            const iOSDevice = /iPad|iPhone|iPod/.test(ua);
+            const iPadOSDesktopUA = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+            return iOSDevice || iPadOSDesktopUA;
+        }
+
+        function triggerBlobDownload(blob, filename) {
+            try {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(a.href);
+                showToast('ZIP 파일이 다운로드되었습니다.');
+            } catch (_) { /* ignore */ }
+        }
+
+        async function openIOSShare() {
+            try {
+                if (!lastZipBlob || !lastMeta?.zipFilename) {
+                    showToast('공유할 파일이 없습니다.', 'bg-red-500');
+                    return;
+                }
+                const zipFile = new File([lastZipBlob], lastMeta.zipFilename, { type: 'application/zip' });
+                if (navigator.canShare && navigator.canShare({ files: [zipFile] }) && typeof navigator.share === 'function') {
+                    await navigator.share({ files: [zipFile], title: lastMeta.zipFilename, text: '파일 앱에서 저장 위치를 선택하세요.' });
+                    showToast('공유 시트가 열렸습니다. "파일에 저장"을 선택하세요.', 'bg-green-600');
+                } else {
+                    // Fallback to direct download
+                    triggerBlobDownload(lastZipBlob, lastMeta.zipFilename);
+                }
+            } catch (e) {
+                // User cancelled or error -> fallback download
+                triggerBlobDownload(lastZipBlob, lastMeta.zipFilename);
+            } finally {
+                if (dom.iosHelpModal) dom.iosHelpModal.classList.add('hidden');
+            }
+        }
 
         // SUBMIT MODULE START
         // Constants & Config
@@ -1062,18 +1143,15 @@ ${reportInnerHtml}
                         const filePath = uploadedFile?.name || zipFilename;
                         const fullPath = `/과제제출/${SUBJECT}/${section}/${studentId}/${filePath}`;
 
-                        setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 로컬 다운로드 시작…`);
-                        // Trigger local download after successful remote submission
-                        try {
-                            const a = document.createElement('a');
-                            a.href = URL.createObjectURL(lastZipBlob || zipBlob);
-                            a.download = zipFilename;
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                            URL.revokeObjectURL(a.href);
-                            showToast('ZIP 파일이 다운로드되었습니다.');
-                        } catch (_) {}
+                        // Success UX by platform
+                        if (isIOS()) {
+                            setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — iOS 저장 안내 표시`);
+                            // Show iOS help modal; user clicks to open share (keeps user gesture)
+                            if (dom.iosHelpModal) dom.iosHelpModal.classList.remove('hidden');
+                        } else {
+                            setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 로컬 다운로드 시작…`);
+                            triggerBlobDownload(lastZipBlob || zipBlob, zipFilename);
+                        }
 
                         showToast(`제출이 완료되었습니다! 파일: ${filePath}`, 'bg-green-600');
 
