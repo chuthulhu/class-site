@@ -6,10 +6,9 @@
 2. [프로젝트 목표](#프로젝트-목표)
 3. [프로젝트 구조](#프로젝트-구조)
 4. [핵심 기능 상세](#핵심-기능-상세)
-5. [환경 변수 설정](#환경-변수-설정)
-6. [API 엔드포인트](#api-엔드포인트)
-7. [앞으로의 작업 계획 및 제안사항](#앞으로의-작업-계획-및-제안사항)
-8. [프로젝트 관리 문서](#프로젝트-관리-문서)
+5. [문서 모음](#문서-모음)
+6. [앞으로의 작업 계획 및 제안사항](#앞으로의-작업-계획-및-제안사항)
+7. [프로젝트 관리 문서](#프로젝트-관리-문서)
 
 ## 프로젝트 개요
 
@@ -51,7 +50,8 @@ class-site/
 │   ├── index.html              # 메인 페이지
 │   ├── netlify/
 │   │   └── functions/
-│   │       └── submit.js       # 핵심 업로드 함수
+│   │       ├── submit.js       # 핵심 업로드 함수(OneDrive 업로드)
+│   │       └── download.js     # 첨부 응답 다운로드(인앱 브라우저 대응)
 │   └── science-experiments/    # 실험 관련 페이지들
 ├── temps/                      # 임시 파일들
 └── README.md                   # 프로젝트 문서
@@ -84,64 +84,23 @@ class-site/
 - **>10MB**: createUploadSession을 통한 청크 업로드 (8MiB 단위)
 - **재시도 로직**: 네트워크 오류 시 최대 3회 재시도 (백오프 적용)
 
+### 3.1. 인앱 브라우저 다운로드 대응
+- **서버 첨부 응답 다운로드**: 인앱 브라우저(네이버/카카오 등)에서 Blob/a[download]가 차단될 수 있어, 서버 함수(`download.js`)로 파일(Base64) POST → 서버가 `Content-Disposition: attachment`로 바로 응답 → 인앱에서도 다운로드 매니저/파일앱에 기록됨.
+- **클라이언트 흐름**: 업로드 성공 후 인앱 감지 시 “서버에서 다운로드(권장)” 버튼만 제공(간소 UI). 일반 브라우저는 로컬 다운로드 트리거.
+- **iOS Safari**: 인앱이 아닌 iOS Safari에서는 “파일에 저장(공유 시트)” 안내 모달 제공. 인앱/사파리 공통으로 PDF 인쇄 버튼은 iOS 또는 인앱에서 숨김 처리.
+
 ### 4. 폴더 관리
 - **자동 폴더 생성**: 필요한 경로 계층 구조 자동 생성
 - **경로 인코딩**: Colon addressing을 통한 특수문자 처리
 - **중복 파일명**: 타임스탬프 접미사 (`_YYYYMMDD_HHmmss`) 자동 부착
 
-## 환경 변수 설정
+## 문서 모음
 
-Netlify UI에서 다음 환경변수들을 설정해야 합니다:
-
-```bash
-SUBMIT_KEY=<제출 인증 키>
-MS_TENANT_ID=<Microsoft 테넌트 ID>
-MS_CLIENT_ID=<Microsoft 클라이언트 ID>
-MS_CLIENT_SECRET=<Microsoft 클라이언트 시크릿>
-MS_REFRESH_TOKEN=<Microsoft 리프레시 토큰>
-ROOT_FOLDER_PATH=/과제제출
-```
-
-## API 엔드포인트
-
-### POST /.netlify/functions/submit
-
-학생 파일 제출을 위한 메인 엔드포인트.
-
-#### 요청 형식
-```json
-{
-  "studentId": "10207",
-  "subject": "physics1",
-  "section": "102",
-  "files": [
-    {
-      "filename": "assignment.pdf",
-      "contentBase64": "<base64-encoded-content>",
-      "mime": "application/pdf"
-    }
-  ]
-}
-```
-
-#### 응답 형식
-```json
-{
-  "ok": true,
-  "studentId": "10207",
-  "subject": "physics1",
-  "section": "102",
-  "submittedAt": "2024-01-15T10:30:00.000Z",
-  "files": [
-    {
-      "name": "assignment.pdf",
-      "size": 1024000,
-      "webUrl": "https://onedrive.live.com/...",
-      "chunked": false
-    }
-  ]
-}
-```
+- 환경 변수: docs/configuration.md
+- API 레퍼런스: docs/api.md
+- 배포 가이드: docs/deployment.md
+- suhaeng3 사용자/테스트: docs/suhaeng3/
+- 변경 로그: CHANGELOG.md
 
 ## 앞으로의 작업 계획 및 제안사항
 
@@ -193,8 +152,10 @@ ROOT_FOLDER_PATH=/과제제출
 
 ---
 
+> 최근 변경은 CHANGELOG.md를 참고하세요.
+
+---
+
 ## 📋 프로젝트 관리 문서
 
-> 📋 **상세 작업 계획 및 진행 상황은 [PROJECT_PLAN.md](PROJECT_PLAN.md)를 참조하세요**
-
-> 📋 **수행한 작업 내역은 [PROJECT_PLAN.md](PROJECT_PLAN.md)를 참조하세요**
+> 📋 상세 작업 계획 및 진행 상황은 PROJECT_PLAN.md를 참조하세요
