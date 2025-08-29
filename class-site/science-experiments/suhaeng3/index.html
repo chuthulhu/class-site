@@ -557,6 +557,30 @@
         </div>
     </div>
 
+    <!-- [NEW] In-App Download Center Modal -->
+    <div id="inapp-download-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 no-print">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
+            <h3 class="text-lg font-bold text-gray-800">인앱 브라우저에서 저장하기</h3>
+            <p class="text-gray-600 mt-2">현재 앱 내부 브라우저에서 열려 있어 저장이 제한될 수 있어요. 아래 옵션을 사용하세요.</p>
+            <div class="mt-4 grid grid-cols-1 gap-3">
+                <button id="inapp-open-share-btn" class="hidden px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">파일에 저장(공유 시트)</button>
+                <button id="inapp-open-chrome-btn" class="hidden px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Chrome에서 열기</button>
+                <button id="inapp-download-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">바로 다운로드(폴백)</button>
+                <div class="flex gap-3">
+                    <button id="inapp-copy-link-btn" class="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">링크 복사</button>
+                    <button id="inapp-show-qr-btn" class="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">QR 보기</button>
+                </div>
+            </div>
+            <div id="inapp-qr" class="mt-4 hidden text-center">
+                <canvas id="inapp-qr-canvas" class="mx-auto"></canvas>
+                <p class="text-gray-500 text-sm mt-2">다른 기기에서 스캔해 이 페이지를 열 수 있어요.</p>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button id="inapp-close-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">닫기</button>
+            </div>
+        </div>
+    </div>
+
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -591,6 +615,16 @@
             iosHelpConfirmBtn: document.getElementById('ios-help-confirm-btn'),
             iosHelpCloseBtn: document.getElementById('ios-help-close-btn'),
             iosHelpDownloadBtn: document.getElementById('ios-help-download-btn'),
+            // In-App Download Center
+            inappModal: document.getElementById('inapp-download-modal'),
+            inappCloseBtn: document.getElementById('inapp-close-btn'),
+            inappDownloadBtn: document.getElementById('inapp-download-btn'),
+            inappCopyLinkBtn: document.getElementById('inapp-copy-link-btn'),
+            inappShowQrBtn: document.getElementById('inapp-show-qr-btn'),
+            inappQr: document.getElementById('inapp-qr'),
+            inappQrCanvas: document.getElementById('inapp-qr-canvas'),
+            inappOpenChromeBtn: document.getElementById('inapp-open-chrome-btn'),
+            inappOpenShareBtn: document.getElementById('inapp-open-share-btn'),
         };
 
         // --- Field Mapping for Preview ---
@@ -642,6 +676,38 @@
             dom.iosHelpModal.classList.add('hidden');
         });
         if (dom.iosHelpConfirmBtn) dom.iosHelpConfirmBtn.addEventListener('click', openIOSShare);
+
+        // In-App Download Center events
+        if (dom.inappCloseBtn) dom.inappCloseBtn.addEventListener('click', () => dom.inappModal.classList.add('hidden'));
+        if (dom.inappDownloadBtn) dom.inappDownloadBtn.addEventListener('click', () => {
+            if (lastZipBlob && lastMeta?.zipFilename) triggerBlobDownload(lastZipBlob, lastMeta.zipFilename);
+            dom.inappModal.classList.add('hidden');
+        });
+        if (dom.inappCopyLinkBtn) dom.inappCopyLinkBtn.addEventListener('click', async () => {
+            const url = location.href;
+            try { await navigator.clipboard.writeText(url); showToast('링크가 복사되었습니다.'); }
+            catch (_) {
+                const ta = document.createElement('textarea'); ta.value = url; document.body.appendChild(ta); ta.select();
+                try { document.execCommand('copy'); showToast('링크가 복사되었습니다.'); } catch (_) { showToast('복사에 실패했습니다.', 'bg-red-500'); }
+                document.body.removeChild(ta);
+            }
+        });
+        if (dom.inappShowQrBtn) dom.inappShowQrBtn.addEventListener('click', async () => {
+            dom.inappQr.classList.remove('hidden');
+            await ensureQrLib();
+            try {
+                const canvas = dom.inappQrCanvas;
+                if (window.QRCode && window.QRCode.toCanvas) {
+                    await window.QRCode.toCanvas(canvas, location.href, { width: 200 });
+                }
+            } catch (_) { /* ignore */ }
+        });
+        if (dom.inappOpenChromeBtn) dom.inappOpenChromeBtn.addEventListener('click', () => {
+            openInChrome();
+        });
+        if (dom.inappOpenShareBtn) dom.inappOpenShareBtn.addEventListener('click', () => {
+            openIOSShare();
+        });
 
         // [NEW] Import/Export event listeners
         dom.importDataBtn.addEventListener('click', () => dom.importModal.classList.remove('hidden'));
@@ -812,6 +878,45 @@
             } finally {
                 if (dom.iosHelpModal) dom.iosHelpModal.classList.add('hidden');
             }
+        }
+
+        function detectInApp() {
+            const uaRaw = navigator.userAgent || navigator.vendor || '';
+            const ua = uaRaw.toLowerCase();
+            const isIOS = /iphone|ipad|ipod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            const isAndroid = /android/.test(ua);
+            const isKakao = /kakaotalk/.test(ua);
+            const isNaver = /naver/.test(ua);
+            const isFB = /fban|fbav|fb_iab/.test(ua);
+            const isIG = /instagram/.test(ua);
+            const isLine = / line\//.test(ua);
+            const isIOSWebView = isIOS && !!window.webkit && !!window.webkit.messageHandlers && !/safari/i.test(uaRaw);
+            const isInApp = isKakao || isNaver || isFB || isIG || isLine || isIOSWebView;
+            let app = null;
+            if (isKakao) app = 'kakao'; else if (isNaver) app = 'naver'; else if (isIG) app = 'instagram'; else if (isFB) app = 'facebook'; else if (isLine) app = 'line'; else if (isIOSWebView) app = 'ios-webview';
+            return { isInApp, app, isIOS, isAndroid };
+        }
+
+        function openInChrome() {
+            try {
+                const url = location.href.replace(/^https?:\/\//, '');
+                const scheme = location.protocol.replace(':','');
+                const intentUrl = `intent://${url}#Intent;scheme=${scheme};package=com.android.chrome;end`;
+                location.href = intentUrl;
+            } catch (_) {
+                showToast('Chrome으로 열 수 없습니다. 링크를 복사하거나 QR을 사용하세요.', 'bg-red-500');
+            }
+        }
+
+        function ensureQrLib() {
+            return new Promise((resolve) => {
+                if (window.QRCode) return resolve();
+                const s = document.createElement('script');
+                s.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js';
+                s.onload = () => resolve();
+                s.onerror = () => resolve();
+                document.head.appendChild(s);
+            });
         }
 
         // SUBMIT MODULE START
@@ -1144,9 +1249,16 @@ ${reportInnerHtml}
                         const fullPath = `/과제제출/${SUBJECT}/${section}/${studentId}/${filePath}`;
 
                         // Success UX by platform
-                        if (isIOS()) {
+                        const env = detectInApp();
+                        if (env.isInApp) {
+                            setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 다운로드 센터 표시`);
+                            // Configure in-app modal for platform
+                            if (dom.inappOpenShareBtn) dom.inappOpenShareBtn.classList.toggle('hidden', !env.isIOS);
+                            if (dom.inappOpenChromeBtn) dom.inappOpenChromeBtn.classList.toggle('hidden', !env.isAndroid);
+                            if (dom.inappQr) dom.inappQr.classList.add('hidden');
+                            if (dom.inappModal) dom.inappModal.classList.remove('hidden');
+                        } else if (isIOS()) {
                             setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — iOS 저장 안내 표시`);
-                            // Show iOS help modal; user clicks to open share (keeps user gesture)
                             if (dom.iosHelpModal) dom.iosHelpModal.classList.remove('hidden');
                         } else {
                             setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 로컬 다운로드 시작…`);
