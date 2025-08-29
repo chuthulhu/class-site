@@ -7,3 +7,4 @@ class-site/build/
 class-site/.cache/
 .DS_Store
 Thumbs.db
+tiny.html
