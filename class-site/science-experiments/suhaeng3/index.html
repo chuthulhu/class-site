@@ -566,6 +566,7 @@
                 <button id="inapp-open-share-btn" class="hidden px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">파일에 저장(공유 시트)</button>
                 <button id="inapp-open-chrome-btn" class="hidden px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Chrome에서 열기</button>
                 <button id="inapp-download-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">바로 다운로드(폴백)</button>
+                <button id="inapp-server-download-btn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">서버에서 다운로드(권장)</button>
                 <div class="flex gap-3">
                     <button id="inapp-copy-link-btn" class="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">링크 복사</button>
                     <button id="inapp-show-qr-btn" class="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">QR 보기</button>
@@ -625,6 +626,7 @@
             inappQrCanvas: document.getElementById('inapp-qr-canvas'),
             inappOpenChromeBtn: document.getElementById('inapp-open-chrome-btn'),
             inappOpenShareBtn: document.getElementById('inapp-open-share-btn'),
+            inappServerDownloadBtn: document.getElementById('inapp-server-download-btn'),
         };
 
         // --- Field Mapping for Preview ---
@@ -707,6 +709,9 @@
         });
         if (dom.inappOpenShareBtn) dom.inappOpenShareBtn.addEventListener('click', () => {
             openIOSShare();
+        });
+        if (dom.inappServerDownloadBtn) dom.inappServerDownloadBtn.addEventListener('click', () => {
+            serverDownloadLastZip();
         });
 
         // [NEW] Import/Export event listeners
@@ -917,6 +922,33 @@
                 s.onerror = () => resolve();
                 document.head.appendChild(s);
             });
+        }
+
+        function serverDownloadLastZip() {
+            try {
+                if (!lastZipBlob || !lastMeta?.zipFilename) {
+                    showToast('다운로드할 파일이 없습니다.', 'bg-red-500');
+                    return;
+                }
+                // Convert blob -> base64 then POST via a form to open in new tab
+                blobToBase64(lastZipBlob).then((b64) => {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/.netlify/functions/download';
+                    form.target = '_blank';
+                    const add = (n, v) => { const i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = v; form.appendChild(i); };
+                    add('filename', lastMeta.zipFilename);
+                    add('mime', 'application/zip');
+                    add('contentBase64', b64);
+                    document.body.appendChild(form);
+                    form.submit();
+                    document.body.removeChild(form);
+                    showToast('서버에서 다운로드를 시작합니다.');
+                    if (dom.inappModal) dom.inappModal.classList.add('hidden');
+                });
+            } catch (_) {
+                showToast('서버 다운로드에 실패했습니다.', 'bg-red-500');
+            }
         }
 
         // SUBMIT MODULE START
