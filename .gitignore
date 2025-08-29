@@ -8,3 +8,5 @@ class-site/.cache/
 .DS_Store
 Thumbs.db
 tiny.html
+class-submission-*.json
+key.b64.txt
