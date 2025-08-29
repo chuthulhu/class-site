@@ -985,18 +985,7 @@ ${reportInnerHtml}
                 lastZipBlob = zipBlob;
                 lastMeta = { studentId, name: form.name, zipFilename, section };
 
-                // Start browser download
-                setStatus('로컬 다운로드 시작…');
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(zipBlob);
-                a.download = zipFilename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(a.href);
-                showToast('ZIP 파일이 다운로드되었습니다.');
-
-                // Convert to base64 for upload
+                // Convert to base64 for upload (upload first)
                 setStatus('OneDrive 업로드 준비 중…');
                 const b64 = await blobToBase64(zipBlob);
 
@@ -1068,12 +1057,24 @@ ${reportInnerHtml}
                             throw new Error(`업로드 실패: ${errorMsg}`);
                         }
 
-                        // Success
+                        // Success: upload completed, then start local download
                         const uploadedFile = data.files?.[0];
                         const filePath = uploadedFile?.name || zipFilename;
                         const fullPath = `/과제제출/${SUBJECT}/${section}/${studentId}/${filePath}`;
 
-                        setStatus(`✅ 제출 완료! 저장 경로: ${fullPath}`);
+                        setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 로컬 다운로드 시작…`);
+                        // Trigger local download after successful remote submission
+                        try {
+                            const a = document.createElement('a');
+                            a.href = URL.createObjectURL(lastZipBlob || zipBlob);
+                            a.download = zipFilename;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(a.href);
+                            showToast('ZIP 파일이 다운로드되었습니다.');
+                        } catch (_) {}
+
                         showToast(`제출이 완료되었습니다! 파일: ${filePath}`, 'bg-green-600');
 
                         // Clear retry button
