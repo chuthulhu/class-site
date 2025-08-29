@@ -1,3 +1,7 @@
+﻿[build]
+  base    = "class-site"
+  publish = "class-site/"
+  # command = ""   # 빌드 커맨드 없으면 주석 유지
+
 [functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild"
+  directory = "netlify/functions"   # Base 기준 상대경로
