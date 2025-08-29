@@ -3,4 +3,4 @@
   publish = "class-site/"
 
 [functions]
-  directory = "netlify/functions"   # Base 기준 상대경로(정답)
+  directory = "netlify/functions"
