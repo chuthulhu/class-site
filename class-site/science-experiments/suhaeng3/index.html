@@ -175,11 +175,11 @@
         <div class="bg-white p-6 sm:p-8 rounded-lg shadow-md mb-6 no-print">
             <div class="flex flex-col sm:flex-row justify-between items-center gap-6">
                 <div class="flex items-center space-x-2 flex-wrap justify-center">
-                    <input type="text" id="student_grade" class="w-20 p-2 border border-gray-300 rounded-md text-center" placeholder="학년">
+                    <input type="number" id="student_grade" min="1" max="3" step="1" inputmode="numeric" class="w-20 p-2 border border-gray-300 rounded-md text-center" placeholder="학년">
                     <label for="student_grade" class="font-semibold">학년</label>
-                     <input type="text" id="student_class" class="w-20 p-2 border border-gray-300 rounded-md text-center" placeholder="반">
+                     <input type="number" id="student_class" min="1" max="20" step="1" inputmode="numeric" class="w-20 p-2 border border-gray-300 rounded-md text-center" placeholder="반">
                     <label for="student_class" class="font-semibold">반</label>
-                    <input type="text" id="student_number" class="w-20 p-2 border border-gray-300 rounded-md text-center" placeholder="번호">
+                    <input type="number" id="student_number" min="1" max="40" step="1" inputmode="numeric" class="w-20 p-2 border border-gray-300 rounded-md text-center" placeholder="번호">
                     <label for="student_number" class="font-semibold">번</label>
                     <input type="text" id="student_name" class="w-32 p-2 border border-gray-300 rounded-md" placeholder="이름">
                 </div>
@@ -473,7 +473,7 @@
                             🔄 업로드 재시도
                         </button>
                     </div>
-                    <p class="text-center text-sm text-gray-600 mt-4" aria-live="polite"><span id="submit_status"></span></p>
+                    <p class="text-center text-sm text-gray-600 mt-4" aria-live="polite" role="status"><span id="submit_status"></span></p>
                 </div>
                 <div class="bg-gray-200 p-4 sm:p-8 rounded-lg">
                     <div class="printable-area report-page" id="report-content">
@@ -539,9 +539,9 @@
     </div>
 
     <!-- [NEW] iOS Save Help Modal -->
-    <div id="ios-help-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 no-print">
+    <div id="ios-help-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 no-print" role="dialog" aria-modal="true" aria-labelledby="ios-help-title">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
-            <h3 class="text-lg font-bold text-gray-800">iOS에서 ZIP 파일 저장하기</h3>
+            <h3 id="ios-help-title" class="text-lg font-bold text-gray-800">iOS에서 ZIP 파일 저장하기</h3>
             <ol class="text-gray-700 mt-3 list-decimal list-inside space-y-2">
                 <li>아래 "파일에 저장(공유 시트)" 버튼을 눌러 공유 시트를 여세요.</li>
                 <li>공유 시트에서 "파일에 저장"을 선택하세요.</li>
@@ -558,12 +558,13 @@
     </div>
 
     <!-- [NEW] In-App Download Center Modal -->
-    <div id="inapp-download-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 no-print">
+    <div id="inapp-download-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 no-print" role="dialog" aria-modal="true" aria-labelledby="inapp-title">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
-            <h3 class="text-lg font-bold text-gray-800">인앱 브라우저에서 저장하기</h3>
+            <h3 id="inapp-title" class="text-lg font-bold text-gray-800">인앱 브라우저에서 저장하기</h3>
             <p class="text-gray-600 mt-2">현재 앱 내부 브라우저에서 열려 있어 저장이 제한될 수 있어요. 아래 버튼으로 서버에서 직접 내려받아 주세요.</p>
             <div class="mt-4 grid grid-cols-1 gap-3">
                 <button id="inapp-server-download-btn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">서버에서 다운로드(권장)</button>
+                <button id="inapp-retry-btn" class="hidden px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">재시도</button>
             </div>
             <div class="mt-6 flex justify-end">
                 <button id="inapp-close-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">닫기</button>
@@ -609,6 +610,7 @@
             inappModal: document.getElementById('inapp-download-modal'),
             inappCloseBtn: document.getElementById('inapp-close-btn'),
             inappServerDownloadBtn: document.getElementById('inapp-server-download-btn'),
+            inappRetryBtn: document.getElementById('inapp-retry-btn'),
         };
 
         // --- Field Mapping for Preview ---
@@ -653,7 +655,7 @@
         if (dom.retryUploadBtn) dom.retryUploadBtn.addEventListener('click', retryLastUpload);
 
         // iOS Help Modal events
-        if (dom.iosHelpCloseBtn) dom.iosHelpCloseBtn.addEventListener('click', () => dom.iosHelpModal.classList.add('hidden'));
+    if (dom.iosHelpCloseBtn) dom.iosHelpCloseBtn.addEventListener('click', () => hideModal(dom.iosHelpModal));
         if (dom.iosHelpDownloadBtn) dom.iosHelpDownloadBtn.addEventListener('click', () => {
             // Fallback direct download
             if (lastZipBlob && lastMeta?.zipFilename) triggerBlobDownload(lastZipBlob, lastMeta.zipFilename);
@@ -662,10 +664,51 @@
         if (dom.iosHelpConfirmBtn) dom.iosHelpConfirmBtn.addEventListener('click', openIOSShare);
 
         // In-App Download Center events
-    if (dom.inappCloseBtn) dom.inappCloseBtn.addEventListener('click', () => dom.inappModal.classList.add('hidden'));
+    if (dom.inappCloseBtn) dom.inappCloseBtn.addEventListener('click', () => hideModal(dom.inappModal));
         if (dom.inappServerDownloadBtn) dom.inappServerDownloadBtn.addEventListener('click', () => {
             serverDownloadLastZip();
         });
+        if (dom.inappRetryBtn) dom.inappRetryBtn.addEventListener('click', () => {
+            serverDownloadLastZip(true);
+        });
+
+        // Close modals on ESC for accessibility
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (dom.iosHelpModal && !dom.iosHelpModal.classList.contains('hidden')) hideModal(dom.iosHelpModal);
+                if (dom.inappModal && !dom.inappModal.classList.contains('hidden')) hideModal(dom.inappModal);
+            }
+        });
+
+        // --- Modal focus trap helpers ---
+        let __lastTriggerEl = null;
+        function getFocusable(el) {
+            return el.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        }
+        function showModal(el, triggerEl = null) {
+            __lastTriggerEl = triggerEl || document.activeElement;
+            el.classList.remove('hidden');
+            const f = getFocusable(el);
+            if (f.length) f[0].focus();
+            function onKey(e) {
+                if (e.key !== 'Tab') return;
+                const focusables = Array.from(getFocusable(el));
+                if (!focusables.length) return;
+                const first = focusables[0];
+                const last = focusables[focusables.length - 1];
+                if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+            }
+            el.__trapHandler = onKey;
+            el.addEventListener('keydown', onKey);
+        }
+        function hideModal(el) {
+            el.classList.add('hidden');
+            if (el.__trapHandler) el.removeEventListener('keydown', el.__trapHandler);
+            if (__lastTriggerEl && typeof __lastTriggerEl.focus === 'function') {
+                __lastTriggerEl.focus();
+            }
+        }
 
         // [NEW] Import/Export event listeners
         dom.importDataBtn.addEventListener('click', () => dom.importModal.classList.remove('hidden'));
@@ -704,25 +747,34 @@
         function showToast(message, bgColor = 'bg-gray-800') { /* ... (no changes) ... */ }
 
         // --- [NEW] Import/Export Functions ---
-        function exportData() {
+        async function exportData() {
             const dataString = localStorage.getItem(storageKey);
             if (!dataString) {
                 showToast('저장된 데이터가 없습니다.', 'bg-red-500');
                 return;
             }
-            // Copy to clipboard
-            const tempTextarea = document.createElement('textarea');
-            tempTextarea.value = dataString;
-            document.body.appendChild(tempTextarea);
-            tempTextarea.select();
             try {
-                document.execCommand('copy');
-                showToast('데이터가 클립보드에 복사되었습니다.');
+                if (navigator.clipboard?.writeText) {
+                    await navigator.clipboard.writeText(dataString);
+                    showToast('데이터가 클립보드에 복사되었습니다.');
+                } else {
+                    throw new Error('Clipboard API not available');
+                }
             } catch (err) {
-                showToast('복사에 실패했습니다. 직접 복사해주세요.', 'bg-red-500');
-                prompt('아래 텍스트를 직접 복사하세요:', dataString);
+                // Fallback
+                const tempTextarea = document.createElement('textarea');
+                tempTextarea.value = dataString;
+                document.body.appendChild(tempTextarea);
+                tempTextarea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('데이터가 클립보드에 복사되었습니다.');
+                } catch (e) {
+                    showToast('복사에 실패했습니다. 직접 복사해주세요.', 'bg-red-500');
+                    prompt('아래 텍스트를 직접 복사하세요:', dataString);
+                }
+                document.body.removeChild(tempTextarea);
             }
-            document.body.removeChild(tempTextarea);
         }
 
         function importData() {
@@ -931,7 +983,13 @@
 
         
 
-        function serverDownloadLastZip() {
+        let __inappRetryCount = 0;
+        const __inappRetryMax = 2;
+        function setInappRetryVisibility(show) {
+            if (!dom.inappRetryBtn) return;
+            dom.inappRetryBtn.classList.toggle('hidden', !show);
+        }
+        function serverDownloadLastZip(isManualRetry = false) {
             try {
                 if (!lastZipBlob || !lastMeta?.zipFilename) {
                     showToast('다운로드할 파일이 없습니다.', 'bg-red-500');
@@ -939,22 +997,39 @@
                 }
                 // Convert blob -> base64 then POST via a form to open in new tab
                 blobToBase64(lastZipBlob).then((b64) => {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = '/.netlify/functions/download';
-                    form.target = '_blank';
-                    const add = (n, v) => { const i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = v; form.appendChild(i); };
-                    add('filename', lastMeta.zipFilename);
-                    add('mime', 'application/zip');
-                    add('contentBase64', b64);
-                    document.body.appendChild(form);
-                    form.submit();
-                    document.body.removeChild(form);
-                    showToast('서버에서 다운로드를 시작합니다.');
-                    if (dom.inappModal) dom.inappModal.classList.add('hidden');
+                    try {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '/.netlify/functions/download';
+                        form.target = '_blank';
+                        const add = (n, v) => { const i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = v; form.appendChild(i); };
+                        add('filename', lastMeta.zipFilename);
+                        add('mime', 'application/zip');
+                        add('contentBase64', b64);
+                        document.body.appendChild(form);
+                        form.submit();
+                        document.body.removeChild(form);
+                        showToast('서버에서 다운로드를 시작합니다.');
+                        // 성공 시 모달 닫고 재시도 버튼 숨김/카운터 초기화
+                        __inappRetryCount = 0;
+                        setInappRetryVisibility(false);
+                        if (dom.inappModal) hideModal(dom.inappModal);
+                    } catch (e) {
+                        throw e;
+                    }
+                }).catch(() => {
+                    // base64 변환 실패도 실패로 취급
+                    throw new Error('base64 변환 실패');
                 });
             } catch (_) {
-                showToast('서버 다운로드에 실패했습니다.', 'bg-red-500');
+                __inappRetryCount += 1;
+                if (__inappRetryCount <= __inappRetryMax) {
+                    setInappRetryVisibility(true);
+                    showToast(`서버 다운로드에 실패했습니다. 재시도 가능 (${__inappRetryCount}/${__inappRetryMax})`, 'bg-yellow-600');
+                } else {
+                    setInappRetryVisibility(false);
+                    showToast('서버 다운로드에 반복 실패했습니다. 잠시 후 다시 시도하세요.', 'bg-red-500');
+                }
             }
         }
 
@@ -1185,15 +1260,14 @@ ${reportInnerHtml}
                 const section = calcSectionCode(form.grade, form.klass);
                 const studentId = calcStudentId(form.grade, form.klass, form.number);
                 const docTitle = getDocTitle();
-                // Use KST (Asia/Seoul) local time for filenames
-                const now = new Date();
-                const y = now.getFullYear();
-                const m = String(now.getMonth() + 1).padStart(2, '0');
-                const d = String(now.getDate()).padStart(2, '0');
-                const hh = String(now.getHours()).padStart(2, '0');
-                const mm = String(now.getMinutes()).padStart(2, '0');
-                const ss = String(now.getSeconds()).padStart(2, '0');
-                const timestamp = `${y}${m}${d}_${hh}${mm}${ss}`;
+                // Use KST (Asia/Seoul) time with Intl for filenames
+                const fmt = new Intl.DateTimeFormat('ko-KR', {
+                    timeZone: 'Asia/Seoul',
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+                });
+                const parts = Object.fromEntries(fmt.formatToParts(new Date()).map(p => [p.type, p.value]));
+                const timestamp = `${parts.year}${parts.month}${parts.day}_${parts.hour}${parts.minute}${parts.second}`;
                 const baseName = `${studentId}_${form.name}_${docTitle}_${timestamp}`;
                 const htmlFilename = `${baseName}.html`;
                 const zipFilename = `${baseName}.zip`;
@@ -1206,7 +1280,7 @@ ${reportInnerHtml}
                 // Build ZIP
                 const zip = new JSZip();
                 zip.file(htmlFilename, docHtml);
-                const zipBlob = await zip.generateAsync({ type: 'blob' });
+                const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
                 lastZipBlob = zipBlob;
                 lastMeta = { studentId, name: form.name, zipFilename, section };
 
@@ -1291,10 +1365,10 @@ ${reportInnerHtml}
                         const env = detectInApp();
                         if (env.isInApp) {
                             setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 다운로드 센터 표시`);
-                            if (dom.inappModal) dom.inappModal.classList.remove('hidden');
+                            if (dom.inappModal) showModal(dom.inappModal, dom.downloadZipBtn);
                         } else if (isIOS()) {
                             setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — iOS 저장 안내 표시`);
-                            if (dom.iosHelpModal) dom.iosHelpModal.classList.remove('hidden');
+                            if (dom.iosHelpModal) showModal(dom.iosHelpModal, dom.downloadZipBtn);
                         } else {
                             setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 로컬 다운로드 시작…`);
                             triggerBlobDownload(lastZipBlob || zipBlob, zipFilename);
