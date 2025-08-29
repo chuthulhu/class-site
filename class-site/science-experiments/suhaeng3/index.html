@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>첫걸음, 마지막 걸음 프로젝트 허브 (개선판)</title>
+    <title>첫걸음, 마지막 걸음 프로젝트 허브</title>
+    <!-- Submission Subject (easily editable) -->
+    <meta name="submission-subject" content="과학탐구실험2">
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- ZIP 생성을 위한 라이브러리 추가 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -735,7 +737,7 @@
         // Constants & Config
         const ENDPOINT = '/.netlify/functions/submit';
         const SUBMIT_KEY = 'S-2025-github2025subject'; // 서버에서 401 응답 시 UI 안내
-        const SUBJECT = '수학1'; // 과목명 - 필요에 따라 변경 가능
+    const SUBJECT = document.querySelector('meta[name="submission-subject"]')?.content || '과학탐구실험2';
         const ASSIGNMENT = 'suhaeng3';
         const SUBMIT_META_KEY = 'submit_meta';
 
