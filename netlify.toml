@@ -1,6 +1,6 @@
-﻿[build]
+[build]
   base    = "class-site"
-  publish = "class-site/"
+  publish = "."
 
 [functions]
   directory = "netlify/functions"
