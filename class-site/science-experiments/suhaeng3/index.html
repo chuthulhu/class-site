@@ -960,7 +960,15 @@ ${reportInnerHtml}
                 const section = calcSectionCode(form.grade, form.klass);
                 const studentId = calcStudentId(form.grade, form.klass, form.number);
                 const docTitle = getDocTitle();
-                const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '').replace('T', '_');
+                // Use KST (Asia/Seoul) local time for filenames
+                const now = new Date();
+                const y = now.getFullYear();
+                const m = String(now.getMonth() + 1).padStart(2, '0');
+                const d = String(now.getDate()).padStart(2, '0');
+                const hh = String(now.getHours()).padStart(2, '0');
+                const mm = String(now.getMinutes()).padStart(2, '0');
+                const ss = String(now.getSeconds()).padStart(2, '0');
+                const timestamp = `${y}${m}${d}_${hh}${mm}${ss}`;
                 const baseName = `${studentId}_${form.name}_${docTitle}_${timestamp}`;
                 const htmlFilename = `${baseName}.html`;
                 const zipFilename = `${baseName}.zip`;
