@@ -761,9 +761,71 @@
         function switchTab(targetTabId) { dom.tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === targetTabId)); dom.tabContents.forEach(content => content.classList.toggle('active', content.id === targetTabId)); window.scrollTo(0, 0); }
         function toggleAccordion(event) { const button = event.currentTarget; const content = button.parentElement.nextElementSibling; const icon = button.querySelector('svg'); const isOpen = button.classList.toggle('open'); content.classList.toggle('open', isOpen); if (isOpen) { content.style.maxHeight = content.scrollHeight + 'px'; content.style.paddingTop = '1rem'; content.style.paddingBottom = '1rem'; if(icon) icon.style.transform = 'rotate(180deg)'; } else { content.style.maxHeight = '0'; content.style.paddingTop = '0'; content.style.paddingBottom = '0'; if(icon) icon.style.transform = 'rotate(0deg)'; } }
         function updatePreview() { Object.entries(fields).forEach(([fieldId, previewId]) => { const inputEl = document.getElementById(fieldId); const previewEl = document.getElementById(previewId); if (!inputEl || !previewEl) return; const value = inputEl.value.trim(); const placeholderSpan = previewEl.querySelector('.preview-placeholder'); const placeholderText = placeholderSpan ? placeholderSpan.textContent : `[${fieldId}]`; if (value) { previewEl.textContent = value; } else { previewEl.innerHTML = `<span class="preview-placeholder">${placeholderText}</span>`; } }); updateSourcesPreview(); }
-        function updateSourcesPreview() { const sourcesPreview = document.getElementById('preview_sources'); const sourceEntries = document.querySelectorAll('.source-entry'); if (sourceEntries.length === 0) { sourcesPreview.innerHTML = `<span class="preview-placeholder">내용을 입력하세요...</span>`; return; } let sourcesText = '<ol class="list-decimal list-inside" style="line-height: 1.8;">'; sourceEntries.forEach(entry => { const values = Array.from(entry.querySelectorAll('input')).map(i => i.value.trim()); let liContent = ''; let parts = []; switch(entry.dataset.type) { case '논문': if(values[0]) parts.push(values[0]); if(values[1]) parts.push(`(${values[1]})`); if(values[2]) parts.push(`${values[2]}.`); if(values[3]) parts.push(values[3]); if(values[4] || values[5]) parts.push(`, ${values[4] || ''}(${values[5] || ''})`); if(values[6]) parts.push(`, ${values[6]}`); break; case '도서': if(values[0]) parts.push(values[0]); if(values[3]) parts.push(`(${values[3]})`); if(values[1]) parts.push(`${values[1]}.`); if(values[2]) parts.push(values[2]); break; case '학술잡지': if(values[2]) parts.push(values[2]); if(values[3]) parts.push(`(${values[3]})`); if(values[1]) parts.push(`${values[1]}.`); if(values[0]) parts.push(values[0]); break; case '인터넷 URL': if(values[2]) parts.push(values[2]); if(values[0]) parts.push(values[0]); if(values[1]) parts.push(`'${values[1]}'.`); if (values[3]) parts.push(`URL: ${values[3]}`); break; } liContent = parts.join(' ').replace(/\s\./g,'.').replace(/\s,/g,','); sourcesText += `<li>${liContent}</li>`; }); sourcesText += '</ol>'; sourcesPreview.innerHTML = sourcesText; }
+        // Safe HTML escape
+        function escapeHtml(s) {
+            return String(s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/\"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function updateSourcesPreview() {
+            const sourcesPreview = document.getElementById('preview_sources');
+            const sourceEntries = document.querySelectorAll('.source-entry');
+            if (sourceEntries.length === 0) {
+                sourcesPreview.innerHTML = `<span class="preview-placeholder">내용을 입력하세요...</span>`;
+                return;
+            }
+            let items = [];
+            sourceEntries.forEach(entry => {
+                const values = Array.from(entry.querySelectorAll('input')).map(i => escapeHtml(i.value.trim()));
+                let parts = [];
+                switch(entry.dataset.type) {
+                    case '논문':
+                        if(values[0]) parts.push(values[0]);
+                        if(values[1]) parts.push(`(${values[1]})`);
+                        if(values[2]) parts.push(`${values[2]}.`);
+                        if(values[3]) parts.push(values[3]);
+                        if(values[4] || values[5]) parts.push(`, ${values[4] || ''}(${values[5] || ''})`);
+                        if(values[6]) parts.push(`, ${values[6]}`);
+                        break;
+                    case '도서':
+                        if(values[0]) parts.push(values[0]);
+                        if(values[3]) parts.push(`(${values[3]})`);
+                        if(values[1]) parts.push(`${values[1]}.`);
+                        if(values[2]) parts.push(values[2]);
+                        break;
+                    case '학술잡지':
+                        if(values[2]) parts.push(values[2]);
+                        if(values[3]) parts.push(`(${values[3]})`);
+                        if(values[1]) parts.push(`${values[1]}.`);
+                        if(values[0]) parts.push(values[0]);
+                        break;
+                    case '인터넷 URL':
+                        if(values[2]) parts.push(values[2]);
+                        if(values[0]) parts.push(values[0]);
+                        if(values[1]) parts.push(`'${values[1]}'.`);
+                        if (values[3]) parts.push(`URL: ${values[3]}`);
+                        break;
+                }
+                let liContent = parts.join(' ').replace(/\s\./g,'.').replace(/\s,/g,',');
+                items.push(`<li>${liContent}</li>`);
+            });
+            const html = `<ol class="list-decimal list-inside" style="line-height: 1.8;">${items.join('')}</ol>`;
+            sourcesPreview.innerHTML = html;
+        }
         function getFormData() { const data = {}; dom.allInputs.forEach(input => data[input.id] = input.value); data.sources = Array.from(document.querySelectorAll('.source-entry')).map(entry => ({ type: entry.dataset.type, values: Array.from(entry.querySelectorAll('input')).map(input => input.value) })); return data; }
-        function saveToBrowser() { localStorage.setItem(storageKey, JSON.stringify(getFormData())); showToast('자동 저장되었습니다.'); }
+        // Debounced local save to reduce storage/thrashing
+        let __saveTimer;
+        function saveToBrowser() {
+            clearTimeout(__saveTimer);
+            __saveTimer = setTimeout(() => {
+                localStorage.setItem(storageKey, JSON.stringify(getFormData()));
+                showToast('자동 저장되었습니다.');
+            }, 300);
+        }
         function loadFromBrowser() { const savedData = localStorage.getItem(storageKey); if (!savedData) return; const data = JSON.parse(savedData); Object.entries(data).forEach(([key, value]) => { if (key === 'sources' && Array.isArray(value)) { value.forEach(source => addSourceElement(source)); } else { const el = document.getElementById(key); if (el) el.value = value; } }); }
         function deleteAllContent() { dom.deleteModal.classList.add('hidden'); dom.allInputs.forEach(input => input.value = ''); dom.sourcesContainer.innerHTML = ''; localStorage.removeItem(storageKey); updatePreview(); showToast('모든 내용이 삭제되었습니다.', 'bg-red-500'); }
         function addSourceElement(sourceData = null) { const entryDiv = document.createElement('div'); entryDiv.className = 'source-entry border p-4 rounded-md bg-gray-50 space-y-3'; const type = sourceData?.type || '논문'; entryDiv.dataset.type = type; entryDiv.innerHTML = `<div class="flex justify-between items-center"><select class="source-type-select p-2 border border-gray-300 rounded-md bg-white">${Object.keys(sourceConfig).map(option => `<option ${type === option ? 'selected' : ''}>${option}</option>`).join('')}</select><button class="delete_source_btn bg-red-500 text-white font-bold py-1 px-3 rounded-lg hover:bg-red-600 text-sm">삭제</button></div><div class="source-inputs grid grid-cols-1 sm:grid-cols-2 gap-2"></div>`; dom.sourcesContainer.appendChild(entryDiv); updateSourceInputs(entryDiv.querySelector('.source-type-select'), sourceData?.values); }
@@ -1148,12 +1210,8 @@ ${reportInnerHtml}
                 lastZipBlob = zipBlob;
                 lastMeta = { studentId, name: form.name, zipFilename, section };
 
-                // Convert to base64 for upload (upload first)
-                setStatus('OneDrive 업로드 준비 중…');
-                const b64 = await blobToBase64(zipBlob);
-
-                // Size validation (8MB limit for ZIP files)
-                const sizeBytes = bytesFromBase64(b64);
+                // Size validation (8MB limit) BEFORE base64 to save CPU/mem
+                const sizeBytes = zipBlob.size;
                 if (sizeBytes > 8 * 1024 * 1024) {
                     setStatus('업로드 실패: ZIP 용량 초과 (8MB)');
                     showToast('ZIP 파일 용량이 8MB를 초과합니다. 내용을 간소화해주세요.', 'bg-red-500');
@@ -1161,6 +1219,10 @@ ${reportInnerHtml}
                     dom.retryUploadBtn.classList.remove('hidden');
                     return;
                 }
+
+                // Convert to base64 for upload (only after size check)
+                setStatus('OneDrive 업로드 준비 중…');
+                const b64 = await blobToBase64(zipBlob);
 
                 // File extension validation
                 if (!zipFilename.toLowerCase().endsWith('.zip')) {
@@ -1186,7 +1248,7 @@ ${reportInnerHtml}
                 let uploadAttempts = 0;
                 const maxAttempts = 3;
 
-                while (uploadAttempts < maxAttempts) {
+        while (uploadAttempts < maxAttempts) {
                     try {
                         uploadAttempts++;
                         if (uploadAttempts > 1) {
@@ -1194,7 +1256,7 @@ ${reportInnerHtml}
                             await new Promise(resolve => setTimeout(resolve, 1000 * uploadAttempts)); // Exponential backoff
                         }
 
-                        const res = await fetch(ENDPOINT, {
+            const res = await fetchWithTimeout(ENDPOINT, 20000, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -1269,6 +1331,17 @@ ${reportInnerHtml}
             }
         }
 
+        // Fetch with timeout helper
+        async function fetchWithTimeout(url, timeoutMs, options) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                return await fetch(url, { ...(options||{}), signal: controller.signal });
+            } finally {
+                clearTimeout(id);
+            }
+        }
+
         async function retryLastUpload() {
             try {
                 if (!lastZipBlob || !lastMeta) {
@@ -1300,7 +1373,7 @@ ${reportInnerHtml}
                     }]
                 };
 
-                const res = await fetch(ENDPOINT, {
+                const res = await fetchWithTimeout(ENDPOINT, 20000, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
