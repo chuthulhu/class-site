@@ -12,6 +12,7 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST,OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type,X-Submission-Key',
+  'Access-Control-Max-Age': '86400',
 };
 
 const MAX_SIZE_BYTES = 8 * 1024 * 1024; // 8MB
@@ -117,26 +118,26 @@ export async function handler(event) {
     // 인증 키 확인
     const headerKey = event.headers['x-submission-key'] || event.headers['X-Submission-Key'];
     if (process.env.SUBMIT_KEY && headerKey !== process.env.SUBMIT_KEY) {
-      return { statusCode: 401, headers: CORS_HEADERS, body: 'unauthorized' };
+      return { statusCode: 401, headers: { ...CORS_HEADERS, 'Content-Type': 'text/plain; charset=utf-8' }, body: 'unauthorized' };
     }
 
     // 요청 본문 파싱
     const body = JSON.parse(event.body || '{}');
     const { studentId, name, filename, contentBase64, subject, section } = body;
     if (!studentId || !filename || !contentBase64) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: 'missing fields' };
+      return { statusCode: 400, headers: { ...CORS_HEADERS, 'Content-Type': 'text/plain; charset=utf-8' }, body: 'missing fields' };
     }
 
     // 크기 검증 (8MB 제한)
     const size = base64Size(contentBase64);
     if (size > MAX_SIZE_BYTES) {
-      return { statusCode: 413, headers: CORS_HEADERS, body: `file too large: ${size} > ${MAX_SIZE_BYTES}` };
+      return { statusCode: 413, headers: { ...CORS_HEADERS, 'Content-Type': 'text/plain; charset=utf-8' }, body: `file too large: ${size} > ${MAX_SIZE_BYTES}` };
     }
 
     // 확장자 화이트리스트
     const lower = String(filename).toLowerCase();
     if (!(/\.(zip|pdf|html?|htm)$/i).test(lower)) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: 'unsupported file type' };
+      return { statusCode: 400, headers: { ...CORS_HEADERS, 'Content-Type': 'text/plain; charset=utf-8' }, body: 'unsupported file type' };
     }
 
     const drive = await getDriveClient();
@@ -203,10 +204,10 @@ export async function handler(event) {
       size,
     });
 
-    return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify(response) };
+    return { statusCode: 200, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' }, body: JSON.stringify(response) };
   } catch (err) {
     log('error', '[submit] error', err);
     const message = (err && err.message) ? err.message : String(err);
-    return { statusCode: 400, headers: CORS_HEADERS, body: message };
+    return { statusCode: 400, headers: { ...CORS_HEADERS, 'Content-Type': 'text/plain; charset=utf-8' }, body: message };
   }
 }
