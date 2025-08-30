@@ -557,11 +557,11 @@
         </div>
     </div>
 
-    <!-- [NEW] In-App Download Center Modal -->
+    <!-- [NEW] Mobile Download Center Modal -->
     <div id="inapp-download-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 no-print" role="dialog" aria-modal="true" aria-labelledby="inapp-title">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
-            <h3 id="inapp-title" class="text-lg font-bold text-gray-800">인앱 브라우저에서 저장하기</h3>
-            <p class="text-gray-600 mt-2">현재 앱 내부 브라우저에서 열려 있어 저장이 제한될 수 있어요. 아래 버튼으로 서버에서 직접 내려받아 주세요.</p>
+            <h3 id="inapp-title" class="text-lg font-bold text-gray-800">모바일 브라우저에서 저장하기</h3>
+            <p class="text-gray-600 mt-2">현재 사용 중인 브라우저에서는 파일 저장이 제한될 수 있어요. 아래 버튼으로 서버에서 직접 내려받아 주세요.</p>
             <div class="mt-4 grid grid-cols-1 gap-3">
                 <button id="inapp-server-download-btn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">서버에서 다운로드(권장)</button>
                 <button id="inapp-retry-btn" class="hidden px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">재시도</button>
@@ -722,7 +722,7 @@
         switchTab('tab1');
         updatePreview();
 
-        // Hide PDF print button on iOS and on any in-app browsers
+        // Hide PDF print button only on iOS and in-app browsers (Android에서는 노출)
         const __env = detectInApp();
         if ((isIOS() || __env.isInApp) && dom.printBtn) {
             dom.printBtn.classList.add('hidden');
@@ -958,6 +958,7 @@
             const ua = uaRaw.toLowerCase();
             const isIOS = /iphone|ipad|ipod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
             const isAndroid = /android/.test(ua);
+            const isSamsung = /samsungbrowser/i.test(uaRaw);
             const isKakao = /kakaotalk/.test(ua);
             const isNaver = /naver/.test(ua);
             const isFB = /fban|fbav|fb_iab/.test(ua);
@@ -967,7 +968,7 @@
             const isInApp = isKakao || isNaver || isFB || isIG || isLine || isIOSWebView;
             let app = null;
             if (isKakao) app = 'kakao'; else if (isNaver) app = 'naver'; else if (isIG) app = 'instagram'; else if (isFB) app = 'facebook'; else if (isLine) app = 'line'; else if (isIOSWebView) app = 'ios-webview';
-            return { isInApp, app, isIOS, isAndroid };
+            return { isInApp, app, isIOS, isAndroid, isSamsung };
         }
 
         function openInChrome() {
@@ -1363,9 +1364,10 @@ ${reportInnerHtml}
 
                         // Success UX by platform
                         const env = detectInApp();
-                        if (env.isInApp) {
-                            setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 다운로드 센터 표시`);
+                        if (env.isInApp || env.isAndroid) {
+                            setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 서버 다운로드 시도 중…`);
                             if (dom.inappModal) showModal(dom.inappModal, dom.downloadZipBtn);
+                            try { serverDownloadLastZip(); } catch(_) {}
                         } else if (isIOS()) {
                             setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — iOS 저장 안내 표시`);
                             if (dom.iosHelpModal) showModal(dom.iosHelpModal, dom.downloadZipBtn);
