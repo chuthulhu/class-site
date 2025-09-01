@@ -928,7 +928,45 @@
                 document.body.removeChild(a);
                 URL.revokeObjectURL(a.href);
                 showToast('ZIP 파일이 다운로드되었습니다.');
-            } catch (_) { /* ignore */ }
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        // Try local download first, then verify by environment heuristics and fallback to server-download
+        function attemptLocalDownloadAndVerify(zipFilename) {
+            const env = detectInApp();
+            let localSaved = false;
+            try {
+                if (lastZipBlob) {
+                    localSaved = triggerBlobDownload(lastZipBlob, zipFilename) === true;
+                }
+            } catch (_) { localSaved = false; }
+
+            // In-app browsers are known to block/ignore a[download]/Blob → fallback to server
+            if (env.isInApp) {
+                setStatus('로컬 다운로드가 제한되어 서버 다운로드로 전환합니다.');
+                if (dom.inappModal) showModal(dom.inappModal, dom.downloadZipBtn);
+                try { serverDownloadLastZip(); } catch(_) {}
+                return;
+            }
+
+            // iOS Safari: guide to Files via share sheet (localSaved 신뢰 어려움)
+            if (isIOS()) {
+                setStatus('iOS 저장 안내를 표시합니다.');
+                if (dom.iosHelpModal) showModal(dom.iosHelpModal, dom.downloadZipBtn);
+                return;
+            }
+
+            if (localSaved) {
+                setStatus('✅ 로컬 다운로드가 완료되었습니다.');
+                showToast('로컬 다운로드 완료', 'bg-green-600');
+            } else {
+                setStatus('로컬 다운로드 실패, 서버에서 다운로드합니다.');
+                if (dom.inappModal) showModal(dom.inappModal, dom.downloadZipBtn);
+                try { serverDownloadLastZip(); } catch(_) {}
+            }
         }
 
         async function openIOSShare() {
@@ -1362,19 +1400,9 @@ ${reportInnerHtml}
                         const filePath = uploadedFile?.name || zipFilename;
                         const fullPath = `/과제제출/${SUBJECT}/${section}/${studentId}/${filePath}`;
 
-                        // Success UX by platform
-                        const env = detectInApp();
-                        if (env.isInApp || env.isAndroid) {
-                            setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 서버 다운로드 시도 중…`);
-                            if (dom.inappModal) showModal(dom.inappModal, dom.downloadZipBtn);
-                            try { serverDownloadLastZip(); } catch(_) {}
-                        } else if (isIOS()) {
-                            setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — iOS 저장 안내 표시`);
-                            if (dom.iosHelpModal) showModal(dom.iosHelpModal, dom.downloadZipBtn);
-                        } else {
-                            setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 로컬 다운로드 시작…`);
-                            triggerBlobDownload(lastZipBlob || zipBlob, zipFilename);
-                        }
+                        // Success: try local download first, verify, then fallback if needed
+                        setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 다운로드 확인 중…`);
+                        attemptLocalDownloadAndVerify(zipFilename);
 
                         showToast(`제출이 완료되었습니다! 파일: ${filePath}`, 'bg-green-600');
 
@@ -1478,8 +1506,8 @@ ${reportInnerHtml}
                 const filePath = uploadedFile?.name || lastMeta.zipFilename;
                 const fullPath = `/과제제출/${SUBJECT}/${lastMeta.section}/${lastMeta.studentId}/${filePath}`;
 
-                setStatus(`✅ 제출 완료! 저장 경로: ${fullPath}`);
-                showToast(`제출이 완료되었습니다! 파일: ${filePath}`, 'bg-green-600');
+                setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 다운로드 확인 중…`);
+                attemptLocalDownloadAndVerify(lastMeta.zipFilename);
 
                 // Clear retry state
                 dom.retryUploadBtn.dataset.show = '';

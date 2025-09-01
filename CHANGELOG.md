@@ -11,3 +11,10 @@
 - 미리보기/새 탭/ZIP HTML을 단일 생성기(`generateDocHtml`)로 통일, 스타일/폰트 일관성 확보
 - 과목 메타(`submission-subject`) 도입 및 기본값 ‘과학탐구실험2’
 - 파일명 타임스탬프를 KST 기준으로 생성
+
+## 2025-09-01
+
+- PROJECT.md를 현재 구현 상태(업로드 우선, 인앱/IOS 안내, KST, 8MB 클라 제한)로 동기화
+- docs/api.md에 인증 헤더, 검증 규칙, 에러 스키마, suhaeng3 특이사항 추가
+- docs/suhaeng3(개요/사용자/테스트) 문서에 KST·8MB 제한·인앱 첨부 응답 명시
+- docs/deployment.md에 Node 18, esbuild/ESM, 캐시 팁 및 인앱 다운로드 확인 추가

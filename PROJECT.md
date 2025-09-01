@@ -31,14 +31,18 @@
 ### 🎯 **현재 우선 목표: suhaeng3 자동 제출 기능**
 
 **대상**: `science-experiments/suhaeng3/index.html`
-**기능**: ZIP/PDF 생성 시 자동으로 OneDrive에 업로드
+**기능**: ZIP/PDF 생성 시 자동으로 OneDrive에 업로드 (업로드 우선 → 성공 후 다운로드 안내)
 **완료 목표일**: 2025년 9월 1일
+**상태**: 코드 반영 완료(배포 확인 중)
 
 #### 구현 내용
 - 학생 정보 입력 폼 추가 (학번, 과목, 반)
-- ZIP 생성과 동시에 OneDrive 업로드
+- ZIP 생성과 동시에 OneDrive 업로드(업로드 우선)
 - 제출 상태 실시간 표시
 - 에러 처리 및 재시도 기능
+- 인앱 브라우저 호환: 서버 첨부 응답 다운로드 제공
+- iOS Safari: 공유 시트를 통한 "파일에 저장" 안내
+- KST 타임스탬프 기반 파일명 생성
 
 ## 프로젝트 구조
 
@@ -73,11 +77,14 @@ class-site/
   - mp4: 300MB
 - **제출 제한**: 최대 5개 파일, 총합 300MB
 
+> suhaeng3 특이사항: 클라이언트에서 생성하는 ZIP 파일은 인앱 다운로드 호환성 및 성능을 위해 8MB로 제한됩니다(클라이언트 사전 검증). 서버 업로드 정책상 ZIP은 50MB까지 허용되지만 suhaeng3 흐름에서는 8MB 제한을 우선 적용합니다.
+
 ### 2. 인증 및 보안
 - **API 인증**: X-Submission-Key 헤더 검증
 - **Microsoft OAuth**: Delegated 권한으로 교사 OneDrive 접근
 - **토큰 관리**: Refresh Token을 통한 Access Token 자동 갱신
 - **범위**: offline_access, Files.ReadWrite, openid, profile, User.Read
+ - **에러 응답 형식(통일)**: { ok:false, error, detail? }
 
 ### 3. 업로드 방식
 - **≤10MB**: 단일 PUT 요청
@@ -88,6 +95,7 @@ class-site/
 - **서버 첨부 응답 다운로드**: 인앱 브라우저(네이버/카카오 등)에서 Blob/a[download]가 차단될 수 있어, 서버 함수(`download.js`)로 파일(Base64) POST → 서버가 `Content-Disposition: attachment`로 바로 응답 → 인앱에서도 다운로드 매니저/파일앱에 기록됨.
 - **클라이언트 흐름**: 업로드 성공 후 인앱 감지 시 “서버에서 다운로드(권장)” 버튼만 제공(간소 UI). 일반 브라우저는 로컬 다운로드 트리거.
 - **iOS Safari**: 인앱이 아닌 iOS Safari에서는 “파일에 저장(공유 시트)” 안내 모달 제공. 인앱/사파리 공통으로 PDF 인쇄 버튼은 iOS 또는 인앱에서 숨김 처리.
+ - **서버 첨부 응답 사이즈 제한**: 8MB(초과 시 413). suhaeng3는 클라이언트에서 8MB 초과 ZIP 생성을 차단합니다.
 
 ### 4. 폴더 관리
 - **자동 폴더 생성**: 필요한 경로 계층 구조 자동 생성
@@ -100,6 +108,9 @@ class-site/
 - API 레퍼런스: docs/api.md
 - 배포 가이드: docs/deployment.md
 - suhaeng3 사용자/테스트: docs/suhaeng3/
+  - 개요: docs/suhaeng3/index.md
+  - 사용자 가이드: docs/suhaeng3/user-guide.md
+  - 테스트 가이드: docs/suhaeng3/test-guide.md
 - 변경 로그: CHANGELOG.md
 
 ## 앞으로의 작업 계획 및 제안사항
