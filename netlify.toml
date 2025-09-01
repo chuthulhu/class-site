@@ -5,3 +5,23 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
+
+# Edge Functions routing for session2 gate
+[[edge_functions]]
+path = "/science-experiments/suhaeng3/session2"
+function = "gate-session2"
+
+[[edge_functions]]
+path = "/science-experiments/suhaeng3/session2.html"
+function = "gate-session2"
+
+# Reduce caching to ensure timely UI updates around release window
+[[headers]]
+for = "/science-experiments/suhaeng3/index.html"
+  [headers.values]
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/science-experiments/suhaeng3/session2.html"
+  [headers.values]
+  Cache-Control = "no-store"

@@ -169,10 +169,15 @@
         <header class="text-center bg-white p-8 rounded-xl shadow-lg mb-6 no-print">
             <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">첫걸음, 마지막 걸음 프로젝트</h1>
             <p class="text-lg text-gray-600 mt-2">S-BRT와 공유 PM 연계를 위한 종합 안내</p>
-            <div class="mt-4 flex gap-3 justify-center">
-                <a href="./session1.html" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">1차시 활동 (현황 분석·고려사항)</a>
-                <a href="./session2.html" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">2차시 활동 (3가지 지렛대·기대효과)</a>
-            </div>
+                        <div class="mt-4 flex gap-3 justify-center">
+                                <a href="./session1.html" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">1차시 활동 (현황 분석·고려사항)</a>
+                                <span id="session2_locked_wrapper" class="relative">
+                                    <a id="session2_link" href="./session2.html" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 hidden" aria-disabled="true">2차시 활동 (3가지 지렛대·기대효과)</a>
+                                    <button id="session2_locked" type="button" class="px-4 py-2 bg-gray-300 text-gray-600 rounded-lg cursor-not-allowed select-none">
+                                        2차시 활동 (9/15 오픈)
+                                    </button>
+                                </span>
+                        </div>
         </header>
         
         
@@ -564,6 +569,37 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // --- Session2 gate (hub) ---
+        // Hide link by default, show locked button. Toggle after server time check.
+        const s2Link = document.getElementById('session2_link');
+        const s2Locked = document.getElementById('session2_locked');
+        const RELEASE_UTC = (() => {
+            // Use env value if inlined at build, else default to 2025-09-14T15:00:00Z
+            const fallback = '2025-09-14T15:00:00Z';
+            return Date.parse(fallback);
+        })();
+        (async () => {
+            try {
+                const res = await fetch('/.netlify/functions/time', { cache: 'no-store' });
+                if (!res.ok) throw new Error('time fetch failed');
+                const data = await res.json();
+                const nowUTC = typeof data?.now === 'number' ? data.now : Date.parse(data?.iso || '');
+                if (!Number.isFinite(nowUTC)) throw new Error('bad time payload');
+                if (nowUTC >= RELEASE_UTC) {
+                    // Release: enable session2 link
+                    if (s2Locked) s2Locked.classList.add('hidden');
+                    if (s2Link) { s2Link.classList.remove('hidden'); s2Link.setAttribute('aria-disabled','false'); }
+                } else {
+                    // Pre-release: keep locked state
+                    if (s2Locked) s2Locked.classList.remove('hidden');
+                    if (s2Link) { s2Link.classList.add('hidden'); s2Link.setAttribute('aria-disabled','true'); }
+                }
+            } catch (_) {
+                // On failure, keep locked state to avoid premature exposure
+                if (s2Locked) s2Locked.classList.remove('hidden');
+                if (s2Link) { s2Link.classList.add('hidden'); s2Link.setAttribute('aria-disabled','true'); }
+            }
+        })();
         // --- DOM Element Constants ---
         const dom = {
             tabs: document.querySelectorAll('.tab-button'),
