@@ -22,7 +22,8 @@
         .report-page { background-color:#fff; padding:2.5cm 2cm; box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05); color:#1f2937; }
         .report-main-title { font-family:'Noto Sans KR',sans-serif; font-size:1.875rem; font-weight:700; text-align:center; margin-bottom:1rem; border-bottom:2px solid #111827; padding-bottom:1rem; }
         .report-section-title { font-family:'Noto Sans KR',sans-serif; font-size:1.5rem; font-weight:700; color:#111827; margin-top:2.5rem; margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:1px solid #d1d5db; }
-        .preview-text { white-space:pre-wrap; word-break:break-word; min-height:2.5em; line-height:1.8; color:#374151; font-family:'Nanum Myeongjo',serif; }
+    .preview-text { white-space:pre-wrap; word-break:break-word; min-height:2.5em; line-height:1.8; color:#374151; font-family:'Nanum Myeongjo',serif; }
+    .preview-text a { color:#2563eb; text-decoration:underline; }
         .preview-placeholder { color:#9ca3af; font-style:italic; }
         /* guidance styles */
         .infographic-card { background-color:#f9fafb; border:1px solid #e5e7eb; border-radius:0.75rem; padding:1.5rem; text-align:center; }
@@ -374,16 +375,17 @@
             if (c1_title || c1_desc) {
                 const title = c1_title ? escapeHtml(c1_title) : '<span class="preview-placeholder">[고려사항 1]</span>';
                 const desc = c1_desc ? escapeHtml(c1_desc) : '<span class="preview-placeholder">이유/근거를 입력하세요.</span>';
-                items.push(`<div class="preview-text"><strong style="font-family: 'Noto Sans KR', sans-serif;">${title}</strong>:<br>${desc}</div>`);
+                // li 내부에서 번호와 제목이 같은 줄에서 시작되도록 인라인 구성, 줄바꿈은 <br>
+                items.push(`<strong style="font-family: 'Noto Sans KR', sans-serif;">${title}</strong>:<br>${desc}`);
             }
             if (c2_title || c2_desc) {
                 const title = c2_title ? escapeHtml(c2_title) : '<span class="preview-placeholder">[고려사항 2]</span>';
                 const desc = c2_desc ? escapeHtml(c2_desc) : '<span class="preview-placeholder">이유/근거를 입력하세요.</span>';
-                items.push(`<div class="preview-text"><strong style="font-family: 'Noto Sans KR', sans-serif;">${title}</strong>:<br>${desc}</div>`);
+                items.push(`<strong style="font-family: 'Noto Sans KR', sans-serif;">${title}</strong>:<br>${desc}`);
             }
 
             if (items.length > 0) {
-                considerationsPreview.innerHTML = `<ol class="list-decimal list-inside space-y-3">${items.map(item => `<li>${item}</li>`).join('')}</ol>`;
+                considerationsPreview.innerHTML = `<ol class="list-decimal list-inside space-y-3">${items.map(item => `<li class="preview-text">${item}</li>`).join('')}</ol>`;
             } else {
                 considerationsPreview.innerHTML = `<p class="preview-text"><span class="preview-placeholder">고려사항을 입력하세요...</span></p>`;
             }
@@ -397,11 +399,89 @@
         function showToast(message) { const toast = dom.toast; if (!toast) return; toast.textContent = message; toast.style.opacity = 1; setTimeout(()=>{ toast.style.opacity = 0; }, 1200); }
         function handleClearAll(){ try{ const ok=window.confirm('입력한 내용을 모두 삭제하시겠어요?\n이 작업은 되돌릴 수 없습니다.'); if(!ok) return; clearFormAndStorage(); showToast('입력 내용이 삭제되었습니다.'); }catch(_){} }
         function clearFormAndStorage(){ try{ localStorage.removeItem(storageKey); localStorage.removeItem(SUBMIT_META_KEY); }catch(_){} Array.from(dom.allInputs).forEach(el=>{ if(el.tagName==='INPUT' || el.tagName==='TEXTAREA'){ el.value=''; } }); if(dom.sourcesContainer){ dom.sourcesContainer.innerHTML=''; } if(dom.retryUploadBtn){ dom.retryUploadBtn.classList.add('hidden'); dom.retryUploadBtn.dataset.show=''; } if (typeof lastZipBlob!=='undefined') lastZipBlob=null; if (typeof lastMeta!=='undefined') lastMeta=null; setStatus(''); updatePreview(); }
-        function updateSourcesPreview() { const sourcesPreview = document.getElementById('preview_sources'); const entries = document.querySelectorAll('.source-entry'); if (!sourcesPreview) return; if (entries.length === 0) { sourcesPreview.innerHTML = `<span class="preview-placeholder">내용을 입력하세요...</span>`; return; } let items = []; entries.forEach(entry => { const values = Array.from(entry.querySelectorAll('input')).map(i => escapeHtml(i.value.trim())); let parts = []; switch(entry.dataset.type){ case '논문': if(values[0]) parts.push(values[0]); if(values[1]) parts.push(`(${values[1]})`); if(values[2]) parts.push(`${values[2]}.`); if(values[3]) parts.push(values[3]); break; case '도서': if(values[0]) parts.push(values[0]); if(values[3]) parts.push(`(${values[3]})`); if(values[1]) parts.push(`${values[1]}.`); if(values[2]) parts.push(values[2]); break; case '학술잡지': if(values[2]) parts.push(values[2]); if(values[3]) parts.push(`(${values[3]})`); if(values[1]) parts.push(`${values[1]}.`); if(values[0]) parts.push(values[0]); break; case '인터넷 URL': if(values[2]) parts.push(values[2]); if(values[0]) parts.push(values[0]); if(values[1]) parts.push(`'${values[1]}'.`); if(values[3]) parts.push(`URL: ${values[3]}`); break; } let li = parts.join(' ').replace(/\s\./g,'.').replace(/\s,/g,','); items.push(`<li>${li}</li>`); }); sourcesPreview.innerHTML = `<ol class="list-decimal list-inside" style="line-height:1.8;">${items.join('')}</ol>`; }
+        function updateSourcesPreview() {
+            const sourcesPreview = document.getElementById('preview_sources');
+            const entries = document.querySelectorAll('.source-entry');
+            if (!sourcesPreview) return;
+            if (entries.length === 0) {
+                sourcesPreview.innerHTML = `<span class="preview-placeholder">내용을 입력하세요...</span>`;
+                return;
+            }
+            let items = [];
+            entries.forEach(entry => {
+                // 호환: 예전 저장 타입 '인터넷 URL'을 새 라벨로 간주
+                const typeRaw = entry.dataset.type || '';
+                const type = (typeRaw === '인터넷 URL') ? '인터넷 기사/게시물' : typeRaw;
+                const rawInputs = Array.from(entry.querySelectorAll('input')).map(i => i.value.trim());
+                const values = rawInputs.map(v => escapeHtml(v));
+                let parts = [];
+                switch(type){
+                    case '논문':
+                        if(values[0]) parts.push(values[0]);
+                        if(values[1]) parts.push(`(${values[1]})`);
+                        if(values[2]) parts.push(`${values[2]}.`);
+                        if(values[3]) parts.push(values[3]);
+                        break;
+                    case '도서':
+                        if(values[0]) parts.push(values[0]);
+                        if(values[3]) parts.push(`(${values[3]})`);
+                        if(values[1]) parts.push(`${values[1]}.`);
+                        if(values[2]) parts.push(values[2]);
+                        break;
+                    case '학술잡지':
+                        if(values[2]) parts.push(values[2]);
+                        if(values[3]) parts.push(`(${values[3]})`);
+                        if(values[1]) parts.push(`${values[1]}.`);
+                        if(values[0]) parts.push(values[0]);
+                        break;
+                    case '인터넷 기사/게시물':
+                    case '인터넷 URL':
+                        if(values[2]) parts.push(values[2]); // 작성자(기자)
+                        if(values[0]) parts.push(values[0]); // 웹사이트명
+                        if(values[1]) parts.push(`'${values[1]}'.`); // 글 제목
+                        if(rawInputs[3]){
+                            const safeUrl = escapeHtml(rawInputs[3]);
+                            parts.push(`URL: <a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeUrl}</a>`);
+                        }
+                        break;
+                }
+                let li = parts.join(' ').replace(/\s\./g,'.').replace(/\s,/g,',');
+                items.push(`<li>${li}</li>`);
+            });
+            sourcesPreview.innerHTML = `<ol class="list-decimal list-inside" style="line-height:1.8;">${items.join('')}</ol>`;
+        }
         function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;');}
 
-        function addSourceElement(sourceData=null){ const entryDiv=document.createElement('div'); entryDiv.className='source-entry border p-4 rounded-md bg-gray-50 space-y-3'; const type=sourceData?.type||'논문'; entryDiv.dataset.type=type; entryDiv.innerHTML=`<div class="flex justify-between items-center"><select class="source-type-select p-2 border border-gray-300 rounded-md bg-white"><option ${type==='논문'?'selected':''}>논문</option><option ${type==='도서'?'selected':''}>도서</option><option ${type==='학술잡지'?'selected':''}>학술잡지</option><option ${type==='인터넷 URL'?'selected':''}>인터넷 URL</option></select><button class="delete_source_btn bg-red-500 text-white font-bold py-1 px-3 rounded-lg hover:bg-red-600 text-sm">삭제</button></div><div class="source-inputs grid grid-cols-1 sm:grid-cols-2 gap-2"></div>`; dom.sourcesContainer.appendChild(entryDiv); updateSourceInputs(entryDiv.querySelector('.source-type-select'), sourceData?.values); }
-        function updateSourceInputs(selectElement, values=null){ const inputsContainer=selectElement.closest('.source-entry').querySelector('.source-inputs'); const type=selectElement.value; selectElement.closest('.source-entry').dataset.type=type; const fields = (type==='논문')?['저자*','연도*','논문 제목*','학술지명','권','호','페이지']: (type==='도서')?['저자*','도서명*','출판사*','연도']: (type==='학술잡지')?['잡지명*','기사 제목*','기자명*','발행일']: ['웹사이트명*','글 제목*','작성자(기자)*','URL*']; let i=0; inputsContainer.innerHTML = fields.map(label=>{ const required=label.endsWith('*'); const name=label.replace('*',''); const val=values?.[i++]||''; return `<label class="block"><span class="text-gray-700 text-sm">${name}${required?'<span class="text-red-500">*</span>':''}</span><input type="text" placeholder="${name}" value="${val}" class="w-full p-2 mt-1 border border-gray-300 rounded-md text-sm"></label>`; }).join(''); }
+        function addSourceElement(sourceData=null){
+            const entryDiv=document.createElement('div');
+            entryDiv.className='source-entry border p-4 rounded-md bg-gray-50 space-y-3';
+            const typeRaw=sourceData?.type||'논문';
+            const type=(typeRaw==='인터넷 URL')?'인터넷 기사/게시물':typeRaw; // 호환 처리
+            entryDiv.dataset.type=type;
+            entryDiv.innerHTML=`<div class="flex justify-between items-center"><select class="source-type-select p-2 border border-gray-300 rounded-md bg-white"><option ${type==='논문'?'selected':''}>논문</option><option ${type==='도서'?'selected':''}>도서</option><option ${type==='학술잡지'?'selected':''}>학술잡지</option><option ${type==='인터넷 기사/게시물'?'selected':''}>인터넷 기사/게시물</option></select><button class="delete_source_btn bg-red-500 text-white font-bold py-1 px-3 rounded-lg hover:bg-red-600 text-sm">삭제</button></div><div class="source-inputs grid grid-cols-1 sm:grid-cols-2 gap-2"></div>`;
+            dom.sourcesContainer.appendChild(entryDiv);
+            updateSourceInputs(entryDiv.querySelector('.source-type-select'), sourceData?.values);
+        }
+        function updateSourceInputs(selectElement, values=null){
+            const inputsContainer=selectElement.closest('.source-entry').querySelector('.source-inputs');
+            let type=selectElement.value;
+            if (type==='인터넷 URL') type='인터넷 기사/게시물'; // 호환 처리
+            selectElement.closest('.source-entry').dataset.type=type;
+            const fields = (type==='논문')
+                ? ['저자*','연도*','논문 제목*','학술지명','권','호','페이지']
+                : (type==='도서')
+                ? ['저자*','도서명*','출판사*','연도']
+                : (type==='학술잡지')
+                ? ['잡지명*','기사 제목*','기자명*','발행일']
+                : ['웹사이트명*','글 제목*','작성자(기자)*','URL*']; // 인터넷 기사/게시물
+            let i=0;
+            inputsContainer.innerHTML = fields.map(label=>{
+                const required=label.endsWith('*');
+                const name=label.replace('*','');
+                const val=values?.[i++]||'';
+                return `<label class="block"><span class="text-gray-700 text-sm">${name}${required?'<span class="text-red-500">*</span>':''}</span><input type="text" placeholder="${name}" value="${val}" class="w-full p-2 mt-1 border border-gray-300 rounded-md text-sm"></label>`;
+            }).join('');
+        }
 
         function getReportFilename(){ const grade=(document.getElementById('student_grade').value||'1').trim(); const studentClass=(document.getElementById('student_class').value||'0').trim().padStart(2,'0'); const studentNumber=(document.getElementById('student_number').value||'0').trim().padStart(2,'0'); const studentId=`${grade}${studentClass}${studentNumber}`; const studentName=document.getElementById('student_name').value.trim()||'이름없음'; return `${studentId}_${studentName}_스마트모빌리티_제안서_1차시`; }
         function printReport(){ const originalTitle=document.title; document.title=getReportFilename(); window.print(); setTimeout(()=>{ document.title=originalTitle; }, 500); }
@@ -422,7 +502,7 @@
         function saveSubmitMeta(){ const meta={ grade:document.getElementById('student_grade')?.value||'', class:document.getElementById('student_class')?.value||'', number:document.getElementById('student_number')?.value||'', name:document.getElementById('student_name')?.value||'' }; try{ localStorage.setItem(SUBMIT_META_KEY, JSON.stringify(meta)); }catch(_){} }
         function loadSubmitMeta(){ try{ const raw=localStorage.getItem(SUBMIT_META_KEY); if(!raw) return; const meta=JSON.parse(raw); if(meta.grade!=null) document.getElementById('student_grade').value=meta.grade; if(meta.class!=null) document.getElementById('student_class').value=meta.class; if(meta.number!=null) document.getElementById('student_number').value=meta.number; if(meta.name!=null) document.getElementById('student_name').value=meta.name; }catch(_){} }
 
-        function generateDocHtml(dynamicTitle, reportInnerHtml){ return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${dynamicTitle}</title><script src="https://cdn.tailwindcss.com"><\/script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet"><style>body{font-family:'Noto Sans KR','Inter',sans-serif;background-color:#f3f4f6;margin:0}*{color:inherit !important}.report-page{background-color:#fff;padding:2.5cm 2cm;box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);color:#1f2937}.printable-area{width:100%}.report-main-title{font-family:'Noto Sans KR',sans-serif;font-size:1.875rem;font-weight:700;text-align:center;margin-bottom:1rem;border-bottom:2px solid #111827;padding-bottom:1rem}.report-section-title{font-family:'Noto Sans KR',sans-serif;font-size:1.5rem;font-weight:700;color:#111827;margin-top:2.5rem;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid #d1d5db}.preview-text{white-space:pre-wrap;word-break:break-word;min-height:2.5em;line-height:1.8;color:#374151;font-family:'Nanum Myeongjo',serif}.preview-placeholder{color:#9ca3af !important;font-style:italic}@page{size:A4 portrait;margin:2cm}@media print{body *{visibility:hidden}.printable-area,.printable-area *{visibility:visible}.printable-area{position:absolute;left:0;top:0;width:100%;padding:0;margin:0;box-shadow:none;border:none}.no-print{display:none}}</style></head><body><div class="report-page"><div class="printable-area">${reportInnerHtml}</div></div></body></html>`; }
+    function generateDocHtml(dynamicTitle, reportInnerHtml){ return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${dynamicTitle}</title><script src="https://cdn.tailwindcss.com"><\/script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet"><style>body{font-family:'Noto Sans KR','Inter',sans-serif;background-color:#f3f4f6;margin:0}*{color:inherit !important}.report-page{background-color:#fff;padding:2.5cm 2cm;box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);color:#1f2937}.printable-area{width:100%}.report-main-title{font-family:'Noto Sans KR',sans-serif;font-size:1.875rem;font-weight:700;text-align:center;margin-bottom:1rem;border-bottom:2px solid #111827;padding-bottom:1rem}.report-section-title{font-family:'Noto Sans KR',sans-serif;font-size:1.5rem;font-weight:700;color:#111827;margin-top:2.5rem;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid #d1d5db}.preview-text{white-space:pre-wrap;word-break:break-word;min-height:2.5em;line-height:1.8;color:#374151;font-family:'Nanum Myeongjo',serif}.preview-text a{color:#2563eb !important;text-decoration:underline}.preview-placeholder{color:#9ca3af !important;font-style:italic}@page{size:A4 portrait;margin:2cm}@media print{body *{visibility:hidden}.printable-area,.printable-area *{visibility:visible}.printable-area{position:absolute;left:0;top:0;width:100%;padding:0;margin:0;box-shadow:none;border:none}.no-print{display:none}}</style></head><body><div class="report-page"><div class="printable-area">${reportInnerHtml}</div></div></body></html>`; }
 
         function calcSectionCode(grade,klass){ const g=String(grade||'').trim(); const k=String(klass||'').trim().padStart(2,'0'); return `${g}${k}`; }
         function calcStudentId(grade,klass,number){ const g=String(grade||'').trim(); const k=String(klass||'').trim().padStart(2,'0'); const n=String(number||'').trim().padStart(2,'0'); return `${g}${k}${n}`; }

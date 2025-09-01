@@ -22,7 +22,8 @@
         .report-page { background-color:#fff; padding:2.5cm 2cm; box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05); color:#1f2937; }
         .report-main-title { font-family:'Noto Sans KR',sans-serif; font-size:1.875rem; font-weight:700; text-align:center; margin-bottom:1rem; border-bottom:2px solid #111827; padding-bottom:1rem; }
         .report-section-title { font-family:'Noto Sans KR',sans-serif; font-size:1.5rem; font-weight:700; color:#111827; margin-top:2.5rem; margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:1px solid #d1d5db; }
-        .preview-text { white-space:pre-wrap; word-break:break-word; min-height:2.5em; line-height:1.8; color:#374151; font-family:'Nanum Myeongjo',serif; }
+    .preview-text { white-space:pre-wrap; word-break:break-word; min-height:2.5em; line-height:1.8; color:#374151; font-family:'Nanum Myeongjo',serif; }
+    .preview-text a { color:#2563eb; text-decoration:underline; }
         .preview-placeholder { color:#9ca3af; font-style:italic; }
         .tip-card { background: linear-gradient(135deg,#f5f3ff,#eef2ff); border-left:4px solid #6366f1; padding:1rem; border-radius:0.5rem; }
         .accordion-header button.open { background-color:#eef2ff; color:#4338ca; }
@@ -350,10 +351,87 @@
         function getFormData() { const data = {}; dom.allInputs.forEach(input => data[input.id] = input.value); data.sources = Array.from(document.querySelectorAll('.source-entry')).map(entry => ({ type: entry.dataset.type, values: Array.from(entry.querySelectorAll('input')).map(input => input.value) })); return data; }
         function saveToBrowser() { localStorage.setItem(storageKey, JSON.stringify(getFormData())); showToast('자동 저장되었습니다.'); }
         function loadFromBrowser() { const saved = localStorage.getItem(storageKey); if (!saved) return; const data = JSON.parse(saved); Object.entries(data).forEach(([k,v]) => { if (k === 'sources' && Array.isArray(v)) { v.forEach(s => addSourceElement(s)); } else { const el = document.getElementById(k); if (el) el.value = v; } }); updatePreview(); }
-        function updateSourcesPreview() { const sourcesPreview = document.getElementById('preview_sources'); const entries = document.querySelectorAll('.source-entry'); if (!sourcesPreview) return; if (entries.length === 0) { sourcesPreview.innerHTML = `<span class=\"preview-placeholder\">내용을 입력하세요...</span>`; return; } let items = []; entries.forEach(entry => { const values = Array.from(entry.querySelectorAll('input')).map(i => escapeHtml(i.value.trim())); let parts = []; switch(entry.dataset.type){ case '논문': if(values[0]) parts.push(values[0]); if(values[1]) parts.push(`(${values[1]})`); if(values[2]) parts.push(`${values[2]}.`); if(values[3]) parts.push(values[3]); break; case '도서': if(values[0]) parts.push(values[0]); if(values[3]) parts.push(`(${values[3]})`); const bookTitle=values[1]; if(bookTitle) parts.push(`${bookTitle}.`); if(values[2]) parts.push(values[2]); break; case '학술잡지': if(values[2]) parts.push(values[2]); if(values[3]) parts.push(`(${values[3]})`); if(values[1]) parts.push(`${values[1]}.`); if(values[0]) parts.push(values[0]); break; case '인터넷 URL': if(values[2]) parts.push(values[2]); if(values[0]) parts.push(values[0]); if(values[1]) parts.push(`'${values[1]}'.`); if (values[3]) parts.push(`URL: ${values[3]}`); break; } let li = parts.join(' ').replace(/\s\./g,'.').replace(/\s,/g,','); items.push(`<li>${li}</li>`); }); sourcesPreview.innerHTML = `<ol class=\"list-decimal list-inside\" style=\"line-height: 1.8;\">${items.join('')}</ol>`; }
+        function updateSourcesPreview() {
+            const sourcesPreview = document.getElementById('preview_sources');
+            const entries = document.querySelectorAll('.source-entry');
+            if (!sourcesPreview) return;
+            if (entries.length === 0) {
+                sourcesPreview.innerHTML = `<span class="preview-placeholder">내용을 입력하세요...</span>`;
+                return;
+            }
+            let items = [];
+            entries.forEach(entry => {
+                const typeRaw = entry.dataset.type || '';
+                const type = (typeRaw === '인터넷 URL') ? '인터넷 기사/게시물' : typeRaw; // 호환
+                const rawInputs = Array.from(entry.querySelectorAll('input')).map(i => i.value.trim());
+                const values = rawInputs.map(v => escapeHtml(v));
+                let parts = [];
+                switch(type){
+                    case '논문':
+                        if(values[0]) parts.push(values[0]);
+                        if(values[1]) parts.push(`(${values[1]})`);
+                        if(values[2]) parts.push(`${values[2]}.`);
+                        if(values[3]) parts.push(values[3]);
+                        break;
+                    case '도서':
+                        if(values[0]) parts.push(values[0]);
+                        if(values[3]) parts.push(`(${values[3]})`);
+                        const bookTitle=values[1]; if(bookTitle) parts.push(`${bookTitle}.`);
+                        if(values[2]) parts.push(values[2]);
+                        break;
+                    case '학술잡지':
+                        if(values[2]) parts.push(values[2]);
+                        if(values[3]) parts.push(`(${values[3]})`);
+                        if(values[1]) parts.push(`${values[1]}.`);
+                        if(values[0]) parts.push(values[0]);
+                        break;
+                    case '인터넷 기사/게시물':
+                    case '인터넷 URL':
+                        if(values[2]) parts.push(values[2]);
+                        if(values[0]) parts.push(values[0]);
+                        if(values[1]) parts.push(`'${values[1]}'.`);
+                        if (rawInputs[3]){
+                            const safeUrl = escapeHtml(rawInputs[3]);
+                            parts.push(`URL: <a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeUrl}</a>`);
+                        }
+                        break;
+                }
+                let li = parts.join(' ').replace(/\s\./g,'.').replace(/\s,/g,',');
+                items.push(`<li>${li}</li>`);
+            });
+            sourcesPreview.innerHTML = `<ol class="list-decimal list-inside" style="line-height: 1.8;">${items.join('')}</ol>`;
+        }
         function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;'); }
-        function addSourceElement(sourceData = null) { const entryDiv = document.createElement('div'); entryDiv.className = 'source-entry border p-4 rounded-md bg-gray-50 space-y-3'; const type = sourceData?.type || '논문'; entryDiv.dataset.type = type; entryDiv.innerHTML = `<div class="flex justify-between items-center"><select class="source-type-select p-2 border border-gray-300 rounded-md bg-white"><option ${type==='논문'?'selected':''}>논문</option><option ${type==='도서'?'selected':''}>도서</option><option ${type==='학술잡지'?'selected':''}>학술잡지</option><option ${type==='인터넷 URL'?'selected':''}>인터넷 URL</option></select><button class="delete_source_btn bg-red-500 text-white font-bold py-1 px-3 rounded-lg hover:bg-red-600 text-sm">삭제</button></div><div class="source-inputs grid grid-cols-1 sm:grid-cols-2 gap-2"></div>`; dom.sourcesContainer.appendChild(entryDiv); updateSourceInputs(entryDiv.querySelector('.source-type-select'), sourceData?.values); }
-        function updateSourceInputs(selectElement, values = null) { const inputsContainer = selectElement.closest('.source-entry').querySelector('.source-inputs'); const type = selectElement.value; selectElement.closest('.source-entry').dataset.type = type; const fields = (type==='논문')?['저자*','연도*','논문 제목*','학술지명','권','호','페이지']:(type==='도서')?['저자*','도서명*','출판사*','연도']:(type==='학술잡지')?['잡지명*','기사 제목*','기자명*','발행일']:['웹사이트명*','글 제목*','작성자(기자)*','URL*']; let i=0; inputsContainer.innerHTML = fields.map(label=>{ const required=label.endsWith('*'); const name=label.replace('*',''); const val=values?.[i++]||''; return `<label class="block"><span class="text-gray-700 text-sm">${name}${required?'<span class="text-red-500">*</span>':''}</span><input type="text" placeholder="${name}" value="${val}" class="w-full p-2 mt-1 border border-gray-300 rounded-md text-sm"></label>`; }).join(''); }
+        function addSourceElement(sourceData = null) {
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'source-entry border p-4 rounded-md bg-gray-50 space-y-3';
+            const typeRaw = sourceData?.type || '논문';
+            const type = (typeRaw === '인터넷 URL') ? '인터넷 기사/게시물' : typeRaw; // 호환
+            entryDiv.dataset.type = type;
+            entryDiv.innerHTML = `<div class="flex justify-between items-center"><select class="source-type-select p-2 border border-gray-300 rounded-md bg-white"><option ${type==='논문'?'selected':''}>논문</option><option ${type==='도서'?'selected':''}>도서</option><option ${type==='학술잡지'?'selected':''}>학술잡지</option><option ${type==='인터넷 기사/게시물'?'selected':''}>인터넷 기사/게시물</option></select><button class="delete_source_btn bg-red-500 text-white font-bold py-1 px-3 rounded-lg hover:bg-red-600 text-sm">삭제</button></div><div class="source-inputs grid grid-cols-1 sm:grid-cols-2 gap-2"></div>`;
+            dom.sourcesContainer.appendChild(entryDiv);
+            updateSourceInputs(entryDiv.querySelector('.source-type-select'), sourceData?.values);
+        }
+        function updateSourceInputs(selectElement, values = null) {
+            const inputsContainer = selectElement.closest('.source-entry').querySelector('.source-inputs');
+            let type = selectElement.value;
+            if (type === '인터넷 URL') type = '인터넷 기사/게시물'; // 호환
+            selectElement.closest('.source-entry').dataset.type = type;
+            const fields = (type==='논문')
+                ? ['저자*','연도*','논문 제목*','학술지명','권','호','페이지']
+                : (type==='도서')
+                ? ['저자*','도서명*','출판사*','연도']
+                : (type==='학술잡지')
+                ? ['잡지명*','기사 제목*','기자명*','발행일']
+                : ['웹사이트명*','글 제목*','작성자(기자)*','URL*']; // 인터넷 기사/게시물
+            let i=0;
+            inputsContainer.innerHTML = fields.map(label=>{
+                const required=label.endsWith('*');
+                const name=label.replace('*','');
+                const val=values?.[i++]||'';
+                return `<label class="block"><span class="text-gray-700 text-sm">${name}${required?'<span class="text-red-500">*</span>':''}</span><input type="text" placeholder="${name}" value="${val}" class="w-full p-2 mt-1 border border-gray-300 rounded-md text-sm"></label>`;
+            }).join('');
+        }
         function showToast(message) { const toast = dom.toast; if (!toast) return; toast.textContent = message; toast.style.opacity = 1; setTimeout(()=>{ toast.style.opacity = 0; }, 1200); }
         function handleClearAll(){ try{ const ok=window.confirm('입력한 내용을 모두 삭제하시겠어요?\n이 작업은 되돌릴 수 없습니다.'); if(!ok) return; clearFormAndStorage(); showToast('입력 내용이 삭제되었습니다.'); }catch(_){} }
         function clearFormAndStorage(){ try{ localStorage.removeItem(storageKey); localStorage.removeItem(SUBMIT_META_KEY); }catch(_){} Array.from(dom.allInputs).forEach(el=>{ if(el.tagName==='INPUT' || el.tagName==='TEXTAREA'){ el.value=''; } }); if(dom.sourcesContainer){ dom.sourcesContainer.innerHTML=''; } if(dom.retryUploadBtn){ dom.retryUploadBtn.classList.add('hidden'); dom.retryUploadBtn.dataset.show=''; } if (typeof lastZipBlob!=='undefined') lastZipBlob=null; if (typeof lastMeta!=='undefined') lastMeta=null; setStatus(''); updatePreview(); }
