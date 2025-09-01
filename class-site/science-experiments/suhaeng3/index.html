@@ -935,14 +935,22 @@
         }
 
         // Try local download first, then verify by environment heuristics and fallback to server-download
-        function attemptLocalDownloadAndVerify(zipFilename) {
-            const env = detectInApp();
-            let localSaved = false;
+        async function saveWithPicker(blob, filename) {
             try {
-                if (lastZipBlob) {
-                    localSaved = triggerBlobDownload(lastZipBlob, zipFilename) === true;
-                }
-            } catch (_) { localSaved = false; }
+                const opts = {
+                    suggestedName: filename,
+                    types: [{ description: 'ZIP file', accept: { 'application/zip': ['.zip'] } }],
+                };
+                const handle = await window.showSaveFilePicker(opts);
+                const writable = await handle.createWritable();
+                await writable.write(blob);
+                await writable.close();
+                return true;
+            } catch (_) { return false; }
+        }
+
+        async function attemptLocalDownloadAndVerify(zipFilename) {
+            const env = detectInApp();
 
             // In-app browsers are known to block/ignore a[download]/Blob → fallback to server
             if (env.isInApp) {
@@ -952,18 +960,38 @@
                 return;
             }
 
-            // iOS Safari: guide to Files via share sheet (localSaved 신뢰 어려움)
+            // iOS Safari: guide to Files via share sheet
             if (isIOS()) {
                 setStatus('iOS 저장 안내를 표시합니다.');
                 if (dom.iosHelpModal) showModal(dom.iosHelpModal, dom.downloadZipBtn);
                 return;
             }
 
+            let localSaved = false;
+            let usedPicker = false;
+            // Prefer native Save As dialog where supported (Chromium-based)
+            if (window.showSaveFilePicker && lastZipBlob) {
+                usedPicker = true;
+                localSaved = await saveWithPicker(lastZipBlob, zipFilename);
+            }
+            // Fallback to default a[download]
+            if (!localSaved && lastZipBlob) {
+                try { localSaved = triggerBlobDownload(lastZipBlob, zipFilename) === true; }
+                catch (_) { localSaved = false; }
+            }
+
+            // Android/Samsung browsers may silently ignore a[download] for Blobs
+            if (env.isAndroid || env.isSamsung) {
+                if (!usedPicker) {
+                    localSaved = false;
+                }
+            }
+
             if (localSaved) {
                 setStatus('✅ 로컬 다운로드가 완료되었습니다.');
                 showToast('로컬 다운로드 완료', 'bg-green-600');
             } else {
-                setStatus('로컬 다운로드 실패, 서버에서 다운로드합니다.');
+                setStatus('로컬 다운로드 실패 또는 제한됨, 서버에서 다운로드합니다.');
                 if (dom.inappModal) showModal(dom.inappModal, dom.downloadZipBtn);
                 try { serverDownloadLastZip(); } catch(_) {}
             }
