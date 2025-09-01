@@ -52,9 +52,9 @@ export const handler = async (event) => {
     let payload;
     try { payload = JSON.parse(event.body); } catch { return withCors(400, { ok:false, error: "invalid json" }); }
 
-    const { studentId, subject, section } = payload || {};
-    if (!studentId || !subject || !section) {
-      return withCors(400, { ok:false, error: "missing fields (studentId/subject/section)" });
+    const { studentId, subject, activity, section } = payload || {};
+    if (!studentId || !subject || !activity || !section) {
+      return withCors(400, { ok:false, error: "missing fields (studentId/subject/activity/section)" });
     }
 
     // 4) 단일/다중 통일
@@ -107,7 +107,7 @@ export const handler = async (event) => {
 
     // 7) 경로/폴더 보장
     const rootPath = normalizeRoot(ROOT_FOLDER_PATH); // "/과제제출" → "과제제출"
-    const parentPath = [rootPath, subject, section, String(studentId)].join("/");
+    const parentPath = [rootPath, subject, activity, section, String(studentId)].join("/");
     await ensureFolderTree(accessToken, parentPath);
 
     // 8) 파일별 업로드(중복 시 타임스탬프)
@@ -133,7 +133,7 @@ export const handler = async (event) => {
     // 9) 응답
     return withCors(200, {
       ok: true,
-      studentId, subject, section,
+      studentId, subject, activity, section,
       submittedAt: new Date().toISOString(),
       files: results,
     });

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>첫걸음, 마지막 걸음 프로젝트 - 2차시</title>
+    <meta name="submission-subject" content="과학탐구실험2">
+    <meta name="submission-activity" content="수행3_2차시">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans KR','Inter',sans-serif; background-color:#f3f4f6; }
+        .tab-button-group { display:flex; flex-wrap:wrap; gap:0.5rem; background-color:#e5e7eb; padding:0.5rem; border-radius:0.75rem; }
+        .tab-button { flex-grow:1; text-align:center; padding:0.75rem 0.5rem; border-radius:0.5rem; font-weight:500; color:#4b5563; cursor:pointer; transition:all .3s ease; border:2px solid transparent; }
+        .tab-button:hover { background-color:#f9fafb; color:#1f2937; }
+        .tab-button.active { background-color:#fff; color:#4f46e5; font-weight:700; box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06); }
+        .tab-content { display:none; }
+        .tab-content.active { display:block; }
+        .report-page { background-color:#fff; padding:2.5cm 2cm; box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05); color:#1f2937; }
+        .report-main-title { font-family:'Noto Sans KR',sans-serif; font-size:2.25rem; font-weight:700; text-align:center; margin-bottom:1rem; border-bottom:2px solid #111827; padding-bottom:1rem; }
+        .report-section-title { font-family:'Noto Sans KR',sans-serif; font-size:1.5rem; font-weight:700; color:#111827; margin-top:2.5rem; margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:1px solid #d1d5db; }
+        .preview-text { white-space:pre-wrap; word-break:break-word; min-height:2.5em; line-height:1.8; color:#374151; font-family:'Nanum Myeongjo',serif; }
+        .preview-placeholder { color:#9ca3af; font-style:italic; }
+        .tip-card { background: linear-gradient(135deg,#f5f3ff,#eef2ff); border-left:4px solid #6366f1; padding:1rem; border-radius:0.5rem; }
+        .accordion-header button.open { background-color:#eef2ff; color:#4338ca; }
+        .accordion-content { transition:max-height .3s ease-out, padding .3s ease-out; max-height:0; overflow:hidden; }
+        .accordion-content.open { max-height:1500px; }
+        @page { size:A4 portrait; margin:2cm; }
+        @media print { body *{ visibility:hidden } .printable-area, .printable-area *{ visibility:visible } .printable-area{ position:absolute; left:0; top:0; width:100%; padding:0; margin:0; box-shadow:none; border:none } .no-print{ display:none } }
+    </style>
+    <link rel="icon" href="data:,">
+</head>
+<body class="p-4 sm:p-8">
+    <div class="max-w-5xl mx-auto">
+        <header class="text-center bg-white p-8 rounded-xl shadow-lg mb-6 no-print">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">첫걸음, 마지막 걸음 프로젝트 - 2차시</h1>
+            <p class="text-lg text-gray-600 mt-2">3가지 지렛대 아이디어 + 기대효과 (부분 제출)</p>
+            <div class="mt-4">
+                <a href="./index.html" class="text-indigo-600 hover:underline">← 활동 허브로 돌아가기</a>
+            </div>
+        </header>
+
+        <div class="bg-white p-6 sm:p-8 rounded-lg shadow-md mb-6 no-print">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-6">
+                <div class="flex items-center space-x-2 flex-wrap justify-center">
+                    <input type="number" id="student_grade" min="1" max="3" step="1" inputmode="numeric" class="w-20 p-2 border border-gray-300 rounded-md text-center" placeholder="학년">
+                    <label for="student_grade" class="font-semibold">학년</label>
+                    <input type="number" id="student_class" min="1" max="20" step="1" inputmode="numeric" class="w-20 p-2 border border-gray-300 rounded-md text-center" placeholder="반">
+                    <label for="student_class" class="font-semibold">반</label>
+                    <input type="number" id="student_number" min="1" max="40" step="1" inputmode="numeric" class="w-20 p-2 border border-gray-300 rounded-md text-center" placeholder="번호">
+                    <label for="student_number" class="font-semibold">번</label>
+                    <input type="text" id="student_name" class="w-32 p-2 border border-gray-300 rounded-md" placeholder="이름">
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-8 no-print">
+            <div class="tab-button-group" aria-label="Tabs">
+                <button class="tab-button active" data-tab="guide2">0. 활동 안내</button>
+                <button class="tab-button" data-tab="tab4">1. 활동지 작성</button>
+                <button class="tab-button" data-tab="tab5">2. 미리보기 및 제출</button>
+            </div>
+        </div>
+            <div id="guide2" class="tab-content active">
+                <div class="bg-white p-6 sm:p-8 rounded-lg shadow-md space-y-8">
+                    <section>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">2차시 목표</h2>
+                        <div class="tip-card text-gray-700">
+                            <ul class="list-disc list-inside text-sm space-y-1">
+                                <li>3가지 지렛대(공간·혜택·협력) 관점으로 아이디어 구체화</li>
+                                <li>기대효과를 구체적 장면으로 서술</li>
+                            </ul>
+                        </div>
+                    </section>
+                    <section>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">3가지 지렛대 예시</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="p-4 bg-gray-50 rounded-lg border"><h3 class="font-bold">공간</h3><p class="text-sm text-gray-600 mt-1">비가림, 조명, CCTV, 충전 등</p></div>
+                            <div class="p-4 bg-gray-50 rounded-lg border"><h3 class="font-bold">혜택</h3><p class="text-sm text-gray-600 mt-1">환승 포인트, 주차 할인, 앱 연동</p></div>
+                            <div class="p-4 bg-gray-50 rounded-lg border"><h3 class="font-bold">협력</h3><p class="text-sm text-gray-600 mt-1">지자체-기업-지역상권 협력</p></div>
+                        </div>
+                    </section>
+                    <!-- Guide items 3~4 from hub -->
+                    <section>
+                        <div class="accordion-item border-t pt-4">
+                            <div class="accordion-header"><button class="w-full text-left p-4 rounded-lg font-semibold text-lg text-gray-800 hover:bg-gray-100 flex justify-between items-center"><span>💡 3. '3가지 지렛대' 아이디어 내기</span><svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button></div>
+                            <div class="accordion-content"><div class="p-4 text-gray-600 space-y-4">
+                                <p>하나의 좋은 아이디어는 여러 요소가 결합되었을 때 나옵니다. '공간', '혜택', '협력'이라는 3가지 관점에서 아이디어를 자유롭게 상상해보세요.</p>
+                                <p><strong>🏛️ 물리적 인프라 (공간):</strong> "예쁜 디자인의 비가림막과 스마트폰 충전기를 설치하자!", "CCTV와 조명을 설치해서 밤에도 안전하게 만들자!"</p>
+                                <p><strong>💡 디지털/정책 (혜택):</strong> "허브에 주차하면 킥보드 요금을 할인해주자!", "S-BRT로 환승하면 추가 포인트를 주는 앱을 만들자!"</p>
+                                <p><strong>🤝 운영 모델 (협력):</strong> "창원시, 킥보드 회사, 버스 회사가 함께 운영 비용을 부담하자!", "허브 주변 카페와 제휴해서 할인 쿠폰을 주자!"</p>
+                            </div></div>
+                        </div>
+                        <div class="accordion-item border-t pt-4">
+                            <div class="accordion-header"><button class="w-full text-left p-4 rounded-lg font-semibold text-lg text-gray-800 hover:bg-gray-100 flex justify-between items-center"><span>📈 4. 기대 효과, 어떻게 쓸까?</span><svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button></div>
+                            <div class="accordion-content"><div class="p-4 text-gray-600 space-y-3">
+                                <p>여러분의 아이디어가 만들어 낼 긍정적인 미래를 상상해서 적어보세요. 구체적인 모습을 그려보는 것이 중요합니다.</p>
+                                <div class="tip-card p-4 rounded-lg">
+                                    <h4 class="font-bold text-indigo-800">생각을 넓히는 질문</h4>
+                                    <ul class="list-disc list-inside mt-2 text-sm">
+                                        <li>여러분의 아이디어가 실현되면 누가 가장 좋아할까요?</li>
+                                        <li>도시의 모습은 어떻게 바뀔까요? (예: 깨끗해진다, 활기차진다 등)</li>
+                                        <li>사람들의 생활은 어떻게 더 편리해질까요?</li>
+                                    </ul>
+                                </div>
+                            </div></div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+        <main>
+            <div id="tab4" class="tab-content active">
+                <div class="bg-white p-6 sm:p-10 rounded-lg shadow-md space-y-8">
+                    <header class="text-center mb-4">
+                        <h2 class="text-2xl font-bold text-gray-800">2차시 활동지</h2>
+                        <p class="text-gray-600">3가지 지렛대 아이디어와 기대효과를 작성하세요.</p>
+                    </header>
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 -mt-2">
+                        <div class="flex items-center gap-2">
+                            <label for="submission_activity" class="text-sm text-gray-600">활동 폴더명</label>
+                            <input id="submission_activity" type="text" class="p-2 border border-gray-300 rounded-md text-sm w-44" placeholder="수행3_2차시" value="수행3_2차시">
+                        </div>
+                        <div class="flex justify-end">
+                            <button id="clear_inputs_btn" class="bg-red-50 text-red-700 font-semibold py-2 px-4 rounded-lg border border-red-200 hover:bg-red-100 transition text-sm">🗑️ 입력 내용 삭제</button>
+                        </div>
+                    </div>
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">1. 스마트 모빌리티 허브 아이디어 (3가지 지렛대)</h3>
+                        <div class="space-y-6">
+                            <div>
+                                <label for="field_idea_infra" class="font-semibold text-gray-700 block mb-2">🏛️ 물리적 인프라 (공간)</label>
+                                <textarea id="field_idea_infra" rows="5" class="w-full p-3 border border-gray-300 rounded-md" placeholder="공간/시설/안전 측면의 아이디어"></textarea>
+                            </div>
+                            <div>
+                                <label for="field_idea_policy" class="font-semibold text-gray-700 block mb-2">💡 디지털/정책 (혜택)</label>
+                                <textarea id="field_idea_policy" rows="5" class="w-full p-3 border border-gray-300 rounded-md" placeholder="앱/요금/인센티브/규칙 등"></textarea>
+                            </div>
+                            <div>
+                                <label for="field_idea_operation" class="font-semibold text-gray-700 block mb-2">🤝 운영 모델 (협력)</label>
+                                <textarea id="field_idea_operation" rows="5" class="w-full p-3 border border-gray-300 rounded-md" placeholder="지속가능한 협력/파트너십"></textarea>
+                            </div>
+                        </div>
+                    </section>
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">2. 기대 효과</h3>
+                        <div>
+                            <label for="field_effects" class="font-semibold text-gray-700 block mb-2">아이디어 실현 시 기대되는 변화</label>
+                            <textarea id="field_effects" rows="6" class="w-full p-3 border border-gray-300 rounded-md" placeholder="긍정적 변화와 근거"></textarea>
+                        </div>
+                    </section>
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">3. 정보 출처</h3>
+                        <div>
+                            <div id="sources_container" class="space-y-4"></div>
+                            <button id="add_source_btn" class="mt-2 bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition text-sm">+ 출처 추가</button>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <div id="tab5" class="tab-content">
+                <div class="bg-white p-6 sm:p-8 rounded-lg shadow-md mb-6 no-print">
+                    <div class="flex justify-center items-center gap-4 flex-wrap">
+                        <button id="download_zip_btn" class="bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition text-base">📦 ZIP으로 다운로드</button>
+                        <button id="print_btn" class="bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition text-base">🖨️ PDF로 저장</button>
+                        <button id="preview_newtab_btn" class="bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition text-base">👁️ 미리보기(새 탭)</button>
+                        <button id="retry_upload_btn" class="hidden bg-yellow-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-yellow-600 transition text-base">🔄 업로드 재시도</button>
+                    </div>
+                    <p class="text-center text-sm text-gray-600 mt-4" aria-live="polite" role="status"><span id="submit_status"></span></p>
+                    <div id="progress_container" class="w-full max-w-xl mx-auto mt-3 hidden" aria-hidden="true">
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div id="progress_bar" class="bg-indigo-600 h-3 rounded-full" style="width:0%"></div>
+                        </div>
+                        <p id="progress_text" class="text-center text-xs text-gray-600 mt-1"></p>
+                    </div>
+                </div>
+                <div class="bg-gray-200 p-4 sm:p-8 rounded-lg">
+                    <div class="printable-area report-page" id="report-content">
+                        <h1 id="preview_main_title" class="report-main-title">스마트 모빌리티 허브 아이디어 제안서 (2차시)</h1>
+                        <p class="text-right text-gray-600 mb-10" style="font-family: 'Noto Sans KR', sans-serif;">
+                            <span id="preview_student_grade">1</span>학년 <span id="preview_student_class">0</span>반 <span id="preview_student_number">00</span>번 이름: <span id="preview_student_name">ㅇㅇㅇ</span>
+                        </p>
+                        <h2 class="report-section-title">III. 스마트 모빌리티 허브 아이디어</h2>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">가. 물리적 인프라 (공간)</h3>
+                        <p class="preview-text" id="preview_idea_infra"><span class="preview-placeholder">내용을 입력하세요...</span></p>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">나. 디지털/정책 (혜택)</h3>
+                        <p class="preview-text" id="preview_idea_policy"><span class="preview-placeholder">내용을 입력하세요...</span></p>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">다. 운영 모델 (협력)</h3>
+                        <p class="preview-text" id="preview_idea_operation"><span class="preview-placeholder">내용을 입력하세요...</span></p>
+                        <h2 class="report-section-title">IV. 기대 효과</h2>
+                        <p class="preview-text" id="preview_effects"><span class="preview-placeholder">내용을 입력하세요...</span></p>
+                        <h2 class="report-section-title">V. 정보 출처</h2>
+                        <div class="preview-text" id="preview_sources"><span class="preview-placeholder">내용을 입력하세요...</span></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast-notification" class="fixed bottom-5 right-5 bg-gray-800 text-white py-3 px-5 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 no-print">저장되었습니다!</div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const dom = {
+            tabs: document.querySelectorAll('.tab-button'),
+            tabContents: document.querySelectorAll('.tab-content'),
+            accordions: document.querySelectorAll('.accordion-header button'),
+            downloadZipBtn: document.getElementById('download_zip_btn'),
+            printBtn: document.getElementById('print_btn'),
+            previewNewTabBtn: document.getElementById('preview_newtab_btn'),
+            retryUploadBtn: document.getElementById('retry_upload_btn'),
+            toast: document.getElementById('toast-notification'),
+            allInputs: document.querySelectorAll('#tab4 input, #tab4 textarea, input#student_grade, input#student_class, input#student_number, input#student_name'),
+            addSourceBtn: document.getElementById('add_source_btn'),
+            sourcesContainer: document.getElementById('sources_container'),
+            clearBtn: document.getElementById('clear_inputs_btn'),
+            submitStatus: document.getElementById('submit_status'),
+        };
+
+        const fields = {
+            'student_grade': 'preview_student_grade',
+            'student_class': 'preview_student_class', 'student_number': 'preview_student_number', 'student_name': 'preview_student_name',
+            'field_idea_infra': 'preview_idea_infra', 'field_idea_policy': 'preview_idea_policy',
+            'field_idea_operation': 'preview_idea_operation',
+            'field_effects': 'preview_effects'
+        };
+
+        const storageKey = 'firstLastMileProjectData_session2';
+
+        dom.tabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+        if (dom.accordions) dom.accordions.forEach(button => button.addEventListener('click', toggleAccordion));
+        dom.allInputs.forEach(input => input.addEventListener('input', updatePreviewAndSave));
+        if (dom.addSourceBtn) dom.addSourceBtn.addEventListener('click', () => addSourceElement());
+        if (dom.sourcesContainer) {
+            dom.sourcesContainer.addEventListener('click', (e) => { if (e.target.classList.contains('delete_source_btn')) { e.target.closest('.source-entry').remove(); updatePreviewAndSave(); } });
+            dom.sourcesContainer.addEventListener('change', (e) => { if (e.target.classList.contains('source-type-select')) { updateSourceInputs(e.target); updatePreviewAndSave(); } });
+            dom.sourcesContainer.addEventListener('input', updatePreviewAndSave);
+        }
+
+        if (dom.downloadZipBtn) dom.downloadZipBtn.addEventListener('click', handleZipDownloadAndSubmit);
+        if (dom.printBtn) dom.printBtn.addEventListener('click', printReport);
+        if (dom.previewNewTabBtn) dom.previewNewTabBtn.addEventListener('click', openPreviewInNewTab);
+        if (dom.retryUploadBtn) dom.retryUploadBtn.addEventListener('click', retryLastUpload);
+        if (dom.clearBtn) dom.clearBtn.addEventListener('click', handleClearAll);
+
+        loadFromBrowser();
+        // 초기 로드 시 메타의 활동값을 입력란에 반영(저장된 값이 없을 때)
+        const actElInit=document.getElementById('submission_activity');
+        if (actElInit && (!actElInit.value || actElInit.value.trim()==='')) actElInit.value=ACTIVITY_INPUT_DEFAULT;
+        switchTab('guide2');
+        updatePreview();
+
+        function switchTab(targetTabId) { dom.tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === targetTabId)); dom.tabContents.forEach(content => content.classList.toggle('active', content.id === targetTabId)); window.scrollTo(0,0); }
+        function toggleAccordion(event) { const button = event.currentTarget; const content = button.parentElement.nextElementSibling; const icon = button.querySelector('svg'); const isOpen = button.classList.toggle('open'); content.classList.toggle('open', isOpen); if (isOpen) { content.style.maxHeight = content.scrollHeight + 'px'; content.style.paddingTop = '1rem'; content.style.paddingBottom = '1rem'; if(icon) icon.style.transform = 'rotate(180deg)'; } else { content.style.maxHeight = '0'; content.style.paddingTop = '0'; content.style.paddingBottom = '0'; if(icon) icon.style.transform = 'rotate(0deg)'; } }
+        function updatePreviewAndSave() { updatePreview(); saveToBrowser(); }
+        function updatePreview() { Object.entries(fields).forEach(([fieldId, previewId]) => { const inputEl = document.getElementById(fieldId); const previewEl = document.getElementById(previewId); if (!inputEl || !previewEl) return; const value = inputEl.value.trim(); const placeholderSpan = previewEl.querySelector('.preview-placeholder'); const placeholderText = placeholderSpan ? placeholderSpan.textContent : `[${fieldId}]`; if (value) { previewEl.textContent = value; } else { previewEl.innerHTML = `<span class="preview-placeholder">${placeholderText}</span>`; } }); updateSourcesPreview(); }
+        function getFormData() { const data = {}; dom.allInputs.forEach(input => data[input.id] = input.value); data.sources = Array.from(document.querySelectorAll('.source-entry')).map(entry => ({ type: entry.dataset.type, values: Array.from(entry.querySelectorAll('input')).map(input => input.value) })); return data; }
+        function saveToBrowser() { localStorage.setItem(storageKey, JSON.stringify(getFormData())); showToast('자동 저장되었습니다.'); }
+        function loadFromBrowser() { const saved = localStorage.getItem(storageKey); if (!saved) return; const data = JSON.parse(saved); Object.entries(data).forEach(([k,v]) => { if (k === 'sources' && Array.isArray(v)) { v.forEach(s => addSourceElement(s)); } else { const el = document.getElementById(k); if (el) el.value = v; } }); updatePreview(); }
+        function updateSourcesPreview() { const sourcesPreview = document.getElementById('preview_sources'); const entries = document.querySelectorAll('.source-entry'); if (!sourcesPreview) return; if (entries.length === 0) { sourcesPreview.innerHTML = `<span class=\"preview-placeholder\">내용을 입력하세요...</span>`; return; } let items = []; entries.forEach(entry => { const values = Array.from(entry.querySelectorAll('input')).map(i => escapeHtml(i.value.trim())); let parts = []; switch(entry.dataset.type){ case '논문': if(values[0]) parts.push(values[0]); if(values[1]) parts.push(`(${values[1]})`); if(values[2]) parts.push(`${values[2]}.`); if(values[3]) parts.push(values[3]); break; case '도서': if(values[0]) parts.push(values[0]); if(values[3]) parts.push(`(${values[3]})`); const bookTitle=values[1]; if(bookTitle) parts.push(`${bookTitle}.`); if(values[2]) parts.push(values[2]); break; case '학술잡지': if(values[2]) parts.push(values[2]); if(values[3]) parts.push(`(${values[3]})`); if(values[1]) parts.push(`${values[1]}.`); if(values[0]) parts.push(values[0]); break; case '인터넷 URL': if(values[2]) parts.push(values[2]); if(values[0]) parts.push(values[0]); if(values[1]) parts.push(`'${values[1]}'.`); if (values[3]) parts.push(`URL: ${values[3]}`); break; } let li = parts.join(' ').replace(/\s\./g,'.').replace(/\s,/g,','); items.push(`<li>${li}</li>`); }); sourcesPreview.innerHTML = `<ol class=\"list-decimal list-inside\" style=\"line-height: 1.8;\">${items.join('')}</ol>`; }
+        function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;'); }
+        function addSourceElement(sourceData = null) { const entryDiv = document.createElement('div'); entryDiv.className = 'source-entry border p-4 rounded-md bg-gray-50 space-y-3'; const type = sourceData?.type || '논문'; entryDiv.dataset.type = type; entryDiv.innerHTML = `<div class="flex justify-between items-center"><select class="source-type-select p-2 border border-gray-300 rounded-md bg-white"><option ${type==='논문'?'selected':''}>논문</option><option ${type==='도서'?'selected':''}>도서</option><option ${type==='학술잡지'?'selected':''}>학술잡지</option><option ${type==='인터넷 URL'?'selected':''}>인터넷 URL</option></select><button class="delete_source_btn bg-red-500 text-white font-bold py-1 px-3 rounded-lg hover:bg-red-600 text-sm">삭제</button></div><div class="source-inputs grid grid-cols-1 sm:grid-cols-2 gap-2"></div>`; dom.sourcesContainer.appendChild(entryDiv); updateSourceInputs(entryDiv.querySelector('.source-type-select'), sourceData?.values); }
+        function updateSourceInputs(selectElement, values = null) { const inputsContainer = selectElement.closest('.source-entry').querySelector('.source-inputs'); const type = selectElement.value; selectElement.closest('.source-entry').dataset.type = type; const fields = (type==='논문')?['저자*','연도*','논문 제목*','학술지명','권','호','페이지']:(type==='도서')?['저자*','도서명*','출판사*','연도']:(type==='학술잡지')?['잡지명*','기사 제목*','기자명*','발행일']:['웹사이트명*','글 제목*','작성자(기자)*','URL*']; let i=0; inputsContainer.innerHTML = fields.map(label=>{ const required=label.endsWith('*'); const name=label.replace('*',''); const val=values?.[i++]||''; return `<label class="block"><span class="text-gray-700 text-sm">${name}${required?'<span class="text-red-500">*</span>':''}</span><input type="text" placeholder="${name}" value="${val}" class="w-full p-2 mt-1 border border-gray-300 rounded-md text-sm"></label>`; }).join(''); }
+        function showToast(message) { const toast = dom.toast; if (!toast) return; toast.textContent = message; toast.style.opacity = 1; setTimeout(()=>{ toast.style.opacity = 0; }, 1200); }
+        function handleClearAll(){ try{ const ok=window.confirm('입력한 내용을 모두 삭제하시겠어요?\n이 작업은 되돌릴 수 없습니다.'); if(!ok) return; clearFormAndStorage(); showToast('입력 내용이 삭제되었습니다.'); }catch(_){} }
+        function clearFormAndStorage(){ try{ localStorage.removeItem(storageKey); localStorage.removeItem(SUBMIT_META_KEY); }catch(_){} Array.from(dom.allInputs).forEach(el=>{ if(el.tagName==='INPUT' || el.tagName==='TEXTAREA'){ el.value=''; } }); if(dom.sourcesContainer){ dom.sourcesContainer.innerHTML=''; } if(dom.retryUploadBtn){ dom.retryUploadBtn.classList.add('hidden'); dom.retryUploadBtn.dataset.show=''; } if (typeof lastZipBlob!=='undefined') lastZipBlob=null; if (typeof lastMeta!=='undefined') lastMeta=null; setStatus(''); updatePreview(); }
+
+        function getReportFilename(){ const grade=(document.getElementById('student_grade').value||'1').trim(); const studentClass=(document.getElementById('student_class').value||'0').trim().padStart(2,'0'); const studentNumber=(document.getElementById('student_number').value||'0').trim().padStart(2,'0'); const studentId=`${grade}${studentClass}${studentNumber}`; const studentName=document.getElementById('student_name').value.trim()||'이름없음'; return `${studentId}_${studentName}_스마트모빌리티_제안서_2차시`; }
+        function printReport(){ const originalTitle=document.title; document.title=getReportFilename(); window.print(); setTimeout(()=>{ document.title=originalTitle; }, 500); }
+        function openPreviewInNewTab(){ try{ const reportContent=document.getElementById('report-content').innerHTML; const now=new Date(); const ts=`${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`; const title=`미리보기-2차시-${ts}`; const docHtml=generateDocHtml(title, reportContent); const blob=new Blob([docHtml],{type:'text/html'}); const url=URL.createObjectURL(blob); window.open(url,'_blank'); setTimeout(()=>URL.revokeObjectURL(url),10000);}catch(_){}}
+
+        function setStatus(text){ if (dom.submitStatus) dom.submitStatus.textContent=text||''; }
+        function showProgress(show){ const c=document.getElementById('progress_container'); if(!c) return; c.classList.toggle('hidden', !show); c.setAttribute('aria-hidden', show?'false':'true'); }
+        function setProgress(percent,label=''){ const bar=document.getElementById('progress_bar'); const txt=document.getElementById('progress_text'); if(bar) bar.style.width=`${Math.max(0,Math.min(100,percent))}%`; if(txt) txt.textContent=label||''; }
+
+        const ENDPOINT='/.netlify/functions/submit';
+        const SUBMIT_KEY='S-2025-github2025subject';
+        const SUBJECT=document.querySelector('meta[name="submission-subject"]')?.content||'과학탐구실험2';
+        const ACTIVITY_INPUT_DEFAULT=document.querySelector('meta[name="submission-activity"]')?.content||'수행3_2차시';
+        const SUBMIT_META_KEY='submit_meta_session2';
+
+        ['student_grade','student_class','student_number','student_name'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('input', saveSubmitMeta); });
+        loadSubmitMeta();
+        function saveSubmitMeta(){ const meta={ grade:document.getElementById('student_grade')?.value||'', class:document.getElementById('student_class')?.value||'', number:document.getElementById('student_number')?.value||'', name:document.getElementById('student_name')?.value||'', activity:document.getElementById('submission_activity')?.value||ACTIVITY_INPUT_DEFAULT, }; try{ localStorage.setItem(SUBMIT_META_KEY, JSON.stringify(meta)); }catch(_){} }
+        function loadSubmitMeta(){ try{ const raw=localStorage.getItem(SUBMIT_META_KEY); if(!raw) return; const meta=JSON.parse(raw); if(meta.grade!=null) document.getElementById('student_grade').value=meta.grade; if(meta.class!=null) document.getElementById('student_class').value=meta.class; if(meta.number!=null) document.getElementById('student_number').value=meta.number; if(meta.name!=null) document.getElementById('student_name').value=meta.name; const actEl=document.getElementById('submission_activity'); if(actEl) actEl.value=meta.activity||ACTIVITY_INPUT_DEFAULT; }catch(_){} }
+
+        function generateDocHtml(dynamicTitle, reportInnerHtml){ return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${dynamicTitle}</title><script src="https://cdn.tailwindcss.com"><\/script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet"><style>body{font-family:'Noto Sans KR','Inter',sans-serif;background-color:#f3f4f6;margin:0}*{color:inherit !important}.report-page{background-color:#fff;padding:2.5cm 2cm;box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);color:#1f2937}.printable-area{width:100%}.report-main-title{font-family:'Noto Sans KR',sans-serif;font-size:2.25rem;font-weight:700;text-align:center;margin-bottom:1rem;border-bottom:2px solid #111827;padding-bottom:1rem}.report-section-title{font-family:'Noto Sans KR',sans-serif;font-size:1.5rem;font-weight:700;color:#111827;margin-top:2.5rem;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid #d1d5db}.preview-text{white-space:pre-wrap;word-break:break-word;min-height:2.5em;line-height:1.8;color:#374151;font-family:'Nanum Myeongjo',serif}.preview-placeholder{color:#9ca3af !important;font-style:italic}@page{size:A4 portrait;margin:2cm}@media print{body *{visibility:hidden}.printable-area,.printable-area *{visibility:visible}.printable-area{position:absolute;left:0;top:0;width:100%;padding:0;margin:0;box-shadow:none;border:none}.no-print{display:none}}</style></head><body><div class="report-page"><div class="printable-area">${reportInnerHtml}</div></div></body></html>`; }
+
+        function calcSectionCode(grade,klass){ const g=String(grade||'').trim(); const k=String(klass||'').trim().padStart(2,'0'); return `${g}${k}`; }
+        function calcStudentId(grade,klass,number){ const g=String(grade||'').trim(); const k=String(klass||'').trim().padStart(2,'0'); const n=String(number||'').trim().padStart(2,'0'); return `${g}${k}${n}`; }
+
+        function validateForm(){ const gradeEl=document.getElementById('student_grade'); const classEl=document.getElementById('student_class'); const numberEl=document.getElementById('student_number'); const nameEl=document.getElementById('student_name'); const grade=parseInt((gradeEl.value||'').trim(),10); const klass=parseInt((classEl.value||'').trim(),10); const number=parseInt((numberEl.value||'').trim(),10); const name=(nameEl.value||'').trim(); if(Number.isNaN(grade)||grade<1||grade>3){ showToast('학년은 1~3 사이의 숫자여야 합니다.'); gradeEl.focus(); return null; } if(Number.isNaN(klass)||klass<1||klass>20){ showToast('반은 1~20 사이의 숫자여야 합니다.'); classEl.focus(); return null; } if(Number.isNaN(number)||number<1||number>40){ showToast('번호는 1~40 사이의 숫자여야 합니다.'); numberEl.focus(); return null; } if(!name){ showToast('이름을 입력하세요.'); nameEl.focus(); return null; } return { grade, klass, number, name }; }
+
+        async function blobToBase64(blob){ return await new Promise((resolve,reject)=>{ const reader=new FileReader(); reader.onload=()=>{ const result=reader.result||''; const commaIdx=String(result).indexOf(','); const b64=commaIdx>=0?String(result).slice(commaIdx+1):String(result); resolve(b64); }; reader.onerror=()=>reject(reader.error); reader.readAsDataURL(blob); }); }
+        function bytesFromBase64(b64){ const len=b64.length; const pad=(b64.endsWith('==')?2:(b64.endsWith('=')?1:0)); return Math.floor((len*3)/4)-pad; }
+
+        function triggerBlobDownload(blob, filename){ try{ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href); showToast('ZIP 파일이 다운로드되었습니다.'); return true; }catch(_){ return false; } }
+        async function saveWithPicker(blob, filename){ try{ const opts={ suggestedName: filename, types:[{ description:'ZIP file', accept:{'application/zip':['.zip']} }] }; const handle=await window.showSaveFilePicker(opts); const writable=await handle.createWritable(); await writable.write(blob); await writable.close(); return true; }catch(_){ return false; } }
+        function detectInApp(){ const uaRaw=navigator.userAgent||navigator.vendor||''; const ua=uaRaw.toLowerCase(); const isIOS=/iphone|ipad|ipod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1); const isAndroid=/android/.test(ua); const isSamsung=/samsungbrowser/i.test(uaRaw); const isKakao=/kakaotalk/.test(ua); const isNaver=/naver/.test(ua); const isFB=/fban|fbav|fb_iab/.test(ua); const isIG=/instagram/.test(ua); const isLine=/ line\//.test(ua); const isIOSWebView=isIOS && !!window.webkit && !!window.webkit.messageHandlers && !/safari/i.test(uaRaw); const isInApp=isKakao||isNaver||isFB||isIG||isLine||isIOSWebView; return { isInApp, isIOS, isAndroid, isSamsung }; }
+
+        async function attemptLocalDownloadAndVerify(zipFilename){ const env=detectInApp(); if (env.isInApp){ setStatus('로컬 다운로드가 제한되어 서버 다운로드로 전환합니다.'); serverDownloadLastZip(); return; } if (env.isIOS){ setStatus('iOS 저장 안내를 표시합니다.'); if (lastZipBlob) triggerBlobDownload(lastZipBlob, zipFilename); return; } let localSaved=false; let usedPicker=false; if (window.showSaveFilePicker && lastZipBlob){ usedPicker=true; localSaved=await saveWithPicker(lastZipBlob, zipFilename); } if (!localSaved && lastZipBlob){ try{ localSaved=triggerBlobDownload(lastZipBlob, zipFilename)===true; }catch(_){ localSaved=false; } } if (env.isAndroid || env.isSamsung){ if (!usedPicker) localSaved=false; } if (localSaved){ setStatus('✅ 로컬 다운로드가 완료되었습니다.'); showToast('로컬 다운로드 완료'); } else { setStatus('로컬 다운로드 실패 또는 제한됨, 서버에서 다운로드합니다.'); serverDownloadLastZip(); } }
+
+        function trackServerDownload(token, timeoutMs=5000){ const deadline=Date.now()+timeoutMs; const key=`download_ok_${encodeURIComponent(token)}=`; const timer=setInterval(()=>{ const found=document.cookie.includes(key); if (found){ clearInterval(timer); setStatus('✅ 로컬 저장(서버 첨부) 확인되었습니다.'); showToast('다운로드 완료 확인'); } else if (Date.now()>deadline){ clearInterval(timer); } }, 300); }
+
+        function serverDownloadLastZip(){ try{ if (!lastZipBlob || !lastMeta?.zipFilename){ showToast('다운로드할 파일이 없습니다.'); return; } blobToBase64(lastZipBlob).then((b64)=>{ const token=`${Date.now()}_${Math.random().toString(36).slice(2,8)}`; trackServerDownload(token, 3500); const form=document.createElement('form'); form.method='POST'; form.action='/.netlify/functions/download'; form.target='_blank'; const add=(n,v)=>{ const i=document.createElement('input'); i.type='hidden'; i.name=n; i.value=v; form.appendChild(i); }; add('filename', lastMeta.zipFilename); add('mime', 'application/zip'); add('contentBase64', b64); add('token', token); document.body.appendChild(form); form.submit(); document.body.removeChild(form); showToast('서버에서 다운로드를 시작합니다.'); }).catch(()=>{ throw new Error('base64 변환 실패'); }); }catch(_){ showToast('서버 다운로드에 실패했습니다.'); }
+        }
+
+        let lastZipBlob=null; let lastMeta=null;
+
+        async function handleZipDownloadAndSubmit(){ try{
+            setStatus('학생 정보 검증 중…'); dom.retryUploadBtn.dataset.show=''; dom.retryUploadBtn.classList.add('hidden'); const form=validateForm(); if(!form) return; showProgress(true); setProgress(10,'문서 생성 준비...');
+            const section=calcSectionCode(form.grade, form.klass); const studentId=calcStudentId(form.grade, form.klass, form.number); const docTitle='스마트 모빌리티 허브 아이디어 제안서 (2차시)';
+            const fmt=new Intl.DateTimeFormat('ko-KR',{ timeZone:'Asia/Seoul', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
+            const parts=Object.fromEntries(fmt.formatToParts(new Date()).map(p=>[p.type,p.value])); const timestamp=`${parts.year}${parts.month}${parts.day}_${parts.hour}${parts.minute}${parts.second}`;
+            const baseName=`${studentId}_${form.name}_${docTitle}_${timestamp}`; const htmlFilename=`${baseName}.html`; const zipFilename=`${baseName}.zip`;
+            setStatus('ZIP 파일 생성 중…'); setProgress(25,'ZIP 생성 중...'); const reportContent=document.getElementById('report-content').innerHTML; const docHtml=generateDocHtml(baseName, reportContent);
+            const zip=new JSZip(); zip.file(htmlFilename, docHtml); const zipBlob=await zip.generateAsync({type:'blob', compression:'DEFLATE', compressionOptions:{level:6}}); lastZipBlob=zipBlob; lastMeta={ studentId, name:form.name, zipFilename, section };
+            const sizeBytes=zipBlob.size; if (sizeBytes>8*1024*1024){ setStatus('업로드 실패: ZIP 용량 초과 (8MB)'); showToast('ZIP 용량이 8MB를 초과합니다.'); dom.retryUploadBtn.dataset.show='1'; dom.retryUploadBtn.classList.remove('hidden'); return; }
+            setStatus('저장준비중입니다. 잠시 기다려 주세요'); setProgress(45,'업로드 준비...'); const b64=await blobToBase64(zipBlob);
+            if (!zipFilename.toLowerCase().endsWith('.zip')){ setStatus('업로드 실패: 지원하지 않는 파일 형식'); showToast('ZIP 파일만 업로드할 수 있습니다.'); return; }
+            const metaActivity=(ACTIVITY_INPUT_DEFAULT||'').trim();
+            const inputActivity=(document.getElementById('submission_activity')?.value||'').trim();
+            const activity=metaActivity || inputActivity;
+            if(!activity){ setStatus('활동 폴더명이 비어 있습니다. 메타 또는 입력값을 지정하세요.'); showToast('활동 폴더명을 입력하거나 메타를 설정하세요.'); return; }
+            const payload={ studentId:studentId, subject:SUBJECT, activity:activity, section:section, files:[{ filename:zipFilename, contentBase64:b64, mime:'application/zip' }] };
+            setProgress(60,'업로드 중...'); const res=await fetch(ENDPOINT,{ method:'POST', headers:{ 'Content-Type':'application/json', 'X-Submission-Key':SUBMIT_KEY }, body:JSON.stringify(payload) });
+            const text=await res.text(); let data={}; try{ data=JSON.parse(text); }catch(_){ data={ raw:text }; }
+            if (!res.ok){ const errorMsg=data.error||data.detail||data.message||res.statusText||`HTTP ${res.status}`; throw new Error(`업로드 실패: ${errorMsg}`); }
+            const uploadedFile=data.files?.[0]; const filePath=uploadedFile?.name||zipFilename; const fullPath=`/과제제출/${SUBJECT}/${activity}/${section}/${studentId}/${filePath}`;
+            setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 다운로드 확인 중…`); setProgress(85,'다운로드 준비...');
+            attemptLocalDownloadAndVerify(zipFilename); setProgress(100,'완료'); setTimeout(()=>showProgress(false),1500);
+        }catch(err){ const errorMessage=err?.message||err||'알 수 없는 오류'; setStatus(`❌ 제출 실패: ${errorMessage}`); showToast(`제출 실패: ${errorMessage}`); setProgress(0,''); showProgress(false); } }
+
+        async function retryLastUpload(){ try{ if(!lastZipBlob||!lastMeta){ showToast('재시도할 항목이 없습니다.'); return; } setStatus('저장준비중입니다. 잠시 기다려 주세요'); showProgress(true); setProgress(45,'업로드 준비...'); const b64=await blobToBase64(lastZipBlob); const sizeBytes=bytesFromBase64(b64); if(sizeBytes>8*1024*1024){ setStatus('업로드 실패: ZIP 용량 초과 (8MB)'); showToast('ZIP 파일 용량이 8MB를 초과합니다.'); return; } const metaActivity=(ACTIVITY_INPUT_DEFAULT||'').trim(); const inputActivity=(document.getElementById('submission_activity')?.value||'').trim(); const activity=metaActivity || inputActivity; if(!activity){ setStatus('활동 폴더명이 비어 있습니다. 메타 또는 입력값을 지정하세요.'); showToast('활동 폴더명을 입력하거나 메타를 설정하세요.'); return; } const payload={ studentId:lastMeta.studentId, subject:SUBJECT, activity:activity, section:lastMeta.section, files:[{ filename:lastMeta.zipFilename, contentBase64:b64, mime:'application/zip' }] }; setProgress(60,'업로드 중...'); const res=await fetch(ENDPOINT,{ method:'POST', headers:{ 'Content-Type':'application/json', 'X-Submission-Key':SUBMIT_KEY }, body:JSON.stringify(payload) }); const text=await res.text(); let data={}; try{ data=JSON.parse(text); }catch(_){ data={ raw:text }; } if(!res.ok){ const reason=data.error||data.detail||data.message||res.statusText||'업로드 실패'; setStatus(`제출 실패: ${reason}`); showToast(`제출 실패: ${reason}`); return; } const uploadedFile=data.files?.[0]; const filePath=uploadedFile?.name||lastMeta.zipFilename; const fullPath=`/과제제출/${SUBJECT}/${activity}/${lastMeta.section}/${lastMeta.studentId}/${filePath}`; setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 다운로드 확인 중…`); setProgress(85,'다운로드 준비...'); attemptLocalDownloadAndVerify(lastMeta.zipFilename); setProgress(100,'완료'); setTimeout(()=>showProgress(false),1500); }catch(err){ const errorMessage=err?.message||err||'알 수 없는 오류'; setStatus(`❌ 제출 실패: ${errorMessage}`); showToast(`제출 실패: ${errorMessage}`); } }
+    });
+    </script>
+</body>
+</html>
+

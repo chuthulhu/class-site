@@ -169,20 +169,37 @@
         <header class="text-center bg-white p-8 rounded-xl shadow-lg mb-6 no-print">
             <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">첫걸음, 마지막 걸음 프로젝트</h1>
             <p class="text-lg text-gray-600 mt-2">S-BRT와 공유 PM 연계를 위한 종합 안내</p>
-            <div class="mt-4 flex gap-3 justify-center">
-                <a href="./session1.html" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">1차시 활동 (현황 분석·고려사항)</a>
-                <a href="./session2.html" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">2차시 활동 (3가지 지렛대·기대효과)</a>
-            </div>
         </header>
         
-        
+        <!-- 학생 정보 및 제출 기능 -->
+        <div class="bg-white p-6 sm:p-8 rounded-lg shadow-md mb-6 no-print">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-6">
+                <div class="flex items-center space-x-2 flex-wrap justify-center">
+                    <input type="number" id="student_grade" min="1" max="3" step="1" inputmode="numeric" class="w-20 p-2 border border-gray-300 rounded-md text-center" placeholder="학년">
+                    <label for="student_grade" class="font-semibold">학년</label>
+                     <input type="number" id="student_class" min="1" max="20" step="1" inputmode="numeric" class="w-20 p-2 border border-gray-300 rounded-md text-center" placeholder="반">
+                    <label for="student_class" class="font-semibold">반</label>
+                    <input type="number" id="student_number" min="1" max="40" step="1" inputmode="numeric" class="w-20 p-2 border border-gray-300 rounded-md text-center" placeholder="번호">
+                    <label for="student_number" class="font-semibold">번</label>
+                    <input type="text" id="student_name" class="w-32 p-2 border border-gray-300 rounded-md" placeholder="이름">
+                </div>
+                <!-- 기능 버튼 그룹 -->
+                <div class="flex space-x-2 flex-wrap justify-center">
+                    <button id="import_data_btn" class="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition text-sm">📥 데이터 가져오기</button>
+                    <button id="export_data_btn" class="bg-purple-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-purple-600 transition text-sm">📤 데이터 내보내기</button>
+                    <button id="delete_all_btn" class="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition text-sm">🗑️ 내용 삭제</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Tab Navigation (허브: 배경/문제/가이드만) -->
+        <!-- Tab Navigation -->
         <div class="mb-8 no-print">
             <div class="tab-button-group" aria-label="Tabs">
                 <button class="tab-button active" data-tab="tab1">1. 배경 및 현황</button>
                 <button class="tab-button" data-tab="tab2">2. 프로젝트 문제</button>
                 <button class="tab-button" data-tab="tab3">3. 공략 가이드</button>
+                <button class="tab-button" data-tab="tab4">4. 활동지 작성</button>
+                <button class="tab-button" data-tab="tab5">5. 미리보기 및 제출</button>
             </div>
         </div>
 
