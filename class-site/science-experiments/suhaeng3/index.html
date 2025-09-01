@@ -171,11 +171,8 @@
             <p class="text-lg text-gray-600 mt-2">S-BRT와 공유 PM 연계를 위한 종합 안내</p>
                         <div class="mt-4 flex gap-3 justify-center">
                                 <a href="./session1.html" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">1차시 활동 (현황 분석·고려사항)</a>
-                                <span id="session2_locked_wrapper" class="relative">
-                                    <a id="session2_link" href="./session2.html" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 hidden" aria-disabled="true">2차시 활동 (3가지 지렛대·기대효과)</a>
-                                    <button id="session2_locked" type="button" class="px-4 py-2 bg-gray-300 text-gray-600 rounded-lg cursor-not-allowed select-none">
-                                        2차시 활동 (9/15 오픈)
-                                    </button>
+                                <span id="session2_locked_wrapper" class="relative hidden">
+                                    <a id="session2_link" href="./session2.html" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700" aria-disabled="true">2차시 활동 (3가지 지렛대·기대효과)</a>
                                 </span>
                         </div>
         </header>
@@ -570,13 +567,10 @@
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         // --- Session2 gate (hub) ---
-        // Hide link by default, show locked button. Toggle after server time check.
+        // Hide link by default, show after server time check.
+        const session2Wrapper = document.getElementById('session2_locked_wrapper');
         const s2Link = document.getElementById('session2_link');
-        const s2Locked = document.getElementById('session2_locked');
-        // Block only during 9/7~9/14 KST
-        const BLOCK_START_UTC = Date.parse('2025-09-06T15:00:00Z');
-        const BLOCK_END_UTC = Date.parse('2025-09-14T14:59:59Z');
-
+        
         // Teacher bypass key support: read from URL once and store in sessionStorage
         (function persistTeacherKey(){
             try{
@@ -587,32 +581,37 @@
         })();
 
         (async () => {
+            if (!session2Wrapper || !s2Link) return;
             try {
                 const res = await fetch('/.netlify/functions/time', { cache: 'no-store' });
                 if (!res.ok) throw new Error('time fetch failed');
                 const data = await res.json();
-                const nowUTC = typeof data?.now === 'number' ? data.now : Date.parse(data?.iso || '');
+                const now = new Date(data.now);
+                const nowUTC = now.getTime();
                 if (!Number.isFinite(nowUTC)) throw new Error('bad time payload');
-                const isBlocked = nowUTC >= BLOCK_START_UTC && nowUTC <= BLOCK_END_UTC;
+                
+                // Hide only during 9/7 ~ 9/14 KST for the current year (based on server time)
+                const currentYear = now.getUTCFullYear();
+                const BLOCK_START_UTC = Date.parse(`${currentYear}-09-06T15:00:00Z`); // YYYY-09-07 00:00 KST
+                const BLOCK_END_UTC = Date.parse(`${currentYear}-09-14T14:59:59Z`);   // YYYY-09-14 23:59:59 KST
+
                 const teacherKey = sessionStorage.getItem('teacher_key') || '';
-                // If blocked window but teacher key exists, keep link enabled using bypass URL
+                const isBlocked = nowUTC >= BLOCK_START_UTC && nowUTC <= BLOCK_END_UTC;
+
                 if (!isBlocked || teacherKey) {
-                    if (teacherKey && s2Link) {
+                    if (teacherKey) {
                         const url = new URL(s2Link.getAttribute('href'), window.location.origin);
                         url.searchParams.set('key', teacherKey);
                         s2Link.setAttribute('href', url.pathname + url.search);
                     }
-                    if (s2Locked) s2Locked.classList.add('hidden');
-                    if (s2Link) { s2Link.classList.remove('hidden'); s2Link.setAttribute('aria-disabled','false'); }
+                    session2Wrapper.classList.remove('hidden');
+                    s2Link.setAttribute('aria-disabled','false');
                 } else {
-                    // Pre-release: keep locked state
-                    if (s2Locked) s2Locked.classList.remove('hidden');
-                    if (s2Link) { s2Link.classList.add('hidden'); s2Link.setAttribute('aria-disabled','true'); }
+                    session2Wrapper.classList.add('hidden');
                 }
             } catch (_) {
-                // On failure, keep locked state to avoid premature exposure
-                if (s2Locked) s2Locked.classList.remove('hidden');
-                if (s2Link) { s2Link.classList.add('hidden'); s2Link.setAttribute('aria-disabled','true'); }
+                // On failure, keep hidden to avoid premature exposure
+                session2Wrapper.classList.add('hidden');
             }
         })();
         // --- DOM Element Constants ---
