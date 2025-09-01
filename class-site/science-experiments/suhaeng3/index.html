@@ -169,11 +169,9 @@
         <header class="text-center bg-white p-8 rounded-xl shadow-lg mb-6 no-print">
             <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">첫걸음, 마지막 걸음 프로젝트</h1>
             <p class="text-lg text-gray-600 mt-2">S-BRT와 공유 PM 연계를 위한 종합 안내</p>
-                        <div class="mt-4 flex gap-3 justify-center">
+                        <div class="mt-4 flex flex-wrap gap-3 justify-center">
                                 <a href="./session1.html" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">1차시 활동 (현황 분석·고려사항)</a>
-                                <span id="session2_locked_wrapper" class="relative hidden">
-                                    <a id="session2_link" href="./session2.html" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700" aria-disabled="true">2차시 활동 (3가지 지렛대·기대효과)</a>
-                                </span>
+                                <a id="session2_link" href="./session2.html" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hidden" aria-disabled="true">2차시 활동 (3가지 지렛대·기대효과)</a>
                         </div>
         </header>
         
@@ -568,9 +566,8 @@
     document.addEventListener('DOMContentLoaded', () => {
         // --- Session2 gate (hub) ---
         // Hide link by default, show after server time check.
-        const session2Wrapper = document.getElementById('session2_locked_wrapper');
         const s2Link = document.getElementById('session2_link');
-        
+
         // Teacher bypass key support: read from URL once and store in sessionStorage
         (function persistTeacherKey(){
             try{
@@ -581,7 +578,7 @@
         })();
 
         (async () => {
-            if (!session2Wrapper || !s2Link) return;
+            if (!s2Link) return;
             try {
                 const res = await fetch('/.netlify/functions/time', { cache: 'no-store' });
                 if (!res.ok) throw new Error('time fetch failed');
@@ -604,14 +601,14 @@
                         url.searchParams.set('key', teacherKey);
                         s2Link.setAttribute('href', url.pathname + url.search);
                     }
-                    session2Wrapper.classList.remove('hidden');
+                    s2Link.classList.remove('hidden');
                     s2Link.setAttribute('aria-disabled','false');
                 } else {
-                    session2Wrapper.classList.add('hidden');
+                    s2Link.classList.add('hidden');
                 }
             } catch (_) {
                 // On failure, keep hidden to avoid premature exposure
-                session2Wrapper.classList.add('hidden');
+                if(s2Link) s2Link.classList.add('hidden');
             }
         })();
         // --- DOM Element Constants ---
