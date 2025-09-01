@@ -573,11 +573,19 @@
         // Hide link by default, show locked button. Toggle after server time check.
         const s2Link = document.getElementById('session2_link');
         const s2Locked = document.getElementById('session2_locked');
-        const RELEASE_UTC = (() => {
-            // Use env value if inlined at build, else default to 2025-09-14T15:00:00Z
-            const fallback = '2025-09-14T15:00:00Z';
-            return Date.parse(fallback);
+        // Block only during 9/7~9/14 KST
+        const BLOCK_START_UTC = Date.parse('2025-09-06T15:00:00Z');
+        const BLOCK_END_UTC = Date.parse('2025-09-14T14:59:59Z');
+
+        // Teacher bypass key support: read from URL once and store in sessionStorage
+        (function persistTeacherKey(){
+            try{
+                const u=new URL(window.location.href);
+                const k=u.searchParams.get('key');
+                if(k){ sessionStorage.setItem('teacher_key', k); }
+            }catch(_){}
         })();
+
         (async () => {
             try {
                 const res = await fetch('/.netlify/functions/time', { cache: 'no-store' });
@@ -585,8 +593,15 @@
                 const data = await res.json();
                 const nowUTC = typeof data?.now === 'number' ? data.now : Date.parse(data?.iso || '');
                 if (!Number.isFinite(nowUTC)) throw new Error('bad time payload');
-                if (nowUTC >= RELEASE_UTC) {
-                    // Release: enable session2 link
+                const isBlocked = nowUTC >= BLOCK_START_UTC && nowUTC <= BLOCK_END_UTC;
+                const teacherKey = sessionStorage.getItem('teacher_key') || '';
+                // If blocked window but teacher key exists, keep link enabled using bypass URL
+                if (!isBlocked || teacherKey) {
+                    if (teacherKey && s2Link) {
+                        const url = new URL(s2Link.getAttribute('href'), window.location.origin);
+                        url.searchParams.set('key', teacherKey);
+                        s2Link.setAttribute('href', url.pathname + url.search);
+                    }
                     if (s2Locked) s2Locked.classList.add('hidden');
                     if (s2Link) { s2Link.classList.remove('hidden'); s2Link.setAttribute('aria-disabled','false'); }
                 } else {
