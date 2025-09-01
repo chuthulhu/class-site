@@ -9,6 +9,7 @@
 {
   "studentId": "10207",
   "subject": "과학탐구실험2",
+  "activity": "수행3_1차시",
   "section": "102",
   "files": [
     { "filename": "report.zip", "contentBase64": "<base64>", "mime": "application/zip" }
@@ -22,6 +23,7 @@
   "ok": true,
   "studentId": "10207",
   "subject": "과학탐구실험2",
+  "activity": "수행3_1차시",
   "section": "102",
   "submittedAt": "2025-08-30T01:23:45.000Z",
   "files": [
@@ -73,3 +75,7 @@
 
 용도
 - 인앱 브라우저(Naver/Kakao 등)에서 a[download]/Blob이 제한될 때 서버가 첨부 응답으로 직접 내려 사용자 저장을 보장합니다.
+
+폴더 구조
+- 업로드 경로는 `/과제제출/{subject}/{activity}/{section}/{studentId}/{filename}` 형식으로 생성됩니다.
+- 활동(activity)은 메타 `submission-activity` 값을 우선 사용하며, 메타가 없는 경우에만 입력값이 사용됩니다(현재 suhaeng3 웹앱은 입력 UI 없음).

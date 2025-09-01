@@ -8,8 +8,9 @@
 - 인앱 브라우저(Naver/Kakao 등): 서버 첨부 응답 다운로드로 호환성 확보
 - iOS Safari: 공유 시트 기반 "파일에 저장" 안내 모달 제공
 - iOS 또는 인앱 환경에서는 PDF 인쇄 버튼 숨김
- - KST(Asia/Seoul) 타임스탬프 기반 파일명 생성
- - 클라이언트 ZIP 크기 제한: 8MB (인앱 첨부 응답/성능 고려)
+- KST(Asia/Seoul) 타임스탬프 기반 파일명 생성
+- 클라이언트 ZIP 크기 제한: 8MB (인앱 첨부 응답/성능 고려)
+- 업로드 경로: `/과제제출/{subject}/{activity}/{section}/{studentId}/...` (activity는 메타 `submission-activity` 우선, 없으면 입력값. 현재 웹앱은 입력 UI 제거로 메타만 사용)
 
 관련 문서
 - 사용자 가이드: ./user-guide.md

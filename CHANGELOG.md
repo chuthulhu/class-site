@@ -14,7 +14,7 @@
 
 ## 2025-09-01
 
-- PROJECT.md를 현재 구현 상태(업로드 우선, 인앱/IOS 안내, KST, 8MB 클라 제한)로 동기화
-- docs/api.md에 인증 헤더, 검증 규칙, 에러 스키마, suhaeng3 특이사항 추가
-- docs/suhaeng3(개요/사용자/테스트) 문서에 KST·8MB 제한·인앱 첨부 응답 명시
+- PROJECT.md를 현재 구현 상태(업로드 우선, 인앱/iOS 안내, KST, 8MB 클라 제한)로 동기화
+- docs/api.md에 activity 필드 및 폴더 경로(`/과제제출/{subject}/{activity}/{section}/{studentId}`) 반영
+- suhaeng3 문서에 활동 메타 우선 정책 및 입력 UI 제거 사실 반영
 - docs/deployment.md에 Node 18, esbuild/ESM, 캐시 팁 및 인앱 다운로드 확인 추가

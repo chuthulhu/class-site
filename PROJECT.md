@@ -24,14 +24,14 @@
 ### 주요 목표
 - **안전한 파일 업로드**: 확장자, 용량, 내용 검증을 통한 보안 강화
 - **다중 파일 지원**: 최대 5개 파일, 총 300MB 제한
-- **자동 폴더 구조화**: `/과제제출/{subject}/{section}/{studentId}/파일명` 형식
+- **자동 폴더 구조화**: `/과제제출/{subject}/{activity}/{section}/{studentId}/파일명` 형식
 - **중복 처리**: 동일 파일명 시 타임스탬프 접미사 자동 부착
 - **청크 업로드**: 10MB 초과 파일에 대한 효율적인 대용량 전송
 
 ### 🎯 **현재 우선 목표: suhaeng3 자동 제출 기능**
 
-**대상**: `science-experiments/suhaeng3/index.html`
-**기능**: ZIP/PDF 생성 시 자동으로 OneDrive에 업로드 (업로드 우선 → 성공 후 다운로드 안내)
+**대상**: `science-experiments/suhaeng3/`
+**기능**: ZIP 생성 시 자동 OneDrive 업로드(업로드 우선 → 성공 후 다운로드 안내), 활동(activity) 단계 폴더 도입(메타 우선)
 **완료 목표일**: 2025년 9월 1일
 **상태**: 코드 반영 완료(배포 확인 중)
 
@@ -101,6 +101,7 @@ class-site/
 - **자동 폴더 생성**: 필요한 경로 계층 구조 자동 생성
 - **경로 인코딩**: Colon addressing을 통한 특수문자 처리
 - **중복 파일명**: 타임스탬프 접미사 (`_YYYYMMDD_HHmmss`) 자동 부착
+ - **활동 폴더 정책**: 활동(activity)은 메타 `submission-activity` 값을 우선 사용하고, 메타가 없을 때만 입력값 사용(현재 suhaeng3 웹앱은 입력 UI 제거)
 
 ## 문서 모음
 
@@ -112,6 +113,9 @@ class-site/
   - 사용자 가이드: docs/suhaeng3/user-guide.md
   - 테스트 가이드: docs/suhaeng3/test-guide.md
 - 변경 로그: CHANGELOG.md
+
+루트 최소 문서 정책
+- 루트에는 README(최소 소개/진입점)와 CHANGELOG만 유지하고, 상세 문서는 docs/로 이동합니다.
 
 ## 앞으로의 작업 계획 및 제안사항
 
