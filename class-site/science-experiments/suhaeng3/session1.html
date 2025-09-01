@@ -127,14 +127,8 @@
                         <h2 class="text-2xl font-bold text-gray-800">1차시 활동지</h2>
                         <p class="text-gray-600">현황 분석과 대상지 고려사항을 작성하세요.</p>
                     </header>
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 -mt-2">
-                        <div class="flex items-center gap-2">
-                            <label for="submission_activity" class="text-sm text-gray-600">활동 폴더명</label>
-                            <input id="submission_activity" type="text" class="p-2 border border-gray-300 rounded-md text-sm w-44" placeholder="수행3_1차시">
-                        </div>
-                        <div class="flex justify-end">
-                            <button id="clear_inputs_btn" class="bg-red-50 text-red-700 font-semibold py-2 px-4 rounded-lg border border-red-200 hover:bg-red-100 transition text-sm">🗑️ 입력 내용 삭제</button>
-                        </div>
+                    <div class="flex justify-end -mt-2">
+                        <button id="clear_inputs_btn" class="bg-red-50 text-red-700 font-semibold py-2 px-4 rounded-lg border border-red-200 hover:bg-red-100 transition text-sm">🗑️ 입력 내용 삭제</button>
                     </div>
                     
                     <section>
@@ -288,11 +282,8 @@
 
         ['student_grade','student_class','student_number','student_name'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('input', saveSubmitMeta); });
         loadSubmitMeta();
-        // 초기 로드 시 메타의 활동값을 입력란에 반영(저장된 값이 없을 때)
-        const actElInit=document.getElementById('submission_activity');
-        if (actElInit && (!actElInit.value || actElInit.value.trim()==='')) actElInit.value=ACTIVITY_INPUT_DEFAULT;
-        function saveSubmitMeta(){ const meta={ grade:document.getElementById('student_grade')?.value||'', class:document.getElementById('student_class')?.value||'', number:document.getElementById('student_number')?.value||'', name:document.getElementById('student_name')?.value||'', activity:document.getElementById('submission_activity')?.value||ACTIVITY_INPUT_DEFAULT, }; try{ localStorage.setItem(SUBMIT_META_KEY, JSON.stringify(meta)); }catch(_){} }
-        function loadSubmitMeta(){ try{ const raw=localStorage.getItem(SUBMIT_META_KEY); if(!raw) return; const meta=JSON.parse(raw); if(meta.grade!=null) document.getElementById('student_grade').value=meta.grade; if(meta.class!=null) document.getElementById('student_class').value=meta.class; if(meta.number!=null) document.getElementById('student_number').value=meta.number; if(meta.name!=null) document.getElementById('student_name').value=meta.name; const actEl=document.getElementById('submission_activity'); if(actEl) actEl.value=meta.activity||ACTIVITY_INPUT_DEFAULT; }catch(_){} }
+        function saveSubmitMeta(){ const meta={ grade:document.getElementById('student_grade')?.value||'', class:document.getElementById('student_class')?.value||'', number:document.getElementById('student_number')?.value||'', name:document.getElementById('student_name')?.value||'' }; try{ localStorage.setItem(SUBMIT_META_KEY, JSON.stringify(meta)); }catch(_){} }
+        function loadSubmitMeta(){ try{ const raw=localStorage.getItem(SUBMIT_META_KEY); if(!raw) return; const meta=JSON.parse(raw); if(meta.grade!=null) document.getElementById('student_grade').value=meta.grade; if(meta.class!=null) document.getElementById('student_class').value=meta.class; if(meta.number!=null) document.getElementById('student_number').value=meta.number; if(meta.name!=null) document.getElementById('student_name').value=meta.name; }catch(_){} }
 
         function generateDocHtml(dynamicTitle, reportInnerHtml){ return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${dynamicTitle}</title><script src="https://cdn.tailwindcss.com"><\/script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet"><style>body{font-family:'Noto Sans KR','Inter',sans-serif;background-color:#f3f4f6;margin:0}*{color:inherit !important}.report-page{background-color:#fff;padding:2.5cm 2cm;box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);color:#1f2937}.printable-area{width:100%}.report-main-title{font-family:'Noto Sans KR',sans-serif;font-size:2.25rem;font-weight:700;text-align:center;margin-bottom:1rem;border-bottom:2px solid #111827;padding-bottom:1rem}.report-section-title{font-family:'Noto Sans KR',sans-serif;font-size:1.5rem;font-weight:700;color:#111827;margin-top:2.5rem;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid #d1d5db}.preview-text{white-space:pre-wrap;word-break:break-word;min-height:2.5em;line-height:1.8;color:#374151;font-family:'Nanum Myeongjo',serif}.preview-placeholder{color:#9ca3af !important;font-style:italic}@page{size:A4 portrait;margin:2cm}@media print{body *{visibility:hidden}.printable-area,.printable-area *{visibility:visible}.printable-area{position:absolute;left:0;top:0;width:100%;padding:0;margin:0;box-shadow:none;border:none}.no-print{display:none}}</style></head><body><div class="report-page"><div class="printable-area">${reportInnerHtml}</div></div></body></html>`; }
 
@@ -334,9 +325,7 @@
             const sizeBytes=zipBlob.size; if (sizeBytes>8*1024*1024){ setStatus('업로드 실패: ZIP 용량 초과 (8MB)'); showToast('ZIP 용량이 8MB를 초과합니다.'); dom.retryUploadBtn.dataset.show='1'; dom.retryUploadBtn.classList.remove('hidden'); return; }
             setStatus('저장준비중입니다. 잠시 기다려 주세요'); setProgress(45,'업로드 준비...'); const b64=await blobToBase64(zipBlob);
             if (!zipFilename.toLowerCase().endsWith('.zip')){ setStatus('업로드 실패: 지원하지 않는 파일 형식'); showToast('ZIP 파일만 업로드할 수 있습니다.'); return; }
-            const metaActivity=(ACTIVITY_INPUT_DEFAULT||'').trim();
-            const inputActivity=(document.getElementById('submission_activity')?.value||'').trim();
-            const activity=metaActivity || inputActivity;
+            const activity=(ACTIVITY_INPUT_DEFAULT||'').trim();
             if(!activity){ setStatus('활동 폴더명이 비어 있습니다. 메타 또는 입력값을 지정하세요.'); showToast('활동 폴더명을 입력하거나 메타를 설정하세요.'); return; }
             const payload={ studentId:studentId, subject:SUBJECT, activity:activity, section:section, files:[{ filename:zipFilename, contentBase64:b64, mime:'application/zip' }] };
             setProgress(60,'업로드 중...'); const res=await fetch(ENDPOINT,{ method:'POST', headers:{ 'Content-Type':'application/json', 'X-Submission-Key':SUBMIT_KEY }, body:JSON.stringify(payload) });
@@ -356,9 +345,7 @@
                 const b64=await blobToBase64(lastZipBlob);
                 const sizeBytes=bytesFromBase64(b64);
                 if(sizeBytes>8*1024*1024){ setStatus('업로드 실패: ZIP 용량 초과 (8MB)'); showToast('ZIP 파일 용량이 8MB를 초과합니다.'); return; }
-                const metaActivity=(ACTIVITY_INPUT_DEFAULT||'').trim();
-                const inputActivity=(document.getElementById('submission_activity')?.value||'').trim();
-                const activity=metaActivity || inputActivity;
+                const activity=(ACTIVITY_INPUT_DEFAULT||'').trim();
                 if(!activity){ setStatus('활동 폴더명이 비어 있습니다. 메타 또는 입력값을 지정하세요.'); showToast('활동 폴더명을 입력하거나 메타를 설정하세요.'); return; }
                 const payload={ studentId:lastMeta.studentId, subject:SUBJECT, activity:activity, section:lastMeta.section, files:[{ filename:lastMeta.zipFilename, contentBase64:b64, mime:'application/zip' }] };
                 setProgress(60,'업로드 중...');
