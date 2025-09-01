@@ -39,6 +39,7 @@ exports.handler = async (event) => {
     const filename = (fields.filename || 'download.bin').toString();
     const mime = (fields.mime || 'application/octet-stream').toString();
     const contentBase64 = (fields.contentBase64 || '').toString().trim();
+    const token = (fields.token || '').toString().trim();
     if (!contentBase64) {
       return { statusCode: 400, body: 'contentBase64 is required' };
     }
@@ -59,6 +60,9 @@ exports.handler = async (event) => {
       'Cache-Control': 'no-store',
       'Content-Length': String(byteLen),
     };
+    if (token) {
+      headers['Set-Cookie'] = `download_ok_${encodeURIComponent(token)}=1; Max-Age=300; Path=/; SameSite=Lax`;
+    }
 
     return {
       statusCode: 200,

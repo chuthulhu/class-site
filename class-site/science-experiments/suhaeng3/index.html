@@ -474,6 +474,12 @@
                         </button>
                     </div>
                     <p class="text-center text-sm text-gray-600 mt-4" aria-live="polite" role="status"><span id="submit_status"></span></p>
+                    <div id="progress_container" class="w-full max-w-xl mx-auto mt-3 hidden" aria-hidden="true">
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div id="progress_bar" class="bg-indigo-600 h-3 rounded-full" style="width:0%"></div>
+                        </div>
+                        <p id="progress_text" class="text-center text-xs text-gray-600 mt-1"></p>
+                    </div>
                 </div>
                 <div class="bg-gray-200 p-4 sm:p-8 rounded-lg">
                     <div class="printable-area report-page" id="report-content">
@@ -1065,6 +1071,9 @@
                 // Convert blob -> base64 then POST via a form to open in new tab
                 blobToBase64(lastZipBlob).then((b64) => {
                     try {
+                        const token = `${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+                        // heartbeat checker
+                        trackServerDownload(token, 3500);
                         const form = document.createElement('form');
                         form.method = 'POST';
                         form.action = '/.netlify/functions/download';
@@ -1073,6 +1082,7 @@
                         add('filename', lastMeta.zipFilename);
                         add('mime', 'application/zip');
                         add('contentBase64', b64);
+                        add('token', token);
                         document.body.appendChild(form);
                         form.submit();
                         document.body.removeChild(form);
@@ -1100,6 +1110,22 @@
             }
         }
 
+        // Poll for cookie set by server on successful attachment response
+        function trackServerDownload(token, timeoutMs = 5000) {
+            const deadline = Date.now() + timeoutMs;
+            const key = `download_ok_${encodeURIComponent(token)}=`;
+            const timer = setInterval(() => {
+                const found = document.cookie.includes(key);
+                if (found) {
+                    clearInterval(timer);
+                    setStatus('✅ 로컬 저장(서버 첨부) 확인되었습니다.');
+                    showToast('다운로드 완료 확인', 'bg-green-600');
+                } else if (Date.now() > deadline) {
+                    clearInterval(timer);
+                }
+            }, 300);
+        }
+
         // SUBMIT MODULE START
         // Constants & Config
         const ENDPOINT = '/.netlify/functions/submit';
@@ -1114,6 +1140,20 @@
         // Utilities
         function setStatus(text) {
             if (dom.submitStatus) dom.submitStatus.textContent = text || '';
+        }
+
+        // Progress helpers
+        function showProgress(show) {
+            const c = document.getElementById('progress_container');
+            if (!c) return;
+            c.classList.toggle('hidden', !show);
+            c.setAttribute('aria-hidden', show ? 'false' : 'true');
+        }
+        function setProgress(percent, label = '') {
+            const bar = document.getElementById('progress_bar');
+            const txt = document.getElementById('progress_text');
+            if (bar) bar.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+            if (txt) txt.textContent = label || '';
         }
 
         function disableSubmitUI(disabled) {
@@ -1322,6 +1362,8 @@ ${reportInnerHtml}
                 if (!form) return;
 
                 disableSubmitUI(true);
+                showProgress(true);
+                setProgress(10, '문서 생성 준비...');
 
                 // Build filenames & meta
                 const section = calcSectionCode(form.grade, form.klass);
@@ -1341,6 +1383,7 @@ ${reportInnerHtml}
 
                 // Generate doc HTML
                 setStatus('ZIP 파일 생성 중…');
+                setProgress(25, 'ZIP 생성 중...');
                 const reportContent = document.getElementById('report-content').innerHTML;
                 const docHtml = generateDocHtml(baseName, reportContent);
 
@@ -1362,7 +1405,8 @@ ${reportInnerHtml}
                 }
 
                 // Convert to base64 for upload (only after size check)
-                setStatus('OneDrive 업로드 준비 중…');
+                setStatus('저장준비중입니다. 잠시 기다려 주세요');
+                setProgress(45, '업로드 준비...');
                 const b64 = await blobToBase64(zipBlob);
 
                 // File extension validation
@@ -1373,7 +1417,7 @@ ${reportInnerHtml}
                 }
 
                 // Prepare payload in submit.js compatible format (multi-file array)
-                setStatus('OneDrive에 업로드 중…');
+                setStatus('저장준비중입니다. 잠시 기다려 주세요');
                 const payload = {
                     studentId: studentId,
                     subject: SUBJECT, // 'science-experiments'
@@ -1393,10 +1437,12 @@ ${reportInnerHtml}
                     try {
                         uploadAttempts++;
                         if (uploadAttempts > 1) {
-                            setStatus(`OneDrive 업로드 재시도 중… (${uploadAttempts}/${maxAttempts})`);
+                            setStatus(`저장준비중입니다. 잠시 기다려 주세요`);
+                            setProgress(60, '업로드 재시도 중...');
                             await new Promise(resolve => setTimeout(resolve, 1000 * uploadAttempts)); // Exponential backoff
                         }
 
+            setProgress(60, '업로드 중...');
             const res = await fetchWithTimeout(ENDPOINT, 20000, {
                             method: 'POST',
                             headers: {
@@ -1430,7 +1476,10 @@ ${reportInnerHtml}
 
                         // Success: try local download first, verify, then fallback if needed
                         setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 다운로드 확인 중…`);
+                        setProgress(85, '다운로드 준비...');
                         attemptLocalDownloadAndVerify(zipFilename);
+                        setProgress(100, '완료');
+                        setTimeout(() => showProgress(false), 1500);
 
                         showToast(`제출이 완료되었습니다! 파일: ${filePath}`, 'bg-green-600');
 
@@ -1452,6 +1501,8 @@ ${reportInnerHtml}
                 const errorMessage = err?.message || err || '알 수 없는 오류';
                 setStatus(`❌ 제출 실패: ${errorMessage}`);
                 showToast(`제출 실패: ${errorMessage}`, 'bg-red-500');
+                setProgress(0, '');
+                showProgress(false);
 
                 // Show retry button
                 if (dom.retryUploadBtn) {
@@ -1482,7 +1533,9 @@ ${reportInnerHtml}
                 }
 
                 disableSubmitUI(true);
-                setStatus('OneDrive 업로드 재시도 중…');
+                setStatus('저장준비중입니다. 잠시 기다려 주세요');
+                showProgress(true);
+                setProgress(45, '업로드 준비...');
 
                 const b64 = await blobToBase64(lastZipBlob);
                 const sizeBytes = bytesFromBase64(b64);
@@ -1535,7 +1588,10 @@ ${reportInnerHtml}
                 const fullPath = `/과제제출/${SUBJECT}/${lastMeta.section}/${lastMeta.studentId}/${filePath}`;
 
                 setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 다운로드 확인 중…`);
+                setProgress(85, '다운로드 준비...');
                 attemptLocalDownloadAndVerify(lastMeta.zipFilename);
+                setProgress(100, '완료');
+                setTimeout(() => showProgress(false), 1500);
 
                 // Clear retry state
                 dom.retryUploadBtn.dataset.show = '';
@@ -1547,6 +1603,8 @@ ${reportInnerHtml}
                 showToast(`제출 실패: ${errorMessage}`, 'bg-red-500');
             } finally {
                 disableSubmitUI(false);
+                setProgress(0, '');
+                showProgress(false);
             }
         }
 
