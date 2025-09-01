@@ -15,6 +15,10 @@ function = "gate-session2"
 path = "/science-experiments/suhaeng3/session2.html"
 function = "gate-session2"
 
+[[edge_functions]]
+path = "/science-experiments/suhaeng3/session2/*"
+function = "gate-session2"
+
 # Reduce caching to ensure timely UI updates around release window
 [[headers]]
 for = "/science-experiments/suhaeng3/index.html"
