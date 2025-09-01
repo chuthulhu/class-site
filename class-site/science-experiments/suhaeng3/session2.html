@@ -20,7 +20,7 @@
         .tab-content { display:none; }
         .tab-content.active { display:block; }
         .report-page { background-color:#fff; padding:2.5cm 2cm; box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05); color:#1f2937; }
-        .report-main-title { font-family:'Noto Sans KR',sans-serif; font-size:2.25rem; font-weight:700; text-align:center; margin-bottom:1rem; border-bottom:2px solid #111827; padding-bottom:1rem; }
+        .report-main-title { font-family:'Noto Sans KR',sans-serif; font-size:1.875rem; font-weight:700; text-align:center; margin-bottom:1rem; border-bottom:2px solid #111827; padding-bottom:1rem; }
         .report-section-title { font-family:'Noto Sans KR',sans-serif; font-size:1.5rem; font-weight:700; color:#111827; margin-top:2.5rem; margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:1px solid #d1d5db; }
         .preview-text { white-space:pre-wrap; word-break:break-word; min-height:2.5em; line-height:1.8; color:#374151; font-family:'Nanum Myeongjo',serif; }
         .preview-placeholder { color:#9ca3af; font-style:italic; }
@@ -28,6 +28,48 @@
         .accordion-header button.open { background-color:#eef2ff; color:#4338ca; }
         .accordion-content { transition:max-height .3s ease-out, padding .3s ease-out; max-height:0; overflow:hidden; }
         .accordion-content.open { max-height:1500px; }
+
+        /* Responsive typography & controls */
+        html { font-size:16px; }
+        @media (min-width: 640px) { html { font-size:16.5px; } }
+        @media (min-width: 768px) { html { font-size:17px; } }
+        @media (min-width: 1024px) { html { font-size:17.5px; } }
+        @media (min-width: 1280px) { html { font-size:18px; } }
+
+        .tab-button { font-size:.95rem; padding:.85rem .5rem; }
+        @media (min-width: 640px) { .tab-button { font-size:1rem; } }
+        @media (min-width: 1024px) { .tab-button { font-size:1.05rem; } }
+
+        #download_zip_btn,
+        #print_btn,
+        #preview_newtab_btn,
+        #retry_upload_btn,
+        #add_source_btn,
+        #clear_inputs_btn {
+            font-size:.95rem; padding:.6rem 1rem;
+        }
+        @media (min-width: 640px) {
+            #download_zip_btn,
+            #print_btn,
+            #preview_newtab_btn,
+            #retry_upload_btn,
+            #add_source_btn,
+            #clear_inputs_btn { font-size:1rem; padding:.7rem 1.1rem; }
+        }
+        @media (min-width: 1024px) {
+            #download_zip_btn,
+            #print_btn,
+            #preview_newtab_btn,
+            #retry_upload_btn,
+            #add_source_btn,
+            #clear_inputs_btn { font-size:1.0625rem; padding:.8rem 1.2rem; }
+        }
+
+        label { font-size:.95rem; }
+        textarea, input[type="text"], input[type="number"], select { font-size:1rem; }
+        @media (min-width: 1024px) {
+            textarea, input[type="text"], input[type="number"], select { font-size:1.0625rem; }
+        }
         @page { size:A4 portrait; margin:2cm; }
         @media print { body *{ visibility:hidden } .printable-area, .printable-area *{ visibility:visible } .printable-area{ position:absolute; left:0; top:0; width:100%; padding:0; margin:0; box-shadow:none; border:none } .no-print{ display:none } }
     </style>
@@ -124,31 +166,47 @@
                     </div>
                     <section>
                         <h3 class="text-xl font-bold text-indigo-700 mb-4">1. 스마트 모빌리티 허브 아이디어 (3가지 지렛대)</h3>
+                        <div class="text-sm bg-blue-50 border border-blue-200 text-blue-900 rounded-md p-3 mb-2">
+                            <div class="font-semibold mb-1">평가 기준</div>
+                            <ul class="list-disc list-inside space-y-0.5">
+                                <li>제시된 3가지 영역(공간·혜택·협력)에서 각 아이디어를 제시</li>
+                                <li>각 아이디어에 대해 <strong>구체적인 근거</strong>를 들어 <strong>실행 가능</strong>한 수준으로 서술</li>
+                            </ul>
+                        </div>
                         <div class="space-y-6">
                             <div>
                                 <label for="field_idea_infra" class="font-semibold text-gray-700 block mb-2">🏛️ 물리적 인프라 (공간)</label>
-                                <textarea id="field_idea_infra" rows="5" class="w-full p-3 border border-gray-300 rounded-md" placeholder="공간/시설/안전 측면의 아이디어"></textarea>
+                                <textarea id="field_idea_infra" rows="5" class="w-full p-3 border border-gray-300 rounded-md" placeholder="안전하고 편리하며 매력적인 '공간'을 만들기 위한 아이디어를 작성해보세요. (예: 디자인, 편의시설, 안전장치 등)"></textarea>
                             </div>
                             <div>
                                 <label for="field_idea_policy" class="font-semibold text-gray-700 block mb-2">💡 디지털/정책 (혜택)</label>
-                                <textarea id="field_idea_policy" rows="5" class="w-full p-3 border border-gray-300 rounded-md" placeholder="앱/요금/인센티브/규칙 등"></textarea>
+                                <textarea id="field_idea_policy" rows="5" class="w-full p-3 border border-gray-300 rounded-md" placeholder="사람들이 허브를 '자발적으로' 이용하게 만들 아이디어를 작성해보세요. (예: 요금 할인, 포인트, 앱 연동, 주차 규칙 등)"></textarea>
                             </div>
                             <div>
                                 <label for="field_idea_operation" class="font-semibold text-gray-700 block mb-2">🤝 운영 모델 (협력)</label>
-                                <textarea id="field_idea_operation" rows="5" class="w-full p-3 border border-gray-300 rounded-md" placeholder="지속가능한 협력/파트너십"></textarea>
+                                <textarea id="field_idea_operation" rows="5" class="w-full p-3 border border-gray-300 rounded-md" placeholder="이 허브를 '지속가능하게' 운영하기 위한 아이디어를 작성해보세요. (예: 시/기업 역할 분담, 주변 상점과 제휴 등)"></textarea>
                             </div>
                         </div>
                     </section>
                     <section>
                         <h3 class="text-xl font-bold text-indigo-700 mb-4">2. 기대 효과</h3>
                         <div>
+                            <div class="text-sm bg-blue-50 border border-blue-200 text-blue-900 rounded-md p-3 mb-2">
+                                <div class="font-semibold mb-1">평가 기준</div>
+                                <ul class="list-disc list-inside space-y-0.5">
+                                    <li>해결방안과 기대효과를 <strong>직접적으로 연결</strong>하여 근거를 들어 서술</li>
+                                    <li>기대효과로 인한 <strong>혜택의 대상</strong>을 명시</li>
+                                </ul>
+                            </div>
                             <label for="field_effects" class="font-semibold text-gray-700 block mb-2">아이디어 실현 시 기대되는 변화</label>
-                            <textarea id="field_effects" rows="6" class="w-full p-3 border border-gray-300 rounded-md" placeholder="긍정적 변화와 근거"></textarea>
+                            <textarea id="field_effects" rows="6" class="w-full p-3 border border-gray-300 rounded-md" placeholder="제안한 허브가 성공적으로 도입되었을 때 예상되는 긍정적인 변화를 자유롭게 상상하여 작성해보세요."></textarea>
                         </div>
                     </section>
                     <section>
                         <h3 class="text-xl font-bold text-indigo-700 mb-4">3. 정보 출처</h3>
                         <div>
+                            <div class="text-sm text-gray-600 mb-2">아이디어와 기대효과에 참고한 근거 자료가 있다면 출처를 기재하세요.</div>
+                            <div class="text-sm text-gray-600 mb-2">아이디어와 기대효과에 참고한 근거 자료가 있다면 출처를 기재하세요.</div>
                             <div id="sources_container" class="space-y-4"></div>
                             <button id="add_source_btn" class="mt-2 bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition text-sm">+ 출처 추가</button>
                         </div>
@@ -282,7 +340,7 @@
         function saveSubmitMeta(){ const meta={ grade:document.getElementById('student_grade')?.value||'', class:document.getElementById('student_class')?.value||'', number:document.getElementById('student_number')?.value||'', name:document.getElementById('student_name')?.value||'', activity:document.getElementById('submission_activity')?.value||ACTIVITY_INPUT_DEFAULT, }; try{ localStorage.setItem(SUBMIT_META_KEY, JSON.stringify(meta)); }catch(_){} }
         function loadSubmitMeta(){ try{ const raw=localStorage.getItem(SUBMIT_META_KEY); if(!raw) return; const meta=JSON.parse(raw); if(meta.grade!=null) document.getElementById('student_grade').value=meta.grade; if(meta.class!=null) document.getElementById('student_class').value=meta.class; if(meta.number!=null) document.getElementById('student_number').value=meta.number; if(meta.name!=null) document.getElementById('student_name').value=meta.name; const actEl=document.getElementById('submission_activity'); if(actEl) actEl.value=meta.activity||ACTIVITY_INPUT_DEFAULT; }catch(_){} }
 
-        function generateDocHtml(dynamicTitle, reportInnerHtml){ return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${dynamicTitle}</title><script src="https://cdn.tailwindcss.com"><\/script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet"><style>body{font-family:'Noto Sans KR','Inter',sans-serif;background-color:#f3f4f6;margin:0}*{color:inherit !important}.report-page{background-color:#fff;padding:2.5cm 2cm;box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);color:#1f2937}.printable-area{width:100%}.report-main-title{font-family:'Noto Sans KR',sans-serif;font-size:2.25rem;font-weight:700;text-align:center;margin-bottom:1rem;border-bottom:2px solid #111827;padding-bottom:1rem}.report-section-title{font-family:'Noto Sans KR',sans-serif;font-size:1.5rem;font-weight:700;color:#111827;margin-top:2.5rem;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid #d1d5db}.preview-text{white-space:pre-wrap;word-break:break-word;min-height:2.5em;line-height:1.8;color:#374151;font-family:'Nanum Myeongjo',serif}.preview-placeholder{color:#9ca3af !important;font-style:italic}@page{size:A4 portrait;margin:2cm}@media print{body *{visibility:hidden}.printable-area,.printable-area *{visibility:visible}.printable-area{position:absolute;left:0;top:0;width:100%;padding:0;margin:0;box-shadow:none;border:none}.no-print{display:none}}</style></head><body><div class="report-page"><div class="printable-area">${reportInnerHtml}</div></div></body></html>`; }
+        function generateDocHtml(dynamicTitle, reportInnerHtml){ return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${dynamicTitle}</title><script src="https://cdn.tailwindcss.com"><\/script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet"><style>body{font-family:'Noto Sans KR','Inter',sans-serif;background-color:#f3f4f6;margin:0}*{color:inherit !important}.report-page{background-color:#fff;padding:2.5cm 2cm;box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);color:#1f2937}.printable-area{width:100%}.report-main-title{font-family:'Noto Sans KR',sans-serif;font-size:1.875rem;font-weight:700;text-align:center;margin-bottom:1rem;border-bottom:2px solid #111827;padding-bottom:1rem}.report-section-title{font-family:'Noto Sans KR',sans-serif;font-size:1.5rem;font-weight:700;color:#111827;margin-top:2.5rem;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid #d1d5db}.preview-text{white-space:pre-wrap;word-break:break-word;min-height:2.5em;line-height:1.8;color:#374151;font-family:'Nanum Myeongjo',serif}.preview-placeholder{color:#9ca3af !important;font-style:italic}@page{size:A4 portrait;margin:2cm}@media print{body *{visibility:hidden}.printable-area,.printable-area *{visibility:visible}.printable-area{position:absolute;left:0;top:0;width:100%;padding:0;margin:0;box-shadow:none;border:none}.no-print{display:none}}</style></head><body><div class="report-page"><div class="printable-area">${reportInnerHtml}</div></div></body></html>`; }
 
         function calcSectionCode(grade,klass){ const g=String(grade||'').trim(); const k=String(klass||'').trim().padStart(2,'0'); return `${g}${k}`; }
         function calcStudentId(grade,klass,number){ const g=String(grade||'').trim(); const k=String(klass||'').trim().padStart(2,'0'); const n=String(number||'').trim().padStart(2,'0'); return `${g}${k}${n}`; }
