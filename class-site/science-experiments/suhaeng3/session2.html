@@ -14,9 +14,9 @@
     <style>
         body { font-family: 'Noto Sans KR','Inter',sans-serif; background-color:#f3f4f6; }
         .tab-button-group { display:flex; flex-wrap:wrap; gap:0.5rem; background-color:#e5e7eb; padding:0.5rem; border-radius:0.75rem; }
-        .tab-button { flex-grow:1; text-align:center; padding:0.75rem 0.5rem; border-radius:0.5rem; font-weight:500; color:#4b5563; cursor:pointer; transition:all .3s ease; border:2px solid transparent; }
-        .tab-button:hover { background-color:#f9fafb; color:#1f2937; }
-        .tab-button.active { background-color:#fff; color:#4f46e5; font-weight:700; box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06); }
+    .tab-button { flex-grow:1; text-align:center; padding:0.75rem 0.5rem; border-radius:0.625rem; font-weight:600; color:#374151; cursor:pointer; transition:all .2s ease; border:1px solid #d1d5db; background-color:#ffffff; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+    .tab-button:hover { background-color:#f9fafb; color:#111827; border-color:#c7d2fe; }
+    .tab-button.active { background-color:#ffffff; color:#4f46e5; border-color:#4f46e5; box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06); }
         .tab-content { display:none; }
         .tab-content.active { display:block; }
         .report-page { background-color:#fff; padding:2.5cm 2cm; box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05); color:#1f2937; }
@@ -100,10 +100,10 @@
         </div>
 
         <div class="mb-8 no-print">
-            <div class="tab-button-group" aria-label="Tabs">
-                <button class="tab-button active" data-tab="guide2">0. 활동 안내</button>
-                <button class="tab-button" data-tab="tab4">1. 활동지 작성</button>
-                <button class="tab-button" data-tab="tab5">2. 미리보기 및 제출</button>
+            <div class="tab-button-group" aria-label="탭 메뉴">
+                <button class="tab-button active" data-tab="guide2">활동 안내</button>
+                <button class="tab-button" data-tab="tab4">활동지 작성</button>
+                <button class="tab-button" data-tab="tab5">미리보기 및 제출</button>
             </div>
         </div>
             <div id="guide2" class="tab-content active">

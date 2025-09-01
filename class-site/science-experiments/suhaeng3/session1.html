@@ -14,9 +14,9 @@
     <style>
         body { font-family: 'Noto Sans KR','Inter',sans-serif; background-color:#f3f4f6; }
         .tab-button-group { display:flex; flex-wrap:wrap; gap:0.5rem; background-color:#e5e7eb; padding:0.5rem; border-radius:0.75rem; }
-        .tab-button { flex-grow:1; text-align:center; padding:0.75rem 0.5rem; border-radius:0.5rem; font-weight:500; color:#4b5563; cursor:pointer; transition:all .3s ease; border:2px solid transparent; }
-        .tab-button:hover { background-color:#f9fafb; color:#1f2937; }
-        .tab-button.active { background-color:#fff; color:#4f46e5; font-weight:700; box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06); }
+    .tab-button { flex-grow:1; text-align:center; padding:0.75rem 0.5rem; border-radius:0.625rem; font-weight:600; color:#374151; cursor:pointer; transition:all .2s ease; border:1px solid #d1d5db; background-color:#ffffff; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+    .tab-button:hover { background-color:#f9fafb; color:#111827; border-color:#c7d2fe; }
+    .tab-button.active { background-color:#ffffff; color:#4f46e5; border-color:#4f46e5; box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06); }
         .tab-content { display:none; }
         .tab-content.active { display:block; }
         .report-page { background-color:#fff; padding:2.5cm 2cm; box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05); color:#1f2937; }
@@ -103,10 +103,10 @@
         </div>
 
         <div class="mb-8 no-print">
-            <div class="tab-button-group" aria-label="Tabs">
-                <button class="tab-button active" data-tab="guide1">0. 활동 안내</button>
-                <button class="tab-button" data-tab="tab4">1. 활동지 작성</button>
-                <button class="tab-button" data-tab="tab5">2. 미리보기 및 제출</button>
+            <div class="tab-button-group" aria-label="탭 메뉴">
+                <button class="tab-button active" data-tab="guide1">활동 안내</button>
+                <button class="tab-button" data-tab="tab4">활동지 작성</button>
+                <button class="tab-button" data-tab="tab5">미리보기 및 제출</button>
             </div>
         </div>
             <div id="guide1" class="tab-content active">
@@ -178,7 +178,7 @@
             </div>
 
         <main>
-            <div id="tab4" class="tab-content active">
+            <div id="tab4" class="tab-content">
                 <div class="bg-white p-6 sm:p-10 rounded-lg shadow-md space-y-8">
                     <header class="text-center mb-4">
                         <h2 class="text-2xl font-bold text-gray-800">1차시 활동지</h2>
@@ -206,28 +206,16 @@
                         <h3 class="text-xl font-bold text-indigo-700 mb-4">2. 시범사업 대상지 선정을 위한 고려사항</h3>
                         <div class="space-y-6">
                             <div class="border border-gray-200 rounded-lg p-4 bg-white">
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                    <div class="md:col-span-1">
-                                        <label for="field_c1_title" class="font-semibold text-gray-700 block mb-2">고려사항 1</label>
-                                        <input type="text" id="field_c1_title" class="w-full p-3 border border-gray-300 rounded-md" placeholder="핵심 기준을 간결하게 작성하세요.">
-                                    </div>
-                                    <div class="md:col-span-2">
-                                        <label for="field_c1_desc" class="font-semibold text-gray-700 block mb-2">이유(근거)</label>
-                                        <textarea id="field_c1_desc" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="왜 이 기준이 중요한가요? 데이터·사례 등 구체적 근거를 들어 설명"></textarea>
-                                    </div>
-                                </div>
+                                <label for="field_c1_title" class="font-semibold text-gray-700 block mb-2">고려사항 1</label>
+                                <input type="text" id="field_c1_title" class="w-full p-3 border border-gray-300 rounded-md mb-3" placeholder="핵심 기준을 간결하게 작성하세요.">
+                                <label for="field_c1_desc" class="font-semibold text-gray-700 block mb-2">이유(근거)</label>
+                                <textarea id="field_c1_desc" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="왜 이 기준이 중요한가요? 데이터·사례 등 구체적 근거를 들어 설명"></textarea>
                             </div>
                             <div class="border border-gray-200 rounded-lg p-4 bg-white">
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                    <div class="md:col-span-1">
-                                        <label for="field_c2_title" class="font-semibold text-gray-700 block mb-2">고려사항 2</label>
-                                        <input type="text" id="field_c2_title" class="w-full p-3 border border-gray-300 rounded-md" placeholder="핵심 기준을 간결하게 작성하세요.">
-                                    </div>
-                                    <div class="md:col-span-2">
-                                        <label for="field_c2_desc" class="font-semibold text-gray-700 block mb-2">이유(근거)</label>
-                                        <textarea id="field_c2_desc" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="왜 이 기준이 중요한가요? 데이터·사례 등 구체적 근거를 들어 설명"></textarea>
-                                    </div>
-                                </div>
+                                <label for="field_c2_title" class="font-semibold text-gray-700 block mb-2">고려사항 2</label>
+                                <input type="text" id="field_c2_title" class="w-full p-3 border border-gray-300 rounded-md mb-3" placeholder="핵심 기준을 간결하게 작성하세요.">
+                                <label for="field_c2_desc" class="font-semibold text-gray-700 block mb-2">이유(근거)</label>
+                                <textarea id="field_c2_desc" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="왜 이 기준이 중요한가요? 데이터·사례 등 구체적 근거를 들어 설명"></textarea>
                             </div>
                         </div>
                     </section>
@@ -375,7 +363,7 @@
                 } 
             });
             
-            // 고려사항 미리보기 업데이트
+            // 고려사항 미리보기 업데이트 (형식: "고려사항: \n이유")
             const considerationsPreview = document.getElementById('preview_considerations');
             const c1_title = (document.getElementById('field_c1_title')?.value || '').trim();
             const c1_desc = (document.getElementById('field_c1_desc')?.value || '').trim();
@@ -386,16 +374,16 @@
             if (c1_title || c1_desc) {
                 const title = c1_title ? escapeHtml(c1_title) : '<span class="preview-placeholder">[고려사항 1]</span>';
                 const desc = c1_desc ? escapeHtml(c1_desc) : '<span class="preview-placeholder">이유/근거를 입력하세요.</span>';
-                items.push(`<strong style="font-family: 'Noto Sans KR', sans-serif;">${title}</strong> - ${desc}`);
+                items.push(`<div class="preview-text"><strong style="font-family: 'Noto Sans KR', sans-serif;">${title}</strong>:<br>${desc}</div>`);
             }
             if (c2_title || c2_desc) {
                 const title = c2_title ? escapeHtml(c2_title) : '<span class="preview-placeholder">[고려사항 2]</span>';
                 const desc = c2_desc ? escapeHtml(c2_desc) : '<span class="preview-placeholder">이유/근거를 입력하세요.</span>';
-                items.push(`<strong style="font-family: 'Noto Sans KR', sans-serif;">${title}</strong> - ${desc}`);
+                items.push(`<div class="preview-text"><strong style="font-family: 'Noto Sans KR', sans-serif;">${title}</strong>:<br>${desc}</div>`);
             }
 
             if (items.length > 0) {
-                considerationsPreview.innerHTML = `<ol class="list-decimal list-inside space-y-3">${items.map(item => `<li class="preview-text">${item}</li>`).join('')}</ol>`;
+                considerationsPreview.innerHTML = `<ol class="list-decimal list-inside space-y-3">${items.map(item => `<li>${item}</li>`).join('')}</ol>`;
             } else {
                 considerationsPreview.innerHTML = `<p class="preview-text"><span class="preview-placeholder">고려사항을 입력하세요...</span></p>`;
             }
