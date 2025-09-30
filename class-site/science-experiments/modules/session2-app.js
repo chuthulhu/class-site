@@ -2,6 +2,7 @@
 import { generateDocHtml, buildZipAndSubmit } from './hub-submit.js';
 import { addSourceElement, updateSourceInputs, renderSourcesPreview, serializeSources } from './hub-sources-extended.js';
 import { escapeHtml, debounce } from './hub-utils.js';
+import { downloadWithFallback } from './hub-download.js';
 
 const STORAGE_KEY = 'firstLastMileProjectData_session2';
 const SUBMIT_META_KEY = 'submit_meta_session2';
@@ -44,10 +45,9 @@ function bindSubmit(){ const downloadBtn=qs('download_zip_btn'); const retryBtn=
   async function attempt(){ const form=validateStudent(); if(!form) return; retryBtn?.classList.add('hidden'); showProgress(true); setProgress(10,'문서 준비'); setStatus('문서 생성 중'); const section=calcSectionCode(form.grade, form.klass); const studentId=calcStudentId(form.grade, form.klass, form.number); const nowParts=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).formatToParts(new Date()); const parts=Object.fromEntries(nowParts.map(p=>[p.type,p.value])); const ts=`${parts.year}${parts.month}${parts.day}_${parts.hour}${parts.minute}${parts.second}`; const baseName=`${studentId}_${form.name}_${qs('preview_main_title')?.textContent?.trim()||'보고서'}_${ts}`;
     try{ const result=await buildZipAndSubmit({ buildHtml:(t,i)=>generateDocHtml(t,i), filenameBase: baseName, reportSelector:'#report-content', onProgress:(p,l)=>setProgress(p,l), onStatus:setStatus, payloadBuilder:(b64, zipFilename)=>({ studentId, subject: document.querySelector('meta[name="submission-subject"]')?.content||'과학탐구실험2', activity:(document.querySelector('meta[name="submission-activity"]')?.content||'수행3_2차시'), section, files:[{ filename: zipFilename, contentBase64:b64, mime:'application/zip' }] }) });
       lastZipBlob=result.zipBlob; lastMeta={ zipFilename: result.zipFilename };
-      setProgress(88,'다운로드'); setStatus('다운로드 중'); triggerDownload(lastZipBlob,lastMeta.zipFilename); setProgress(100,'완료'); setTimeout(()=>showProgress(false),1200); toast('제출 & 다운로드 완료','bg-green-600');
+      setProgress(88,'다운로드'); setStatus('다운로드 중'); await downloadWithFallback({ blob:lastZipBlob, filename:lastMeta.zipFilename, onStatus:setStatus, onToast:(m)=>toast(m) }); setProgress(100,'완료'); setTimeout(()=>showProgress(false),1200); toast('제출 & 다운로드 완료','bg-green-600');
     }catch(e){ setStatus('실패: '+e.message); toast('실패: '+e.message,'bg-red-600'); showProgress(false); retryBtn?.classList.remove('hidden'); }
   }
-  function triggerDownload(blob, filename){ try{ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); setStatus('다운로드 완료'); }catch{ setStatus('다운로드 실패'); } }
   downloadBtn?.addEventListener('click', attempt); retryBtn?.addEventListener('click', attempt); printBtn?.addEventListener('click', printReport); previewBtn?.addEventListener('click', openPreview);
 }
 

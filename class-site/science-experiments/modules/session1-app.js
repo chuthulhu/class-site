@@ -2,7 +2,7 @@
 import { generateDocHtml, buildZipAndSubmit } from './hub-submit.js';
 import { addSourceElement, updateSourceInputs, renderSourcesPreview, serializeSources } from './hub-sources-extended.js';
 import { escapeHtml, debounce } from './hub-utils.js';
-import { blobToBase64 } from './hub-utils.js';
+import { downloadWithFallback } from './hub-download.js';
 
 // 개별 세션 저장 키 (허브와 분리)
 const STORAGE_KEY = 'firstLastMileProjectData_session1';
@@ -60,11 +60,10 @@ function bindSubmit(){ const downloadBtn=qs('download_zip_btn'); const retryBtn=
     try{ const result=await buildZipAndSubmit({ buildHtml: (title,inner)=>generateDocHtml(title,inner), filenameBase: baseName, reportSelector: '#report-content', onProgress: (p,l)=>{ setProgress(p,l); }, onStatus: setStatus, payloadBuilder: (b64, zipFilename)=>({ studentId, subject: document.querySelector('meta[name="submission-subject"]')?.content||'과학탐구실험2', activity: (document.querySelector('meta[name="submission-activity"]')?.content||'수행3_1차시'), section, files:[{ filename: zipFilename, contentBase64: b64, mime:'application/zip' }] }) });
       lastZipBlob=result.zipBlob; lastMeta={ zipFilename: result.zipFilename };
       setProgress(90,'다운로드'); setStatus('다운로드 진행 중');
-      triggerDownload(lastZipBlob, lastMeta.zipFilename);
+      await downloadWithFallback({ blob:lastZipBlob, filename:lastMeta.zipFilename, onStatus:setStatus, onToast:(m)=>toast(m) });
       setProgress(100,'완료'); setTimeout(()=>showProgress(false),1200); toast('제출 & 다운로드 완료','bg-green-600');
     }catch(e){ setStatus('실패: '+e.message); toast('실패: '+e.message,'bg-red-600'); retryBtn?.classList.remove('hidden'); showProgress(false); }
   }
-  function triggerDownload(blob, filename){ try{ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); setStatus('다운로드 완료'); }catch{ setStatus('다운로드 실패'); } }
   downloadBtn?.addEventListener('click', attempt); retryBtn?.addEventListener('click', attempt); printBtn?.addEventListener('click', printReport); previewBtn?.addEventListener('click', openPreviewNewTab);
 }
 
