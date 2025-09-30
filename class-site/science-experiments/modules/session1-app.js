@@ -1,5 +1,5 @@
 // session1-app.js - 1차시 페이지 모듈 (테스트용) - 공유 모듈(hub-*) 재사용
-import { generateDocHtml, buildZipAndSubmit } from './hub-submit.js';
+import { generateDocHtml, buildZipAndSubmit, buildZip, submitBuiltZip } from './hub-submit.js';
 import { addSourceElement, updateSourceInputs, renderSourcesPreview, serializeSources } from './hub-sources-extended.js';
 import { escapeHtml, debounce } from './hub-utils.js';
 import { downloadWithFallback } from './hub-download.js';
@@ -48,7 +48,7 @@ function validateStudent(){ const grade=parseInt((qs('student_grade')?.value||''
 function calcSectionCode(g,k){ return `${String(g)}${String(k).padStart(2,'0')}`; }
 function calcStudentId(g,k,n){ return `${String(g)}${String(k).padStart(2,'0')}${String(n).padStart(2,'0')}`; }
 
-function bindSubmit(){ const downloadBtn=qs('download_zip_btn'); const retryBtn=qs('retry_upload_btn'); const printBtn=qs('print_btn'); const previewBtn=qs('preview_newtab_btn'); const statusEl=qs('submit_status'); const progressC=qs('progress_container'); const bar=qs('progress_bar'); const txt=qs('progress_text'); let lastZipBlob=null; let lastMeta=null;
+function bindSubmit(){ const downloadBtn=qs('download_zip_btn'); const retryBtn=qs('retry_upload_btn'); const printBtn=qs('print_btn'); const previewBtn=qs('preview_newtab_btn'); const statusEl=qs('submit_status'); const progressC=qs('progress_container'); const bar=qs('progress_bar'); const txt=qs('progress_text'); let lastZipBlob=null; let lastMeta=null; let lastPayloadBuilder=null; let lastZipFilename=null;
   function setStatus(t){ if(statusEl) statusEl.textContent=t; }
   function setProgress(p,label=''){ if(bar) bar.style.width=`${Math.min(100,Math.max(0,p))}%`; if(txt) txt.textContent=label; }
   function showProgress(show){ if(progressC){ progressC.classList.toggle('hidden',!show); progressC.setAttribute('aria-hidden', show?'false':'true'); } }
@@ -56,15 +56,19 @@ function bindSubmit(){ const downloadBtn=qs('download_zip_btn'); const retryBtn=
   function getReportFilename(){ const g=(qs('student_grade')?.value||'1').trim(); const c=(qs('student_class')?.value||'0').trim().padStart(2,'0'); const n=(qs('student_number')?.value||'0').trim().padStart(2,'0'); const id=`${g}${c}${n}`; const name=(qs('student_name')?.value||'이름없음').trim(); return `${id}_${name}_스마트모빌리티_제안서_1차시`; }
   function openPreviewNewTab(){ try{ const inner=qs('report-content')?.innerHTML||''; const now=new Date(); const ts=`${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`; const title=`미리보기-1차시-${ts}`; const html=generateDocHtml(title,inner); const blob=new Blob([html],{type:'text/html'}); const url=URL.createObjectURL(blob); window.open(url,'_blank'); setTimeout(()=>URL.revokeObjectURL(url),10000);}catch{}
   }
-  async function attempt(){ const form=validateStudent(); if(!form) return; retryBtn?.classList.add('hidden'); showProgress(true); setProgress(10,'문서 준비'); setStatus('문서 생성 중'); const section=calcSectionCode(form.grade, form.klass); const studentId=calcStudentId(form.grade, form.klass, form.number); const nowParts=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).formatToParts(new Date()); const parts=Object.fromEntries(nowParts.map(p=>[p.type,p.value])); const ts=`${parts.year}${parts.month}${parts.day}_${parts.hour}${parts.minute}${parts.second}`; const baseName=`${studentId}_${form.name}_${qs('preview_main_title')?.textContent?.trim()||'보고서'}_${ts}`;
-    try{ const result=await buildZipAndSubmit({ buildHtml: (title,inner)=>generateDocHtml(title,inner), filenameBase: baseName, reportSelector: '#report-content', onProgress: (p,l)=>{ setProgress(p,l); }, onStatus: setStatus, payloadBuilder: (b64, zipFilename)=>({ studentId, subject: document.querySelector('meta[name="submission-subject"]')?.content||'과학탐구실험2', activity: (document.querySelector('meta[name="submission-activity"]')?.content||'수행3_1차시'), section, files:[{ filename: zipFilename, contentBase64: b64, mime:'application/zip' }] }) });
-      lastZipBlob=result.zipBlob; lastMeta={ zipFilename: result.zipFilename };
+  async function attempt(){ const form=validateStudent(); if(!form) return; retryBtn?.classList.add('hidden'); showProgress(true); setProgress(8,'문서 준비'); setStatus('문서 생성 중'); const section=calcSectionCode(form.grade, form.klass); const studentId=calcStudentId(form.grade, form.klass, form.number); const nowParts=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).formatToParts(new Date()); const parts=Object.fromEntries(nowParts.map(p=>[p.type,p.value])); const ts=`${parts.year}${parts.month}${parts.day}_${parts.hour}${parts.minute}${parts.second}`; const baseName=`${studentId}_${form.name}_${qs('preview_main_title')?.textContent?.trim()||'보고서'}_${ts}`;
+    const payloadBuilder=(b64, zipFilename)=>({ studentId, subject: document.querySelector('meta[name="submission-subject"]')?.content||'과학탐구실험2', activity: (document.querySelector('meta[name="submission-activity"]')?.content||'수행3_1차시'), section, files:[{ filename: zipFilename, contentBase64: b64, mime:'application/zip' }] });
+    try {
+      const { zipBlob, zipFilename } = await buildZip({ buildHtml:(t,i)=>generateDocHtml(t,i), filenameBase: baseName, reportSelector:'#report-content', onProgress:(p,l)=>setProgress(p,l), onStatus:setStatus });
+      lastZipBlob=zipBlob; lastZipFilename=zipFilename; lastPayloadBuilder=payloadBuilder; lastMeta={ zipFilename };
+      const { data } = await submitBuiltZip({ zipBlob, zipFilename, payloadBuilder, onProgress:(p,l)=>setProgress(p,l), onStatus:setStatus });
       setProgress(90,'다운로드'); setStatus('다운로드 진행 중');
-      await downloadWithFallback({ blob:lastZipBlob, filename:lastMeta.zipFilename, onStatus:setStatus, onToast:(m)=>toast(m) });
+      await downloadWithFallback({ blob:zipBlob, filename:zipFilename, onStatus:setStatus, onToast:(m)=>toast(m) });
       setProgress(100,'완료'); setTimeout(()=>showProgress(false),1200); toast('제출 & 다운로드 완료','bg-green-600');
-    }catch(e){ setStatus('실패: '+e.message); toast('실패: '+e.message,'bg-red-600'); retryBtn?.classList.remove('hidden'); showProgress(false); }
+    }catch(e){ setStatus('실패: '+e.message); toast('실패: '+e.message,'bg-red-600'); showProgress(false); retryBtn?.classList.remove('hidden'); }
   }
-  downloadBtn?.addEventListener('click', attempt); retryBtn?.addEventListener('click', attempt); printBtn?.addEventListener('click', printReport); previewBtn?.addEventListener('click', openPreviewNewTab);
+  async function retry(){ if(!lastZipBlob||!lastPayloadBuilder||!lastZipFilename){ toast('재시도할 데이터가 없습니다.'); return; } retryBtn?.classList.add('hidden'); showProgress(true); setProgress(40,'재업로드'); setStatus('재업로드 중'); try{ const { data } = await submitBuiltZip({ zipBlob:lastZipBlob, zipFilename:lastZipFilename, payloadBuilder:lastPayloadBuilder, onProgress:(p,l)=>setProgress(p,l||'재업로드'), onStatus:setStatus }); setProgress(88,'다운로드'); await downloadWithFallback({ blob:lastZipBlob, filename:lastZipFilename, onStatus:setStatus, onToast:(m)=>toast(m) }); setProgress(100,'완료'); setTimeout(()=>showProgress(false),1200); toast('재제출 & 다운로드 완료','bg-green-600'); }catch(e){ setStatus('재시도 실패: '+e.message); toast('재시도 실패: '+e.message,'bg-red-600'); retryBtn?.classList.remove('hidden'); showProgress(false); } }
+  downloadBtn?.addEventListener('click', attempt); retryBtn?.addEventListener('click', retry); printBtn?.addEventListener('click', printReport); previewBtn?.addEventListener('click', openPreviewNewTab);
 }
 
 function bindClear(){ const clearBtn=qs('clear_inputs_btn'); if(!clearBtn) return; clearBtn.addEventListener('click',()=>{ if(!window.confirm('입력한 내용을 모두 삭제하시겠어요?')) return; try{ localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(SUBMIT_META_KEY);}catch{} document.querySelectorAll('#tab4 input,#tab4 textarea').forEach(el=>{ el.value=''; }); const sc=qs('sources_container'); if(sc) sc.innerHTML=''; saveAll(); updateConsiderations(); toast('입력 내용이 삭제되었습니다.','bg-red-600'); }); }

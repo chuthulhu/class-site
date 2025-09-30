@@ -1,29 +1,46 @@
 // hub-submit.js - 업로드 + ZIP 생성
 import { SUBMISSION_ENDPOINT, SUBMISSION_KEY_HEADER, SUBMISSION_KEY_VALUE, MAX_ZIP_BYTES } from './hub-config.js';
-import { blobToBase64, bytesFromBase64 } from './hub-utils.js';
+import { blobToBase64 } from './hub-utils.js';
 
-export async function buildZipAndSubmit({ buildHtml, filenameBase, onProgress, onStatus, reportSelector }) {
-  onStatus('ZIP 파일 생성 중…');
-  onProgress(20,'문서 HTML 생성');
+// 새 분리 단계: ZIP 생성과 업로드를 분리하여 재시도/재업로드에 활용
+export async function buildZip({ buildHtml, filenameBase, onProgress, onStatus, reportSelector }) {
+  onStatus && onStatus('ZIP 파일 생성 중…');
+  onProgress && onProgress(15,'문서 HTML 수집');
   const inner = document.querySelector(reportSelector)?.innerHTML || '';
   const html = buildHtml(filenameBase, inner);
   const zip = new JSZip();
   const htmlFilename = `${filenameBase}.html`;
   const zipFilename = `${filenameBase}.zip`;
   zip.file(htmlFilename, html);
+  onProgress && onProgress(30,'압축 중');
   const zipBlob = await zip.generateAsync({ type:'blob', compression:'DEFLATE', compressionOptions:{ level:6 } });
   if(zipBlob.size > MAX_ZIP_BYTES) throw new Error('ZIP 용량 초과 (8MB)');
-  onProgress(40,'업로드 준비');
+  return { zipBlob, zipFilename };
+}
+
+export async function submitBuiltZip({ zipBlob, zipFilename, payloadBuilder, onProgress, onStatus }) {
+  onProgress && onProgress(45,'업로드 준비');
   const b64 = await blobToBase64(zipBlob);
-  onProgress(55,'업로드 중');
-  const payload = arguments[0].payloadBuilder(b64, zipFilename);
+  onProgress && onProgress(60,'업로드 중');
+  const payload = payloadBuilder(b64, zipFilename);
   const res = await fetch(SUBMISSION_ENDPOINT, {
-    method:'POST', headers:{ 'Content-Type':'application/json', [SUBMISSION_KEY_HEADER]: SUBMISSION_KEY_VALUE }, body: JSON.stringify(payload)
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', [SUBMISSION_KEY_HEADER]: SUBMISSION_KEY_VALUE },
+    body: JSON.stringify(payload)
   });
   const text = await res.text();
   let data={}; try{ data=JSON.parse(text);}catch{ data={ raw:text }; }
   if(!res.ok) throw new Error(data.error||data.detail||data.message||res.statusText||'업로드 실패');
-  onProgress(85,'다운로드 준비');
+  onProgress && onProgress(82,'다운로드 준비');
+  onStatus && onStatus('업로드 완료');
+  return { data };
+}
+
+// 역호환 편의 함수 (기존 API 유지)
+export async function buildZipAndSubmit(opts){
+  const { buildHtml, filenameBase, onProgress, onStatus, reportSelector } = opts;
+  const { zipBlob, zipFilename } = await buildZip({ buildHtml, filenameBase, onProgress, onStatus, reportSelector });
+  const { data } = await submitBuiltZip({ zipBlob, zipFilename, payloadBuilder: opts.payloadBuilder, onProgress, onStatus });
   return { zipBlob, zipFilename, data };
 }
 
