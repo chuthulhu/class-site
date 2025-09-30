@@ -45,8 +45,8 @@
     <div id="toast-notification" class="fixed bottom-5 right-5 bg-gray-800 text-white py-3 px-5 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 no-print">저장되었습니다!</div>
     <!-- 1단계: 최소 부트스트랩 스크립트 (탭 + 게이트) -->
     <script type="module">
-        import { initTabs } from './scripts/dom.js';
-        import { initGate } from './scripts/gate.js';
+        import { initTabs } from '../modules/dom.js';
+        import { initGate } from '../modules/gate.js';
         initTabs();
         initGate({ unlockAt: '2025-10-12T15:00:00Z' });
     </script>
