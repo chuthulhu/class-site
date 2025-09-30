@@ -3,6 +3,7 @@ import { generateDocHtml, buildZipAndSubmit, buildZip, submitBuiltZip } from './
 import { addSourceElement, updateSourceInputs, renderSourcesPreview, serializeSources } from './hub-sources-extended.js';
 import { escapeHtml, debounce } from './hub-utils.js';
 import { downloadWithFallback } from './hub-download.js';
+import { bindFieldPreviewsSubset, refreshDynamicPreviews } from './hub-preview.js';
 
 const STORAGE_KEY = 'firstLastMileProjectData_session2';
 const SUBMIT_META_KEY = 'submit_meta_session2';
@@ -25,7 +26,7 @@ function saveSubmitMeta(){ const meta={ grade:qs('student_grade')?.value||'', cl
 function loadSubmitMeta(){ try{ const raw=localStorage.getItem(SUBMIT_META_KEY); if(!raw) return; const meta=JSON.parse(raw); if(meta.grade!=null) qs('student_grade').value=meta.grade; if(meta.class!=null) qs('student_class').value=meta.class; if(meta.number!=null) qs('student_number').value=meta.number; if(meta.name!=null) qs('student_name').value=meta.name; }catch{} }
 
 // 필드 미리보기 (FIELD_PREVIEW_MAP 일부 재구현)
-function bindFieldPreviews(){ const map={ 'student_grade':'preview_student_grade','student_class':'preview_student_class','student_number':'preview_student_number','student_name':'preview_student_name','field_idea_infra':'preview_idea_infra','field_idea_policy':'preview_idea_policy','field_idea_operation':'preview_idea_operation','field_effects':'preview_effects' }; Object.entries(map).forEach(([fid,pid])=>{ const input=qs(fid); const prev=qs(pid); if(!input||!prev) return; const update=()=>{ const v=input.value.trim(); const ph=prev.querySelector('.preview-placeholder'); const phText=ph?ph.textContent:`[${fid}]`; if(v) prev.textContent=v; else prev.innerHTML=`<span class='preview-placeholder'>${escapeHtml(phText)}</span>`; const sc=qs('sources_container'); if(sc) renderSourcesPreview(sc); }; input.addEventListener('input', update); update(); }); }
+// 개별 구현 제거 -> 공통 서브셋 바인딩 사용
 
 function bindSourceEvents(){ const c=qs('sources_container'); const addBtn=qs('add_source_btn'); if(!c||!addBtn) return; addBtn.addEventListener('click',()=>{ addSourceElement(c); renderSourcesPreview(c); saveAllDebounced(); }); c.addEventListener('click',e=>{ if(e.target.classList.contains('delete_source_btn')){ e.target.closest('.source-entry')?.remove(); renderSourcesPreview(c); saveAllDebounced(); }}); c.addEventListener('change',e=>{ if(e.target.classList.contains('source-type-select')){ updateSourceInputs(e.target); renderSourcesPreview(c); saveAllDebounced(); }}); c.addEventListener('input',()=>{ renderSourcesPreview(c); saveAllDebounced(); }); }
 
@@ -57,11 +58,12 @@ export function initSession2(){
   bindAccordions();
   loadSubmitMeta();
   loadAll();
-  bindFieldPreviews();
+  bindFieldPreviewsSubset({ include:['student_grade','student_class','student_number','student_name','field_idea_infra','field_idea_policy','field_idea_operation','field_effects'] });
+  refreshDynamicPreviews();
   bindSourceEvents();
   bindSubmit();
   bindClear();
-  document.querySelectorAll('#tab4 input,#tab4 textarea').forEach(el=>el.addEventListener('input',()=>{ saveAllDebounced(); saveSubmitMeta(); }));
+  document.querySelectorAll('#tab4 input,#tab4 textarea').forEach(el=>el.addEventListener('input',()=>{ saveAllDebounced(); saveSubmitMeta(); refreshDynamicPreviews(); }));
   // 아코디언 처음부터 펼치기
   document.querySelectorAll('.accordion-header button').forEach(b=>{ const c=b.parentElement.nextElementSibling; const icon=b.querySelector('svg'); b.classList.add('open'); c.classList.add('open'); setTimeout(()=>{ c.style.maxHeight=c.scrollHeight+'px'; c.style.paddingTop='1rem'; c.style.paddingBottom='1rem'; },10); if(icon) icon.style.transform='rotate(180deg)'; });
 }
