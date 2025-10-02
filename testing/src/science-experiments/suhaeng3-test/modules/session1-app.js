@@ -66,12 +66,17 @@ document.addEventListener('DOMContentLoaded', () => {
         accordionButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const content = button.nextElementSibling;
+                if (!content) return; // 안전성 검사
+                
                 const isOpen = content.classList.contains('open');
                 
                 // 모든 아코디언 닫기
                 accordionButtons.forEach(btn => {
                     btn.classList.remove('open');
-                    btn.nextElementSibling.classList.remove('open');
+                    const btnContent = btn.nextElementSibling;
+                    if (btnContent) {
+                        btnContent.classList.remove('open');
+                    }
                 });
                 
                 // 클릭된 아코디언이 닫혀있었다면 열기

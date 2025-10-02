@@ -1053,29 +1053,34 @@
             });
         }
         
-        // --- 아코디언 기능 정의 ---
-        function initAccordions() {
-            const accordionButtons = document.querySelectorAll('.accordion-header button');
-            
-            accordionButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const content = button.nextElementSibling;
-                    const isOpen = content.classList.contains('open');
-                    
-                    // 모든 아코디언 닫기
-                    accordionButtons.forEach(btn => {
-                        btn.classList.remove('open');
-                        btn.nextElementSibling.classList.remove('open');
-                    });
-                    
-                    // 클릭된 아코디언이 닫혀있었다면 열기
-                    if (!isOpen) {
-                        button.classList.add('open');
-                        content.classList.add('open');
+    // --- 아코디언 기능 정의 ---
+    function initAccordions() {
+        const accordionButtons = document.querySelectorAll('.accordion-header button');
+        
+        accordionButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const content = button.nextElementSibling;
+                if (!content) return; // 안전성 검사
+                
+                const isOpen = content.classList.contains('open');
+                
+                // 모든 아코디언 닫기
+                accordionButtons.forEach(btn => {
+                    btn.classList.remove('open');
+                    const btnContent = btn.nextElementSibling;
+                    if (btnContent) {
+                        btnContent.classList.remove('open');
                     }
                 });
+                
+                // 클릭된 아코디언이 닫혀있었다면 열기
+                if (!isOpen) {
+                    button.classList.add('open');
+                    content.classList.add('open');
+                }
             });
-        }
+        });
+    }
     });
     </script>
 </body>
