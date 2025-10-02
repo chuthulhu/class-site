@@ -47,20 +47,24 @@ class-site/
 
 ## 🔧 기술 스택
 
-- **Frontend**: HTML, CSS (Tailwind), JavaScript
-- **Backend**: Netlify Functions
-- **Storage**: Microsoft OneDrive
+- **Frontend**: HTML, CSS (Tailwind), JavaScript (ES6+)
+- **Backend**: Netlify Functions (Node.js)
+- **Storage**: Microsoft OneDrive (Graph API)
 - **Deployment**: Netlify
+- **Build Tools**: esbuild, JSZip
+- **PWA**: Service Worker, Web App Manifest
 
 ## 📋 사용 방법
 
 ### 기존 환경 (현재 배포)
 - URL: 기존 웹 주소 그대로 유지
 - 기능: 안정화된 운영 기능
+- 교사키: `?key=TEACHER_KEY` 파라미터로 시간 제한 우회
 
 ### 새로운 환경 (개선된 기능)
 - Production: 안정화된 운영 환경
 - Testing: 개발 및 테스트 환경
+- 독립적인 함수: `submit_test.js`, `download_test.js` 사용
 
 ## 🔄 개발 워크플로우
 

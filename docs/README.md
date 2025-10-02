@@ -15,6 +15,10 @@
 
 ### 사용자 가이드
 - [사용자 가이드](user-guides/README.md) - 사용자 매뉴얼
+- [suhaeng3 사용자 가이드](suhaeng3-user-guide.md) - suhaeng3 사용자 가이드
+- [suhaeng3 테스트 가이드](suhaeng3-test-guide.md) - suhaeng3 테스트 가이드
+- [suhaeng3 사용자 매뉴얼](suhaeng3-user-manual.md) - suhaeng3 사용자 매뉴얼
+- [교사키 가이드](teacher-key-guide.md) - 교사키 기능 사용법
 
 ## 🔧 기술 문서
 
@@ -25,9 +29,17 @@
 - [이슈 트래킹](../project/ISSUES.md)
 
 ### 마이그레이션
-- [안전한 마이그레이션 계획](../SAFE_MIGRATION_PLAN.md)
-- [빠른 시작 가이드](../QUICK_START_GUIDE.md)
-- [구현 가이드](../IMPLEMENTATION_GUIDE.md)
+- [안전한 마이그레이션 계획](../project/SAFE_MIGRATION_PLAN.md)
+- [빠른 시작 가이드](../project/QUICK_START_GUIDE.md)
+- [구현 가이드](../project/IMPLEMENTATION_GUIDE.md)
+
+### 최근 업데이트
+- 교사키 기능 개선 (2025-10-02)
+- Netlify 배포 오류 해결
+- 프로젝트 구조 개선
+
+### 문서 구조
+- [문서 구조 가이드](DOCUMENTATION_STRUCTURE.md) - 전체 문서 구조 및 접근 방법
 
 ## 📋 문서 작성 가이드
 
