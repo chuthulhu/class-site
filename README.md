@@ -16,15 +16,24 @@
 
 ## 🚀 빠른 시작
 
-### 기존 환경 (현재 배포)
-```
-https://physichu.netlify.app/science-experiments/suhaeng3/
-```
+### 🌐 배포 환경
 
-### 교사키 사용
-```
-https://physichu.netlify.app/science-experiments/suhaeng3/?key=TEACHER_KEY
-```
+#### Production 환경 (운영)
+- **URL**: `https://physichu.netlify.app/science-experiments/suhaeng3/`
+- **교사키**: `https://physichu.netlify.app/science-experiments/suhaeng3/?key=TEACHER_KEY`
+- **상태**: ✅ 안정 운영 중
+
+#### Testing 환경 (개발/테스트)
+- **URL**: `https://test-physichu.netlify.app/science-experiments/suhaeng3-test/`
+- **교사키**: `https://test-physichu.netlify.app/science-experiments/suhaeng3-test/?key=TEACHER_KEY`
+- **상태**: ✅ 개발 중
+
+### 📊 환경별 특징
+
+| 환경 | 용도 | 특징 | 함수 |
+|------|------|------|------|
+| **Production** | 운영 환경 | 안정성 우선, 검증된 기능 | `submit.js`, `download.js` |
+| **Testing** | 개발 환경 | 실험적 기능, 디버깅 | `submit_test.js`, `download_test.js` |
 
 ## 🔧 기술 스택
 
@@ -37,17 +46,30 @@ https://physichu.netlify.app/science-experiments/suhaeng3/?key=TEACHER_KEY
 
 ## 📁 프로젝트 구조
 
+### 🏗️ 멀티 환경 배포 구조
+
+이 프로젝트는 **하나의 GitHub 저장소**에서 **두 개의 독립적인 Netlify 사이트**를 배포하는 구조입니다.
+
 ```
 class-site/
-├── class-site/                    # 🏠 메인 애플리케이션
+├── class-site/                    # 🏠 Production 환경 (운영)
 │   ├── science-experiments/      # 과학 실험 모듈
 │   │   ├── suhaeng1/             # 수행1
 │   │   ├── suhaeng2/             # 수행2
-│   │   ├── suhaeng3/             # 수행3 (메인)
-│   │   └── suhaeng3-test/        # 수행3 테스트 환경
-│   └── netlify/functions/         # 서버리스 함수
-├── production/                   # 🚀 프로덕션 환경
-├── testing/                       # 🧪 테스트 환경
+│   │   └── suhaeng3/             # 수행3 (메인 운영)
+│   └── netlify/functions/         # 운영용 서버리스 함수
+│       ├── submit.js             # 운영용 제출 함수
+│       ├── download.js           # 운영용 다운로드 함수
+│       └── gate-session2.js      # 세션2 게이트
+├── testing/                       # 🧪 Testing 환경 (개발)
+│   ├── src/science-experiments/
+│   │   └── suhaeng3-test/        # 테스트용 수행3
+│   ├── functions/                # 테스트용 서버리스 함수
+│   │   ├── submit_test.js        # 테스트용 제출 함수
+│   │   ├── download_test.js      # 테스트용 다운로드 함수
+│   │   └── gate-session2.js      # 세션2 게이트
+│   └── netlify.toml              # 테스트 환경 설정
+├── production/                   # 🚀 향후 프로덕션 환경
 ├── docs/                         # 📚 사용자 문서
 ├── project/                      # 📋 개발자 문서
 ├── scripts/                      # 🔧 자동화 스크립트
