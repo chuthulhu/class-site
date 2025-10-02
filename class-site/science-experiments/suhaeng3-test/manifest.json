@@ -1,0 +1,73 @@
+{
+  "name": "스마트 모빌리티 허브 아이디어 제안서 (테스트)",
+  "short_name": "모빌리티 허브 테스트",
+  "description": "과학탐구실험2 수행평가용 스마트 모빌리티 허브 아이디어 제안서 작성 도구 (테스트 버전)",
+  "start_url": "/science-experiments/suhaeng3-test/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait-primary",
+  "scope": "/science-experiments/suhaeng3-test/",
+  "lang": "ko",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "features": [
+    "offline-support",
+    "auto-save",
+    "file-upload",
+    "print-support"
+  ],
+  "shortcuts": [
+    {
+      "name": "새 제안서 작성",
+      "short_name": "새 작성",
+      "description": "새로운 아이디어 제안서를 작성합니다",
+      "url": "/science-experiments/suhaeng3-test/?action=new",
+      "icons": [
+        {
+          "src": "/shortcut-new.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "제안서 제출",
+      "short_name": "제출",
+      "description": "작성한 제안서를 제출합니다",
+      "url": "/science-experiments/suhaeng3-test/?action=submit",
+      "icons": [
+        {
+          "src": "/shortcut-submit.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}

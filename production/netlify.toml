@@ -1,0 +1,37 @@
+[build]
+  base    = "."
+  publish = "src"
+
+[functions]
+  directory = "functions"
+  node_bundler = "esbuild"
+
+# Production-specific routing
+[[edge_functions]]
+path = "/science-experiments/suhaeng3/session2"
+function = "gate-session2"
+
+[[edge_functions]]
+path = "/science-experiments/suhaeng3/session2.html"
+function = "gate-session2"
+
+[[edge_functions]]
+path = "/science-experiments/suhaeng3/session2/*"
+function = "gate-session2"
+
+# Production-specific headers
+[[headers]]
+for = "/science-experiments/suhaeng3/index.html"
+  [headers.values]
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/science-experiments/suhaeng3/session2.html"
+  [headers.values]
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/*"
+  [headers.values]
+  X-Environment = "production"
+  X-Version = "1.0.0"

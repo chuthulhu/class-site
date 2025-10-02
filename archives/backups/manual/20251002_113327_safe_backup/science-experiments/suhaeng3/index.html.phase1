@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>첫걸음, 마지막 걸음 프로젝트 허브</title>
+    <!-- Submission Subject (easily editable) -->
+    <meta name="submission-subject" content="과학탐구실험2">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- ZIP 생성을 위한 라이브러리 추가 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- Google Fonts - Noto Sans KR & Nanum Myeongjo for serif font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        /* --- 탭 버튼 스타일 (from index.html) --- */
+        .tab-button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem; /* 8px */
+            background-color: #e5e7eb; /* gray-200 */
+            padding: 0.5rem;
+            border-radius: 0.75rem; /* 12px */
+        }
+        .tab-button {
+            flex-grow: 1;
+            text-align: center;
+            padding: 0.75rem 0.5rem;
+            border-radius: 0.5rem; /* 8px */
+            font-weight: 500;
+            color: #4b5563; /* gray-600 */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .tab-button:hover {
+            background-color: #f9fafb; /* gray-50 */
+            color: #1f2937; /* gray-800 */
+        }
+        .tab-button.active {
+            background-color: #ffffff;
+            color: #4f46e5; /* indigo-600 */
+            font-weight: 700;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* --- Styles from a previous version (수행평가3.html) --- */
+        .tip-card {
+            background: linear-gradient(135deg, #f5f3ff, #eef2ff);
+            border-left: 4px solid #6366f1;
+        }
+        .name-explainer-card {
+             background-color: #f0fdf4;
+             border-left: 4px solid #22c55e;
+             padding: 1.5rem;
+             border-radius: 0.5rem;
+        }
+        .infographic-card {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .step-icon {
+            background-color: #4f46e5;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        .accordion-header button.open {
+            background-color: #eef2ff;
+            color: #4338ca;
+        }
+        .accordion-content {
+            transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+            max-height: 0;
+            overflow: hidden;
+        }
+        .accordion-content.open {
+            max-height: 1500px;
+        }
+        
+        /* 활동지 입력 필드 스타일 */
+        textarea, input[type="text"], select {
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        textarea:focus, input[type="text"]:focus, select:focus {
+            border-color: #4f46e5; /* indigo-600 */
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+            outline: none;
+        }
+        
+        /* --- 미리보기(리포트) 스타일 (from index.html) --- */
+        .report-page {
+            background-color: white;
+            padding: 2.5cm 2cm;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            color: #1f2937;
+        }
+        .report-main-title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 2.25rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #111827;
+            padding-bottom: 1rem;
+        }
+        .report-section-title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111827;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #d1d5db;
+        }
+        .preview-text {
+            white-space: pre-wrap;
+            word-break: break-word;
+            min-height: 2.5em;
+            line-height: 1.8;
+            color: #374151;
+            font-family: 'Nanum Myeongjo', serif; /* 본문은 명조체 유지 */
+        }
+        .preview-placeholder {
+            color: #9ca3af;
+            font-style: italic;
+        }
+        
+        /* 인쇄 설정 */
+        @page {
+            size: A4 portrait; margin: 2cm;
+        }
+        @media print {
+            body * { visibility: hidden; }
+            .printable-area, .printable-area * { visibility: visible; }
+            .printable-area {
+                position: absolute; left: 0; top: 0;
+                width: 100%; padding: 0; margin: 0;
+                box-shadow: none; border: none;
+            }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+
+    <div class="max-w-5xl mx-auto">
+        <header class="text-center bg-white p-8 rounded-xl shadow-lg mb-6 no-print">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">첫걸음, 마지막 걸음 프로젝트</h1>
+            <p class="text-lg text-gray-600 mt-2">S-BRT와 공유 PM 연계를 위한 종합 안내</p>
+            <div class="mt-4 flex flex-wrap gap-3 justify-center" id="session_links_wrapper">
+                <a id="session1_link" href="./session1.html" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hidden" aria-disabled="true">1차시 활동 (현황 분석·고려사항)</a>
+                <a id="session2_link" href="./session2.html" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 hidden" aria-disabled="true">2차시 활동 (3가지 지렛대·기대효과)</a>
+                <span id="session_locked_notice" class="px-4 py-2 bg-gray-300 text-gray-600 rounded-lg select-none">활동 버튼은 10/13 00:00 공개 예정</span>
+            </div>
+        </header>
+        
+        
+
+        <!-- Tab Navigation (허브: 배경/문제/가이드만) -->
+        <div class="mb-8 no-print">
+            <div class="tab-button-group" aria-label="Tabs">
+                <button class="tab-button active" data-tab="tab1">1. 배경 및 현황</button>
+                <button class="tab-button" data-tab="tab2">2. 프로젝트 문제</button>
+                <button class="tab-button" data-tab="tab3">3. 공략 가이드</button>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        <main>
+            <!-- Tab 1: 배경 및 현황 (Content Filled) -->
+            <div id="tab1" class="tab-content active">
+                <div class="bg-white p-6 sm:p-8 rounded-lg shadow-md space-y-12">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">🤔 혹시, 당신의 등하굣길은 어떤가요?</h2>
+                        <div class="bg-indigo-50 border-l-4 border-indigo-400 p-6 rounded-lg space-y-3 text-gray-700">
+                            <p>"아침에 버스 타러 가는데, 인도 한가운데 킥보드가 넘어져 있어서 짜증 났던 적."</p>
+                            <p>"버스를 기다리는데, 정류장 앞에 킥보드가 여러 대 널려 있어서 타기 불편했던 적."</p>
+                            <p>"학원 갈 때 킥보드 타고 S-BRT 정류장까지 가면 편할 것 같은데, 막상 타려고 하면 근처에 없거나 배터리가 없어서 포기한 적."</p>
+                            <p class="pt-2 font-semibold">이런 경험, 한 번쯤 있지 않나요? 이 작은 불편함들이 바로 우리가 해결하려는 도시 문제의 시작입니다.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">S-BRT: 빛과 그림자</h2>
+                        <p class="text-gray-600 mb-6">창원 S-BRT는 대중교통의 효율을 높였지만, 새로운 문제도 낳았습니다. 그 성과를 인포그래픽으로 살펴봅시다.</p>
+                        <div class="bg-gray-50 p-6 rounded-xl">
+                            <div class="relative flex items-end justify-center">
+                                <div class="w-1/2 pr-4 text-center">
+                                    <h3 class="text-lg font-bold text-blue-600">긍정적 효과 (빛) ⬆️</h3>
+                                    <div class="mt-4 space-y-3">
+                                        <div class="bg-blue-100 p-3 rounded-lg"><p class="text-2xl">🚌</p><p class="font-semibold text-blue-800">버스 통행시간 단축</p><p class="text-xl font-bold text-blue-600">-5분 58초</p></div>
+                                        <div class="bg-blue-100 p-3 rounded-lg"><p class="text-2xl">📈</p><p class="font-semibold text-blue-800">버스 이용객 증가</p><p class="text-xl font-bold text-blue-600">+16.2%</p></div>
+                                    </div>
+                                </div>
+                                <div class="w-1/2 pl-4 text-center transform -translate-y-10">
+                                    <h3 class="text-lg font-bold text-red-600">부정적 효과 (그림자) ⬇️</h3>
+                                    <div class="mt-4">
+                                        <div class="bg-red-100 p-3 rounded-lg"><p class="text-2xl">🚗</p><p class="font-semibold text-red-800">승용차 통행시간 증가</p><p class="text-xl font-bold text-red-600">+6분 12초</p></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="h-2 bg-gray-400 rounded-full transform -skew-y-3"></div>
+                            <div class="w-0 h-0 border-l-[25px] border-l-transparent border-r-[25px] border-r-transparent border-b-[43.3px] border-b-gray-500 mx-auto"></div>
+                            <p class="text-center text-sm text-gray-600 mt-4">S-BRT 도입으로 버스는 빨라졌지만, 그만큼 승용차는 느려지는 <strong>'풍선 효과'</strong>가 발생했습니다. 한쪽을 누르면 다른 쪽이 부풀어 오르는 것처럼, 도로 공간의 변화가 서로 다른 영향을 미친 것입니다.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">공유 PM: 편리함 속 무질서</h2>
+                        <p class="text-gray-600 mb-6">공유 킥보드와 자전거는 단거리 이동을 편리하게 만들었지만, 무분별한 주차 문제라는 그림자를 만들었습니다.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="infographic-card"><span class="text-5xl mb-3">✅</span><h3 class="text-lg font-bold text-gray-800">기회: 유연한 이동성</h3><p class="text-gray-600 mt-2">앱으로 간편하게 대여/반납하며, 버스가 닿지 않는 곳까지 연결하는 편리함을 제공합니다.</p></div>
+                            <div class="infographic-card"><span class="text-5xl mb-3">⚠️</span><h3 class="text-lg font-bold text-gray-800">위기: 도시의 무질서</h3><p class="text-gray-600 mt-2">보도, 건물 입구 등에 무질서하게 방치되어 보행 안전을 위협하고 도시 미관을 해칩니다.</p></div>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">문제의 본질: 끊어진 '첫걸음'과 '마지막 걸음'</h2>
+                        <p class="text-gray-600 mb-6">대중교통의 진정한 성공은 '문 앞에서 문 앞까지(Door-to-Door)'의 여정이 얼마나 편리한가에 달려있습니다. 집에서 나와 버스 정류장까지 가는 <strong>'첫걸음(First Mile)'</strong>과, 정류장에서 내려 최종 목적지까지 가는 <strong>'마지막 걸음(Last Mile)'</strong>이 바로 그 핵심입니다. S-BRT는 간선도로 구간의 이동 시간은 단축했지만, 이 '첫걸음'과 '마지막 걸음'의 불편함은 해결하지 못했습니다. 바로 이 끊어진 연결고리가 시민들이 자가용의 유혹을 뿌리치지 못하는 가장 큰 이유입니다.</p>
+                        <div class="bg-gray-50 p-6 rounded-lg">
+                            <h3 class="text-lg font-semibold text-center text-gray-800 mb-4">하나의 완전한 여정: First Mile to Last Mile</h3>
+                            <div class="flex items-center justify-between text-center text-xs sm:text-sm">
+                                <div class="flex flex-col items-center w-1/5"><span class="text-4xl">🏠</span><p class="font-bold mt-1">집</p></div>
+                                <div class="flex-1 text-gray-400">•••<p class="font-semibold text-blue-600">첫걸음</p>•••</div>
+                                <div class="flex flex-col items-center w-1/5"><span class="text-4xl">🛴</span><p class="font-bold mt-1">공유PM</p></div>
+                                <div class="flex-1 text-red-500 font-bold text-lg">X</div>
+                                <div class="flex flex-col items-center w-1/5"><span class="text-4xl">🚏</span><p class="font-bold mt-1">S-BRT</p></div>
+                                <div class="flex-1 text-red-500 font-bold text-lg">X</div>
+                                <div class="flex flex-col items-center w-1/5"><span class="text-4xl">🛴</span><p class="font-bold mt-1">공유PM</p></div>
+                                <div class="flex-1 text-gray-400">•••<p class="font-semibold text-green-600">마지막 걸음</p>•••</div>
+                                <div class="flex flex-col items-center w-1/5"><span class="text-4xl">🏢</span><p class="font-bold mt-1">목적지</p></div>
+                            </div>
+                             <p class="text-center text-red-600 font-semibold mt-4">현재 공유 PM과 S-BRT의 연계가 끊어져, 시민들의 여정은 불편하고 도시는 무질서해지고 있습니다.<br> 이 문제를 해결하는 것이 우리 프로젝트의 핵심입니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: 프로젝트 문제 제시 (Content Filled) -->
+            <div id="tab2" class="tab-content">
+                <div class="bg-white p-6 sm:p-8 rounded-lg shadow-md space-y-12">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">프로젝트 개요: 도시교통 컨설턴트 되기</h2>
+                        <p class="text-gray-700 mt-2">여러분은 창원시의 도시교통 컨설턴트가 되어, 'S-BRT와 공유 PM의 단절'이라는 실제 도시 문제를 해결하기 위한 창의적인 아이디어 제안서를 작성합니다.</p>
+                    </div>
+                    <div class="name-explainer-card">
+                        <h3 class="font-bold text-lg text-green-800 mb-2">💡 프로젝트 이름: 첫걸음, 마지막 걸음</h3>
+                        <p class="text-green-700">이 이름은 교통 분야의 중요 개념인 <strong>'퍼스트 마일, 라스트 마일(First Mile, Last Mile)'</strong>에서 영감을 얻었습니다. 집에서 나와 대중교통을 타기까지의 여정(<strong>첫걸음</strong>)과, 대중교통에서 내려 최종 목적지까지 가는 여정(<strong>마지막 걸음</strong>)을 의미합니다. 이 프로젝트의 목표는 바로 이 '첫걸음과 마지막 걸음'을 공유 PM과 연계하여 완벽하고 편리한 이동 경험으로 만드는 것입니다.</p>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <h3 class="text-xl font-bold text-indigo-700 border-b-2 border-indigo-200 pb-3">프로젝트 과제: 스마트 모빌리티 허브 아이디어 제안</h3>
+                        <p class="text-gray-600">
+                            <strong>과제 목표:</strong> '스마트 모빌리티 허브' 시범사업을 성공시키기 위해, <strong>현실적인 문제 상황을 분석</strong>하고, <strong>'대상지 선정을 위한 고려사항'</strong>을 2가지 이상 제안하며, 이를 바탕으로 구체적인 솔루션과 기대효과를 작성합니다.
+                        </p>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center mt-4">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <span class="text-4xl">📊</span>
+                                <h4 class="font-bold mt-2">1. 현황 분석</h4>
+                                <p class="text-sm text-gray-600 mt-1">문제의 심각성과 중요성을 파악하여 정리합니다.</p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <span class="text-4xl">🤔</span>
+                                <h4 class="font-bold mt-2">2. 선정 기준 제시</h4>
+                                <p class="text-sm text-gray-600 mt-1">어떤 곳에 허브를 설치해야 성공할지, 그 기준을 제시합니다.</p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <span class="text-4xl">💡</span>
+                                <h4 class="font-bold mt-2">3. 솔루션 제안</h4>
+                                <p class="text-sm text-gray-600 mt-1">'3가지 지렛대'를 활용해 구체적인 아이디어를 제시합니다.</p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <span class="text-4xl">📈</span>
+                                <h4 class="font-bold mt-2">4. 기대 효과 작성</h4>
+                                <p class="text-sm text-gray-600 mt-1">아이디어가 실현되었을 때의 긍정적 변화를 예측합니다.</p>
+                            </div>
+                        </div>
+                         <div class="text-center mt-6"><p class="font-semibold text-gray-800"><strong>최종 결과물:</strong> '스마트 모빌리티 허브 아이디어 제안서'</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: 프로젝트 공략 가이드 (Content Filled) -->
+            <div id="tab3" class="tab-content">
+                <div class="bg-white p-6 sm:p-8 rounded-lg shadow-md">
+                    <section>
+                        <h2 class="text-2xl font-bold text-indigo-700 mb-4 flex items-center">
+                            <span class="step-icon mr-3">🚀</span>
+                            아이디어 제안서 작성 가이드
+                        </h2>
+                        <div class="bg-white p-6 rounded-lg shadow-sm space-y-4">
+                            <p class="text-gray-700">이 프로젝트의 핵심은 정해진 답을 찾는 것이 아니라, 여러분의 창의적인 생각과 논리를 자유롭게 펼치는 것입니다. 아래 가이드를 참고하여 멋진 아이디어를 구체화해 보세요.</p>
+                            
+                            <div class="accordion-item border-t pt-4">
+                                <div class="accordion-header"><button class="w-full text-left p-4 rounded-lg font-semibold text-lg text-gray-800 hover:bg-gray-100 flex justify-between items-center"><span>📊 1. '현황 분석'은 어떻게 할까?</span><svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button></div>
+                                <div class="accordion-content"><div class="p-4 text-gray-600 space-y-3">
+                                    <p>좋은 해결책은 정확한 문제 인식에서 시작됩니다. 왜 지금 S-BRT와 공유 PM의 연계가 중요한 문제인지, 최신 뉴스 기사나 자료를 참고하여 자신의 언어로 정리해보세요.</p>
+                                    <div class="tip-card p-4 rounded-lg">
+                                        <h4 class="font-bold text-indigo-800">생각을 넓히는 질문</h4>
+                                        <ul class="list-disc list-inside mt-2 text-sm">
+                                            <li>최근 창원시 S-BRT나 공유 PM과 관련하여 어떤 뉴스들이 있었나요?</li>
+                                            <li>시민들은 이 문제에 대해 어떤 불편을 겪고 있을까요?</li>
+                                            <li>이 문제를 해결하지 않으면 미래에 어떤 더 큰 문제가 발생할 수 있을까요?</li>
+                                        </ul>
+                                    </div>
+                                </div></div>
+                            </div>
+
+                            <div class="accordion-item border-t pt-4">
+                                <div class="accordion-header"><button class="w-full text-left p-4 rounded-lg font-semibold text-lg text-gray-800 hover:bg-gray-100 flex justify-between items-center"><span>🤔 2. '대상지 선정을 위한 고려사항'은 어떻게 정할까?</span><svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button></div>
+                                <div class="accordion-content"><div class="p-4 text-gray-600 space-y-3">
+                                    <p>만약 여러분이 창원시장이라면, 한정된 예산으로 '스마트 모빌리티 허브'를 딱 한 곳에만 설치해야 합니다. 어떤 기준으로 그 장소를 골라야 시범사업이 성공하고, 시민들에게 가장 큰 도움이 될까요? 그 기준을 정하는 것이 이번 활동의 핵심입니다.</p>
+                                    <div class="tip-card p-4 rounded-lg">
+                                        <h4 class="font-bold text-indigo-800">생각을 넓히는 질문</h4>
+                                        <ul class="list-disc list-inside mt-2 text-sm">
+                                            <li>누가 허브를 가장 많이 이용할까요? (학생, 직장인, 주민 등)</li>
+                                            <li>어떤 문제를 가장 시급하게 해결해야 할까요? (안전, 불편, 도시 미관 등)</li>
+                                            <li>어디에 설치해야 눈에 잘 띄고 더 많은 사람이 이용할 수 있을까요?</li>
+                                        </ul>
+                                    </div>
+                                </div></div>
+                            </div>
+
+                            <div class="accordion-item border-t pt-4">
+                                <div class="accordion-header"><button class="w-full text-left p-4 rounded-lg font-semibold text-lg text-gray-800 hover:bg-gray-100 flex justify-between items-center"><span>💡 3. '3가지 지렛대' 아이디어 내기</span><svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button></div>
+                                <div class="accordion-content"><div class="p-4 text-gray-600 space-y-4">
+                                    <p>하나의 좋은 아이디어는 여러 요소가 결합되었을 때 나옵니다. '공간', '혜택', '협력'이라는 3가지 관점에서 아이디어를 자유롭게 상상해보세요.</p>
+                                    <p><strong>🏛️ 물리적 인프라 (공간):</strong> "예쁜 디자인의 비가림막과 스마트폰 충전기를 설치하자!", "CCTV와 조명을 설치해서 밤에도 안전하게 만들자!"</p>
+                                    <p><strong>💡 디지털/정책 (혜택):</strong> "허브에 주차하면 킥보드 요금을 할인해주자!", "S-BRT로 환승하면 추가 포인트를 주는 앱을 만들자!"</p>
+                                    <p><strong>🤝 운영 모델 (협력):</strong> "창원시, 킥보드 회사, 버스 회사가 함께 운영 비용을 부담하자!", "허브 주변 카페와 제휴해서 할인 쿠폰을 주자!"</p>
+                                </div></div>
+                            </div>
+
+                            <div class="accordion-item border-t pt-4">
+                                <div class="accordion-header"><button class="w-full text-left p-4 rounded-lg font-semibold text-lg text-gray-800 hover:bg-gray-100 flex justify-between items-center"><span>📈 4. 기대 효과, 어떻게 쓸까?</span><svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button></div>
+                                <div class="accordion-content"><div class="p-4 text-gray-600 space-y-3">
+                                    <p>여러분의 아이디어가 만들어 낼 긍정적인 미래를 상상해서 적어보세요. 거창하지 않아도 괜찮아요. 구체적인 모습을 그려보는 것이 중요합니다.</p>
+                                     <div class="tip-card p-4 rounded-lg">
+                                        <h4 class="font-bold text-indigo-800">생각을 넓히는 질문</h4>
+                                        <ul class="list-disc list-inside mt-2 text-sm">
+                                            <li>여러분의 아이디어가 실현되면 누가 가장 좋아할까요?</li>
+                                            <li>도시의 모습은 어떻게 바뀔까요? (예: 깨끗해진다, 활기차진다 등)</li>
+                                            <li>사람들의 생활은 어떻게 더 편리해질까요?</li>
+                                        </ul>
+                                    </div>
+                                </div></div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Tab 4: 프로젝트 활동지 -->
+            <div id="tab4" class="tab-content">
+                <div class="bg-white p-6 sm:p-10 rounded-lg shadow-md space-y-8">
+                    <header class="text-center mb-10">
+                        <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">스마트 모빌리티 허브 아이디어 제안서</h1>
+                        <p class="text-lg text-gray-600 mt-2">첫걸음, 마지막 걸음 프로젝트 활동지</p>
+                    </header>
+                    
+                    <section>
+                        <h2 class="text-2xl font-bold text-indigo-700 mb-4">1. 현황 분석 및 문제 인식</h2>
+                        <div>
+                            <label for="field_analysis" class="font-semibold text-gray-700 block mb-2">S-BRT와 공유 PM 연계 문제의 현황과 중요성</label>
+                            <textarea id="field_analysis" rows="6" placeholder="최신 뉴스나 자료를 참고하여, 현재 창원시의 S-BRT와 공유 PM 연계 문제가 왜 중요하고 시급한지 자신의 언어로 분석하여 작성해보세요." class="w-full p-3 border border-gray-300 rounded-md"></textarea>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 class="text-2xl font-bold text-indigo-700 mb-4">2. 시범사업 대상지 선정을 위한 고려사항</h2>
+                        <p class="text-gray-600 mb-6">스마트 모빌리티 허브 시범사업을 성공시키기 위해, 어떤 기준으로 대상지를 선정해야 할지 <strong>2가지 이상의 고려사항</strong>과 그 이유를 구체적으로 작성하세요.</p>
+                        <div class="space-y-6">
+                             <div>
+                                <label for="field_c1_title" class="font-semibold text-gray-700 block mb-2">고려사항 1</label>
+                                <input type="text" id="field_c1_title" class="w-full p-3 border border-gray-300 rounded-md" placeholder="첫 번째 기준을 한 문장으로 작성하세요.">
+                                <textarea id="field_c1_desc" rows="4" placeholder="왜 이 기준이 중요하다고 생각하나요? 구체적인 이유를 설명해주세요." class="w-full p-3 mt-2 border border-gray-300 rounded-md"></textarea>
+                            </div>
+                            <div>
+                                <label for="field_c2_title" class="font-semibold text-gray-700 block mb-2">고려사항 2</label>
+                                <input type="text" id="field_c2_title" class="w-full p-3 border border-gray-300 rounded-md" placeholder="두 번째 기준을 한 문장으로 작성하세요.">
+                                <textarea id="field_c2_desc" rows="4" placeholder="왜 이 기준이 중요하다고 생각하나요? 구체적인 이유를 설명해주세요." class="w-full p-3 mt-2 border border-gray-300 rounded-md"></textarea>
+                            </div>
+                        </div>
+                    </section>
+            
+                    <section>
+                        <h2 class="text-2xl font-bold text-indigo-700 mb-4">3. 스마트 모빌리티 허브 아이디어 (3가지 지렛대)</h2>
+                        <div class="space-y-6">
+                            <div>
+                                <label for="field_idea_infra" class="font-semibold text-gray-700 block mb-2">🏛️ 물리적 인프라 (공간)</label>
+                                <textarea id="field_idea_infra" rows="5" placeholder="안전하고 편리하며 매력적인 '공간'을 만들기 위한 아이디어를 작성해보세요. (예: 디자인, 편의시설, 안전장치 등)" class="w-full p-3 border border-gray-300 rounded-md"></textarea>
+                            </div>
+                            <div>
+                                <label for="field_idea_policy" class="font-semibold text-gray-700 block mb-2">💡 디지털/정책 (혜택)</label>
+                                <textarea id="field_idea_policy" rows="5" placeholder="사람들이 허브를 '자발적으로' 이용하게 만들 아이디어를 작성해보세요. (예: 요금 할인, 포인트, 앱 연동, 주차 규칙 등)" class="w-full p-3 border border-gray-300 rounded-md"></textarea>
+                            </div>
+                            <div>
+                                <label for="field_idea_operation" class="font-semibold text-gray-700 block mb-2">🤝 운영 모델 (협력)</label>
+                                <textarea id="field_idea_operation" rows="5" placeholder="이 허브를 '지속가능하게' 운영하기 위한 아이디어를 작성해보세요. (예: 시/기업 역할 분담, 주변 상점과 제휴 등)" class="w-full p-3 border border-gray-300 rounded-md"></textarea>
+                            </div>
+                        </div>
+                    </section>
+            
+                    <section>
+                        <h2 class="text-2xl font-bold text-indigo-700 mb-4">4. 기대 효과</h2>
+                        <div>
+                            <label for="field_effects" class="font-semibold text-gray-700 block mb-2">아이디어 실현 후 예상되는 긍정적 변화</label>
+                            <textarea id="field_effects" rows="6" placeholder="제안한 허브가 성공적으로 도입되었을 때 예상되는 긍정적인 변화를 자유롭게 상상하여 작성해보세요." class="w-full p-3 border border-gray-300 rounded-md"></textarea>
+                        </div>
+                    </section>
+                    
+                    <!-- [NEW] 출처 추가 섹션 from index.html -->
+                    <section>
+                        <h2 class="text-2xl font-bold text-indigo-700 mb-4">5. 정보 출처</h2>
+                        <div>
+                            <div id="sources_container" class="space-y-4"></div>
+                            <button id="add_source_btn" class="mt-4 bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition text-sm">+ 출처 추가</button>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Tab 5: 미리보기 및 제출 -->
+            <div id="tab5" class="tab-content">
+                 <div class="bg-white p-6 sm:p-8 rounded-lg shadow-md mb-6 no-print">
+                    <!-- [MODIFIED] Button container -->
+                    <div class="flex justify-center items-center gap-4 flex-wrap">
+                        <button id="download_zip_btn" class="bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition text-base">
+                            📦 ZIP으로 다운로드
+                        </button>
+                        <button id="print_btn" class="bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition text-base">
+                            🖨️ PDF로 저장
+                        </button>
+                        <button id="preview_newtab_btn" class="bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition text-base">
+                            👁️ 미리보기(새 탭)
+                        </button>
+                        <button id="retry_upload_btn" class="hidden bg-yellow-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-yellow-600 transition text-base">
+                            🔄 업로드 재시도
+                        </button>
+                    </div>
+                    <p class="text-center text-sm text-gray-600 mt-4" aria-live="polite" role="status"><span id="submit_status"></span></p>
+                    <div id="progress_container" class="w-full max-w-xl mx-auto mt-3 hidden" aria-hidden="true">
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div id="progress_bar" class="bg-indigo-600 h-3 rounded-full" style="width:0%"></div>
+                        </div>
+                        <p id="progress_text" class="text-center text-xs text-gray-600 mt-1"></p>
+                    </div>
+                </div>
+                <div class="bg-gray-200 p-4 sm:p-8 rounded-lg">
+                    <div class="printable-area report-page" id="report-content">
+                        <h1 id="preview_main_title" class="report-main-title">스마트 모빌리티 허브 아이디어 제안서</h1>
+                        <p class="text-right text-gray-600 mb-10" style="font-family: 'Noto Sans KR', sans-serif;">
+                            <span id="preview_student_grade">1</span>학년 <span id="preview_student_class">0</span>반 <span id="preview_student_number">00</span>번 이름: <span id="preview_student_name">ㅇㅇㅇ</span>
+                        </p>
+                        
+                        <h2 class="report-section-title">I. 현황 분석 및 문제 인식</h2>
+                        <p class="preview-text" id="preview_analysis"><span class="preview-placeholder">내용을 입력하세요...</span></p>
+
+                        <h2 class="report-section-title">II. 시범사업 대상지 선정을 위한 고려사항</h2>
+                        <h3 class="font-semibold mt-4 mb-2" id="preview_c1_title" style="font-family: 'Noto Sans KR', sans-serif;"><span class="preview-placeholder">[고려사항 1 제목]</span></h3>
+                        <p class="preview-text" id="preview_c1_desc"><span class="preview-placeholder">내용을 입력하세요...</span></p>
+                        <h3 class="font-semibold mt-4 mb-2" id="preview_c2_title" style="font-family: 'Noto Sans KR', sans-serif;"><span class="preview-placeholder">[고려사항 2 제목]</span></h3>
+                        <p class="preview-text" id="preview_c2_desc"><span class="preview-placeholder">내용을 입력하세요...</span></p>
+
+                        <h2 class="report-section-title">III. 스마트 모빌리티 허브 아이디어</h2>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">가. 물리적 인프라 (공간)</h3>
+                        <p class="preview-text" id="preview_idea_infra"><span class="preview-placeholder">내용을 입력하세요...</span></p>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">나. 디지털/정책 (혜택)</h3>
+                        <p class="preview-text" id="preview_idea_policy"><span class="preview-placeholder">내용을 입력하세요...</span></p>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">다. 운영 모델 (협력)</h3>
+                        <p class="preview-text" id="preview_idea_operation"><span class="preview-placeholder">내용을 입력하세요...</span></p>
+
+                        <h2 class="report-section-title">IV. 기대 효과</h2>
+                        <p class="preview-text" id="preview_effects"><span class="preview-placeholder">내용을 입력하세요...</span></p>
+
+                        <h2 class="report-section-title">V. 정보 출처</h2>
+                        <div class="preview-text" id="preview_sources"><span class="preview-placeholder">내용을 입력하세요...</span></div>
+
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals and Toasts -->
+    <div id="toast-notification" class="fixed bottom-5 right-5 bg-gray-800 text-white py-3 px-5 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 no-print">
+        저장되었습니다!
+    </div>
+    <div id="delete-confirm-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 no-print">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm">
+            <h3 class="text-lg font-bold text-gray-800">작성한 내용을 삭제하시겠습니까?</h3>
+            <p class="text-gray-600 mt-2">이 작업은 되돌릴 수 없습니다.</p>
+            <div class="mt-6 flex justify-end space-x-4">
+                <button id="cancel-delete-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">취소</button>
+                <button id="confirm-delete-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">삭제</button>
+            </div>
+        </div>
+    </div>
+    <!-- [NEW] Import Modal -->
+    <div id="import-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 no-print">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
+            <h3 class="text-lg font-bold text-gray-800">데이터 가져오기</h3>
+            <p class="text-gray-600 mt-2">'데이터 내보내기'로 복사한 텍스트를 아래에 붙여넣고 '불러오기' 버튼을 누르세요.</p>
+            <textarea id="import_textarea" class="w-full h-32 p-2 mt-4 border border-gray-300 rounded-md"></textarea>
+            <div class="mt-6 flex justify-end space-x-4">
+                <button id="cancel-import-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">취소</button>
+                <button id="confirm-import-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">불러오기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- [NEW] iOS Save Help Modal -->
+    <div id="ios-help-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 no-print" role="dialog" aria-modal="true" aria-labelledby="ios-help-title">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
+            <h3 id="ios-help-title" class="text-lg font-bold text-gray-800">iOS에서 ZIP 파일 저장하기</h3>
+            <ol class="text-gray-700 mt-3 list-decimal list-inside space-y-2">
+                <li>아래 "파일에 저장(공유 시트)" 버튼을 눌러 공유 시트를 여세요.</li>
+                <li>공유 시트에서 "파일에 저장"을 선택하세요.</li>
+                <li>원하는 저장 위치(예: iCloud Drive 또는 내 iPhone)와 폴더를 선택하고 저장하세요.</li>
+            </ol>
+            <p class="text-gray-500 text-sm mt-3">팁: 저장 후 "파일" 앱에서 방금 저장한 위치로 이동해 확인할 수 있어요.</p>
+            <div class="mt-6 flex flex-col sm:flex-row justify-end gap-3">
+                <button id="ios-help-download-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">대신 바로 다운로드</button>
+                <div class="flex-1"></div>
+                <button id="ios-help-close-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">닫기</button>
+                <button id="ios-help-confirm-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">파일에 저장(공유 시트)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- [NEW] Mobile Download Center Modal -->
+    <div id="inapp-download-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 no-print" role="dialog" aria-modal="true" aria-labelledby="inapp-title">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
+            <h3 id="inapp-title" class="text-lg font-bold text-gray-800">모바일 브라우저에서 저장하기</h3>
+            <p class="text-gray-600 mt-2">현재 사용 중인 브라우저에서는 파일 저장이 제한될 수 있어요. 아래 버튼으로 서버에서 직접 내려받아 주세요.</p>
+            <div class="mt-4 grid grid-cols-1 gap-3">
+                <button id="inapp-server-download-btn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">서버에서 다운로드(권장)</button>
+                <button id="inapp-retry-btn" class="hidden px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">재시도</button>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button id="inapp-close-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">닫기</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Session buttons gate (hub) ---
+        const s1Link = document.getElementById('session1_link');
+        const s2Link = document.getElementById('session2_link');
+        const notice = document.getElementById('session_locked_notice');
+
+        // Teacher bypass key support: read from URL once and store in sessionStorage
+        (function persistTeacherKey(){
+            try{
+                const u=new URL(window.location.href);
+                const k=u.searchParams.get('key');
+                if(k){ sessionStorage.setItem('teacher_key', k); }
+            }catch(_){}
+        })();
+
+        (async () => {
+            if (!s1Link || !s2Link) return;
+            try {
+                const res = await fetch('/.netlify/functions/time', { cache: 'no-store' });
+                if (!res.ok) throw new Error('time fetch failed');
+                const data = await res.json();
+                const nowUTC = typeof data?.now === 'number' ? data.now : Date.parse(data?.iso || '');
+                if (!Number.isFinite(nowUTC)) throw new Error('bad time payload');
+
+                // KST 2025-10-13 00:00 == UTC 2025-10-12T15:00:00Z
+                const SHOW_UTC = Date.parse('2025-10-12T15:00:00Z');
+                const teacherKey = sessionStorage.getItem('teacher_key') || '';
+                const unlock = teacherKey || nowUTC >= SHOW_UTC;
+
+                if (unlock) {
+                    // Append teacher key to links if present
+                    if (teacherKey) {
+                        [s1Link, s2Link].forEach(a => {
+                            if (!a) return; const url = new URL(a.getAttribute('href'), window.location.origin); url.searchParams.set('key', teacherKey); a.setAttribute('href', url.pathname + url.search);
+                        });
+                    }
+                    s1Link.classList.remove('hidden');
+                    s2Link.classList.remove('hidden');
+                    s1Link.setAttribute('aria-disabled','false');
+                    s2Link.setAttribute('aria-disabled','false');
+                    if (notice) notice.classList.add('hidden');
+                } else {
+                    // Keep hidden until release
+                    s1Link.classList.add('hidden');
+                    s2Link.classList.add('hidden');
+                    s1Link.setAttribute('aria-disabled','true');
+                    s2Link.setAttribute('aria-disabled','true');
+                    if (notice) notice.classList.remove('hidden');
+                }
+            } catch (_) {
+                // On failure keep everything hidden (fail-safe)
+                if (s1Link) { s1Link.classList.add('hidden'); s1Link.setAttribute('aria-disabled','true'); }
+                if (s2Link) { s2Link.classList.add('hidden'); s2Link.setAttribute('aria-disabled','true'); }
+                if (notice) notice.classList.remove('hidden');
+            }
+        })();
+        // --- DOM Element Constants ---
+        const dom = {
+            tabs: document.querySelectorAll('.tab-button'),
+            tabContents: document.querySelectorAll('.tab-content'),
+            accordions: document.querySelectorAll('.accordion-header button'),
+            deleteAllBtn: document.getElementById('delete_all_btn'),
+            deleteModal: document.getElementById('delete-confirm-modal'),
+            confirmDeleteBtn: document.getElementById('confirm-delete-btn'),
+            cancelDeleteBtn: document.getElementById('cancel-delete-btn'),
+            downloadZipBtn: document.getElementById('download_zip_btn'),
+            printBtn: document.getElementById('print_btn'),
+            previewNewTabBtn: document.getElementById('preview_newtab_btn'),
+            retryUploadBtn: document.getElementById('retry_upload_btn'),
+            addSourceBtn: document.getElementById('add_source_btn'),
+            sourcesContainer: document.getElementById('sources_container'),
+            toast: document.getElementById('toast-notification'),
+            allInputs: document.querySelectorAll('#tab4 input, #tab4 textarea, input#student_grade, input#student_class, input#student_number, input#student_name'),
+            // [NEW] Import/Export elements
+            importDataBtn: document.getElementById('import_data_btn'),
+            exportDataBtn: document.getElementById('export_data_btn'),
+            importModal: document.getElementById('import-modal'),
+            importTextarea: document.getElementById('import_textarea'),
+            confirmImportBtn: document.getElementById('confirm-import-btn'),
+            cancelImportBtn: document.getElementById('cancel-import-btn'),
+            // Submit status
+            submitStatus: document.getElementById('submit_status'),
+            // iOS Help Modal
+            iosHelpModal: document.getElementById('ios-help-modal'),
+            iosHelpConfirmBtn: document.getElementById('ios-help-confirm-btn'),
+            iosHelpCloseBtn: document.getElementById('ios-help-close-btn'),
+            iosHelpDownloadBtn: document.getElementById('ios-help-download-btn'),
+            // In-App Download Center
+            inappModal: document.getElementById('inapp-download-modal'),
+            inappCloseBtn: document.getElementById('inapp-close-btn'),
+            inappServerDownloadBtn: document.getElementById('inapp-server-download-btn'),
+            inappRetryBtn: document.getElementById('inapp-retry-btn'),
+        };
+
+        // --- Field Mapping for Preview ---
+        const fields = {
+            'student_grade': 'preview_student_grade',
+            'student_class': 'preview_student_class', 'student_number': 'preview_student_number', 'student_name': 'preview_student_name',
+            'field_analysis': 'preview_analysis',
+            'field_c1_title': 'preview_c1_title', 'field_c1_desc': 'preview_c1_desc',
+            'field_c2_title': 'preview_c2_title', 'field_c2_desc': 'preview_c2_desc',
+            'field_idea_infra': 'preview_idea_infra', 'field_idea_policy': 'preview_idea_policy',
+            'field_idea_operation': 'preview_idea_operation',
+            'field_effects': 'preview_effects'
+        };
+        
+        // --- Source Configuration ---
+        const sourceConfig = {
+            '논문': {'저자':true, '연도':true, '논문 제목':true, '학술지명':false, '권':false, '호':false, '페이지':false},
+            '도서': {'저자':true, '도서명':true, '출판사':true, '연도':false},
+            '학술잡지': {'잡지명':true, '기사 제목':true, '기자명':true, '발행일':false},
+            '인터넷 URL': {'웹사이트명':true, '글 제목':true, '작성자(기자)':true, 'URL':true}
+        };
+
+        const storageKey = 'firstLastMileProjectData';
+
+        // --- Event Listeners ---
+        dom.tabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+        dom.accordions.forEach(button => button.addEventListener('click', toggleAccordion));
+        dom.allInputs.forEach(input => input.addEventListener('input', updatePreviewAndSave));
+        
+        dom.addSourceBtn.addEventListener('click', () => addSourceElement());
+        dom.sourcesContainer.addEventListener('click', (e) => { if (e.target.classList.contains('delete_source_btn')) { e.target.closest('.source-entry').remove(); updatePreviewAndSave(); } });
+        dom.sourcesContainer.addEventListener('change', (e) => { if (e.target.classList.contains('source-type-select')) { updateSourceInputs(e.target); updatePreviewAndSave(); } });
+        dom.sourcesContainer.addEventListener('input', updatePreviewAndSave);
+        
+        dom.deleteAllBtn.addEventListener('click', () => dom.deleteModal.classList.remove('hidden'));
+        dom.cancelDeleteBtn.addEventListener('click', () => dom.deleteModal.classList.add('hidden'));
+        dom.confirmDeleteBtn.addEventListener('click', deleteAllContent);
+        // Replace default ZIP download with simultaneous download + upload
+        dom.downloadZipBtn.addEventListener('click', handleZipDownloadAndSubmit);
+        if (dom.printBtn) dom.printBtn.addEventListener('click', printReport);
+        if (dom.previewNewTabBtn) dom.previewNewTabBtn.addEventListener('click', openPreviewInNewTab);
+        if (dom.retryUploadBtn) dom.retryUploadBtn.addEventListener('click', retryLastUpload);
+
+        // iOS Help Modal events
+    if (dom.iosHelpCloseBtn) dom.iosHelpCloseBtn.addEventListener('click', () => hideModal(dom.iosHelpModal));
+        if (dom.iosHelpDownloadBtn) dom.iosHelpDownloadBtn.addEventListener('click', () => {
+            // Fallback direct download
+            if (lastZipBlob && lastMeta?.zipFilename) triggerBlobDownload(lastZipBlob, lastMeta.zipFilename);
+            dom.iosHelpModal.classList.add('hidden');
+        });
+        if (dom.iosHelpConfirmBtn) dom.iosHelpConfirmBtn.addEventListener('click', openIOSShare);
+
+        // In-App Download Center events
+    if (dom.inappCloseBtn) dom.inappCloseBtn.addEventListener('click', () => hideModal(dom.inappModal));
+        if (dom.inappServerDownloadBtn) dom.inappServerDownloadBtn.addEventListener('click', () => {
+            serverDownloadLastZip();
+        });
+        if (dom.inappRetryBtn) dom.inappRetryBtn.addEventListener('click', () => {
+            serverDownloadLastZip(true);
+        });
+
+        // Close modals on ESC for accessibility
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (dom.iosHelpModal && !dom.iosHelpModal.classList.contains('hidden')) hideModal(dom.iosHelpModal);
+                if (dom.inappModal && !dom.inappModal.classList.contains('hidden')) hideModal(dom.inappModal);
+            }
+        });
+
+        // --- Modal focus trap helpers ---
+        let __lastTriggerEl = null;
+        function getFocusable(el) {
+            return el.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        }
+        function showModal(el, triggerEl = null) {
+            __lastTriggerEl = triggerEl || document.activeElement;
+            el.classList.remove('hidden');
+            const f = getFocusable(el);
+            if (f.length) f[0].focus();
+            function onKey(e) {
+                if (e.key !== 'Tab') return;
+                const focusables = Array.from(getFocusable(el));
+                if (!focusables.length) return;
+                const first = focusables[0];
+                const last = focusables[focusables.length - 1];
+                if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+            }
+            el.__trapHandler = onKey;
+            el.addEventListener('keydown', onKey);
+        }
+        function hideModal(el) {
+            el.classList.add('hidden');
+            if (el.__trapHandler) el.removeEventListener('keydown', el.__trapHandler);
+            if (__lastTriggerEl && typeof __lastTriggerEl.focus === 'function') {
+                __lastTriggerEl.focus();
+            }
+        }
+
+        // [NEW] Import/Export event listeners
+        dom.importDataBtn.addEventListener('click', () => dom.importModal.classList.remove('hidden'));
+        dom.exportDataBtn.addEventListener('click', exportData);
+        dom.cancelImportBtn.addEventListener('click', () => dom.importModal.classList.add('hidden'));
+        dom.confirmImportBtn.addEventListener('click', importData);
+
+
+        // --- Initialization ---
+        loadFromBrowser();
+        switchTab('tab1');
+        updatePreview();
+
+        // Hide PDF print button only on iOS and in-app browsers (Android에서는 노출)
+        const __env = detectInApp();
+        if ((isIOS() || __env.isInApp) && dom.printBtn) {
+            dom.printBtn.classList.add('hidden');
+        }
+
+        // --- Main Functions ---
+        function switchTab(targetTabId) { /* ... (no changes) ... */ }
+        function toggleAccordion(event) { /* ... (no changes) ... */ }
+        function updatePreviewAndSave() { updatePreview(); saveToBrowser(); }
+        function updatePreview() { /* ... (no changes) ... */ }
+        function updateSourcesPreview() { /* ... (no changes) ... */ }
+        function getFormData() { /* ... (no changes) ... */ }
+        function saveToBrowser() { /* ... (no changes) ... */ }
+        function loadFromBrowser() { /* ... (no changes) ... */ }
+        function deleteAllContent() { /* ... (no changes) ... */ }
+        function addSourceElement(sourceData = null) { /* ... (no changes) ... */ }
+        function updateSourceInputs(selectElement, values = null) { /* ... (no changes) ... */ }
+        function getReportFilename() { /* ... (no changes) ... */ }
+        function printReport() { /* ... (no changes) ... */ }
+        function downloadAsZIP() { /* ... (no changes) ... */ }
+        let toastTimer;
+        function showToast(message, bgColor = 'bg-gray-800') { /* ... (no changes) ... */ }
+
+        // --- [NEW] Import/Export Functions ---
+        async function exportData() {
+            const dataString = localStorage.getItem(storageKey);
+            if (!dataString) {
+                showToast('저장된 데이터가 없습니다.', 'bg-red-500');
+                return;
+            }
+            try {
+                if (navigator.clipboard?.writeText) {
+                    await navigator.clipboard.writeText(dataString);
+                    showToast('데이터가 클립보드에 복사되었습니다.');
+                } else {
+                    throw new Error('Clipboard API not available');
+                }
+            } catch (err) {
+                // Fallback
+                const tempTextarea = document.createElement('textarea');
+                tempTextarea.value = dataString;
+                document.body.appendChild(tempTextarea);
+                tempTextarea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('데이터가 클립보드에 복사되었습니다.');
+                } catch (e) {
+                    showToast('복사에 실패했습니다. 직접 복사해주세요.', 'bg-red-500');
+                    prompt('아래 텍스트를 직접 복사하세요:', dataString);
+                }
+                document.body.removeChild(tempTextarea);
+            }
+        }
+
+        function importData() {
+            const dataString = dom.importTextarea.value;
+            if (!dataString.trim()) {
+                showToast('붙여넣을 데이터가 없습니다.', 'bg-red-500');
+                return;
+            }
+            try {
+                const data = JSON.parse(dataString);
+                // Clear existing content before loading
+                dom.allInputs.forEach(input => input.value = '');
+                dom.sourcesContainer.innerHTML = '';
+
+                // Load new data
+                Object.entries(data).forEach(([key, value]) => {
+                    if (key === 'sources' && Array.isArray(value)) {
+                        value.forEach(source => addSourceElement(source));
+                    } else {
+                        const el = document.getElementById(key);
+                        if (el) el.value = value;
+                    }
+                });
+                
+                updatePreviewAndSave(); // Save imported data to the current browser and update preview
+                dom.importModal.classList.add('hidden');
+                dom.importTextarea.value = '';
+                showToast('데이터를 성공적으로 불러왔습니다.');
+
+            } catch (error) {
+                showToast('데이터 형식이 올바르지 않습니다.', 'bg-red-500');
+            }
+        }
+
+        // --- Unchanged Functions (for brevity in this view, but they are in the full code) ---
+        function switchTab(targetTabId) { dom.tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === targetTabId)); dom.tabContents.forEach(content => content.classList.toggle('active', content.id === targetTabId)); window.scrollTo(0, 0); }
+        function toggleAccordion(event) { const button = event.currentTarget; const content = button.parentElement.nextElementSibling; const icon = button.querySelector('svg'); const isOpen = button.classList.toggle('open'); content.classList.toggle('open', isOpen); if (isOpen) { content.style.maxHeight = content.scrollHeight + 'px'; content.style.paddingTop = '1rem'; content.style.paddingBottom = '1rem'; if(icon) icon.style.transform = 'rotate(180deg)'; } else { content.style.maxHeight = '0'; content.style.paddingTop = '0'; content.style.paddingBottom = '0'; if(icon) icon.style.transform = 'rotate(0deg)'; } }
+        function updatePreview() { Object.entries(fields).forEach(([fieldId, previewId]) => { const inputEl = document.getElementById(fieldId); const previewEl = document.getElementById(previewId); if (!inputEl || !previewEl) return; const value = inputEl.value.trim(); const placeholderSpan = previewEl.querySelector('.preview-placeholder'); const placeholderText = placeholderSpan ? placeholderSpan.textContent : `[${fieldId}]`; if (value) { previewEl.textContent = value; } else { previewEl.innerHTML = `<span class="preview-placeholder">${placeholderText}</span>`; } }); updateSourcesPreview(); }
+        // Safe HTML escape
+        function escapeHtml(s) {
+            return String(s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/\"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function updateSourcesPreview() {
+            const sourcesPreview = document.getElementById('preview_sources');
+            const sourceEntries = document.querySelectorAll('.source-entry');
+            if (sourceEntries.length === 0) {
+                sourcesPreview.innerHTML = `<span class="preview-placeholder">내용을 입력하세요...</span>`;
+                return;
+            }
+            let items = [];
+            sourceEntries.forEach(entry => {
+                const values = Array.from(entry.querySelectorAll('input')).map(i => escapeHtml(i.value.trim()));
+                let parts = [];
+                switch(entry.dataset.type) {
+                    case '논문':
+                        if(values[0]) parts.push(values[0]);
+                        if(values[1]) parts.push(`(${values[1]})`);
+                        if(values[2]) parts.push(`${values[2]}.`);
+                        if(values[3]) parts.push(values[3]);
+                        if(values[4] || values[5]) parts.push(`, ${values[4] || ''}(${values[5] || ''})`);
+                        if(values[6]) parts.push(`, ${values[6]}`);
+                        break;
+                    case '도서':
+                        if(values[0]) parts.push(values[0]);
+                        if(values[3]) parts.push(`(${values[3]})`);
+                        if(values[1]) parts.push(`${values[1]}.`);
+                        if(values[2]) parts.push(values[2]);
+                        break;
+                    case '학술잡지':
+                        if(values[2]) parts.push(values[2]);
+                        if(values[3]) parts.push(`(${values[3]})`);
+                        if(values[1]) parts.push(`${values[1]}.`);
+                        if(values[0]) parts.push(values[0]);
+                        break;
+                    case '인터넷 URL':
+                        if(values[2]) parts.push(values[2]);
+                        if(values[0]) parts.push(values[0]);
+                        if(values[1]) parts.push(`'${values[1]}'.`);
+                        if (values[3]) parts.push(`URL: ${values[3]}`);
+                        break;
+                }
+                let liContent = parts.join(' ').replace(/\s\./g,'.').replace(/\s,/g,',');
+                items.push(`<li>${liContent}</li>`);
+            });
+            const html = `<ol class="list-decimal list-inside" style="line-height: 1.8;">${items.join('')}</ol>`;
+            sourcesPreview.innerHTML = html;
+        }
+        function getFormData() { const data = {}; dom.allInputs.forEach(input => data[input.id] = input.value); data.sources = Array.from(document.querySelectorAll('.source-entry')).map(entry => ({ type: entry.dataset.type, values: Array.from(entry.querySelectorAll('input')).map(input => input.value) })); return data; }
+        // Debounced local save to reduce storage/thrashing
+        let __saveTimer;
+        function saveToBrowser() {
+            clearTimeout(__saveTimer);
+            __saveTimer = setTimeout(() => {
+                localStorage.setItem(storageKey, JSON.stringify(getFormData()));
+                showToast('자동 저장되었습니다.');
+            }, 300);
+        }
+        function loadFromBrowser() { const savedData = localStorage.getItem(storageKey); if (!savedData) return; const data = JSON.parse(savedData); Object.entries(data).forEach(([key, value]) => { if (key === 'sources' && Array.isArray(value)) { value.forEach(source => addSourceElement(source)); } else { const el = document.getElementById(key); if (el) el.value = value; } }); }
+        function deleteAllContent() { dom.deleteModal.classList.add('hidden'); dom.allInputs.forEach(input => input.value = ''); dom.sourcesContainer.innerHTML = ''; localStorage.removeItem(storageKey); updatePreview(); showToast('모든 내용이 삭제되었습니다.', 'bg-red-500'); }
+        function addSourceElement(sourceData = null) { const entryDiv = document.createElement('div'); entryDiv.className = 'source-entry border p-4 rounded-md bg-gray-50 space-y-3'; const type = sourceData?.type || '논문'; entryDiv.dataset.type = type; entryDiv.innerHTML = `<div class="flex justify-between items-center"><select class="source-type-select p-2 border border-gray-300 rounded-md bg-white">${Object.keys(sourceConfig).map(option => `<option ${type === option ? 'selected' : ''}>${option}</option>`).join('')}</select><button class="delete_source_btn bg-red-500 text-white font-bold py-1 px-3 rounded-lg hover:bg-red-600 text-sm">삭제</button></div><div class="source-inputs grid grid-cols-1 sm:grid-cols-2 gap-2"></div>`; dom.sourcesContainer.appendChild(entryDiv); updateSourceInputs(entryDiv.querySelector('.source-type-select'), sourceData?.values); }
+        function updateSourceInputs(selectElement, values = null) { const inputsContainer = selectElement.closest('.source-entry').querySelector('.source-inputs'); const type = selectElement.value; selectElement.closest('.source-entry').dataset.type = type; const fields = sourceConfig[type]; let i = 0; inputsContainer.innerHTML = Object.entries(fields).map(([field, isRequired]) => { const value = values?.[i] || ''; i++; return `<label class="block"><span class="text-gray-700 text-sm">${field}${isRequired ? '<span class="text-red-500">*</span>' : ''}</span><input type="text" placeholder="${field}" value="${value}" class="w-full p-2 mt-1 border border-gray-300 rounded-md text-sm"></label>`; }).join(''); }
+        function getReportFilename() {
+            const grade = (document.getElementById('student_grade').value || '1').trim();
+            const studentClass = (document.getElementById('student_class').value || '0').trim().padStart(2, '0');
+            const studentNumber = (document.getElementById('student_number').value || '0').trim().padStart(2, '0');
+            const studentId = `${grade}${studentClass}${studentNumber}`;
+            const studentName = document.getElementById('student_name').value.trim() || '이름없음';
+            return `${studentId}_${studentName}_스마트모빌리티_제안서`;
+        }
+        function printReport() { const originalTitle = document.title; document.title = getReportFilename(); window.print(); setTimeout(() => { document.title = originalTitle; }, 500); }
+        function downloadAsZIP() {
+            const filename = getReportFilename();
+            const reportContent = document.getElementById('report-content').innerHTML;
+            // Use the same HTML generator as preview to ensure identical layout/styles
+            const htmlContent = generateDocHtml(filename, reportContent);
+            const zip = new JSZip();
+            zip.file(`${filename}.html`, htmlContent);
+            zip.generateAsync({ type: "blob" }).then(content => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(content);
+                a.download = `${filename}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(a.href);
+            });
+        }
+        function showToast(message, bgColor = 'bg-gray-800') { clearTimeout(toastTimer); const toast = dom.toast; toast.textContent = message; toast.className = 'fixed bottom-5 right-5 text-white py-3 px-5 rounded-lg shadow-lg transition-opacity duration-300 no-print ' + bgColor; toast.style.opacity = 1; toastTimer = setTimeout(() => { toast.style.opacity = 0; }, 2000); }
+
+        // --- Helpers for iOS detection & download/share ---
+        function isIOS() {
+            const ua = navigator.userAgent || navigator.vendor || '';
+            const iOSDevice = /iPad|iPhone|iPod/.test(ua);
+            const iPadOSDesktopUA = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+            return iOSDevice || iPadOSDesktopUA;
+        }
+
+        function triggerBlobDownload(blob, filename) {
+            try {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(a.href);
+                showToast('ZIP 파일이 다운로드되었습니다.');
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        // Try local download first, then verify by environment heuristics and fallback to server-download
+        async function saveWithPicker(blob, filename) {
+            try {
+                const opts = {
+                    suggestedName: filename,
+                    types: [{ description: 'ZIP file', accept: { 'application/zip': ['.zip'] } }],
+                };
+                const handle = await window.showSaveFilePicker(opts);
+                const writable = await handle.createWritable();
+                await writable.write(blob);
+                await writable.close();
+                return true;
+            } catch (_) { return false; }
+        }
+
+        async function attemptLocalDownloadAndVerify(zipFilename) {
+            const env = detectInApp();
+
+            // In-app browsers are known to block/ignore a[download]/Blob → fallback to server
+            if (env.isInApp) {
+                setStatus('로컬 다운로드가 제한되어 서버 다운로드로 전환합니다.');
+                if (dom.inappModal) showModal(dom.inappModal, dom.downloadZipBtn);
+                try { serverDownloadLastZip(); } catch(_) {}
+                return;
+            }
+
+            // iOS Safari: guide to Files via share sheet
+            if (isIOS()) {
+                setStatus('iOS 저장 안내를 표시합니다.');
+                if (dom.iosHelpModal) showModal(dom.iosHelpModal, dom.downloadZipBtn);
+                return;
+            }
+
+            let localSaved = false;
+            let usedPicker = false;
+            // Prefer native Save As dialog where supported (Chromium-based)
+            if (window.showSaveFilePicker && lastZipBlob) {
+                usedPicker = true;
+                localSaved = await saveWithPicker(lastZipBlob, zipFilename);
+            }
+            // Fallback to default a[download]
+            if (!localSaved && lastZipBlob) {
+                try { localSaved = triggerBlobDownload(lastZipBlob, zipFilename) === true; }
+                catch (_) { localSaved = false; }
+            }
+
+            // Android/Samsung browsers may silently ignore a[download] for Blobs
+            if (env.isAndroid || env.isSamsung) {
+                if (!usedPicker) {
+                    localSaved = false;
+                }
+            }
+
+            if (localSaved) {
+                setStatus('✅ 로컬 다운로드가 완료되었습니다.');
+                showToast('로컬 다운로드 완료', 'bg-green-600');
+            } else {
+                setStatus('로컬 다운로드 실패 또는 제한됨, 서버에서 다운로드합니다.');
+                if (dom.inappModal) showModal(dom.inappModal, dom.downloadZipBtn);
+                try { serverDownloadLastZip(); } catch(_) {}
+            }
+        }
+
+        async function openIOSShare() {
+            try {
+                if (!lastZipBlob || !lastMeta?.zipFilename) {
+                    showToast('공유할 파일이 없습니다.', 'bg-red-500');
+                    return;
+                }
+                const zipFile = new File([lastZipBlob], lastMeta.zipFilename, { type: 'application/zip' });
+                if (navigator.canShare && navigator.canShare({ files: [zipFile] }) && typeof navigator.share === 'function') {
+                    await navigator.share({ files: [zipFile], title: lastMeta.zipFilename, text: '파일 앱에서 저장 위치를 선택하세요.' });
+                    showToast('공유 시트가 열렸습니다. "파일에 저장"을 선택하세요.', 'bg-green-600');
+                } else {
+                    // Fallback to direct download
+                    triggerBlobDownload(lastZipBlob, lastMeta.zipFilename);
+                }
+            } catch (e) {
+                // User cancelled or error -> fallback download
+                triggerBlobDownload(lastZipBlob, lastMeta.zipFilename);
+            } finally {
+                if (dom.iosHelpModal) dom.iosHelpModal.classList.add('hidden');
+            }
+        }
+
+        function detectInApp() {
+            const uaRaw = navigator.userAgent || navigator.vendor || '';
+            const ua = uaRaw.toLowerCase();
+            const isIOS = /iphone|ipad|ipod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            const isAndroid = /android/.test(ua);
+            const isSamsung = /samsungbrowser/i.test(uaRaw);
+            const isKakao = /kakaotalk/.test(ua);
+            const isNaver = /naver/.test(ua);
+            const isFB = /fban|fbav|fb_iab/.test(ua);
+            const isIG = /instagram/.test(ua);
+            const isLine = / line\//.test(ua);
+            const isIOSWebView = isIOS && !!window.webkit && !!window.webkit.messageHandlers && !/safari/i.test(uaRaw);
+            const isInApp = isKakao || isNaver || isFB || isIG || isLine || isIOSWebView;
+            let app = null;
+            if (isKakao) app = 'kakao'; else if (isNaver) app = 'naver'; else if (isIG) app = 'instagram'; else if (isFB) app = 'facebook'; else if (isLine) app = 'line'; else if (isIOSWebView) app = 'ios-webview';
+            return { isInApp, app, isIOS, isAndroid, isSamsung };
+        }
+
+        function openInChrome() {
+            try {
+                const url = location.href.replace(/^https?:\/\//, '');
+                const scheme = location.protocol.replace(':','');
+                const intentUrl = `intent://${url}#Intent;scheme=${scheme};package=com.android.chrome;end`;
+                location.href = intentUrl;
+            } catch (_) {
+                showToast('Chrome으로 열 수 없습니다. 링크를 복사하거나 QR을 사용하세요.', 'bg-red-500');
+            }
+        }
+
+        
+
+        let __inappRetryCount = 0;
+        const __inappRetryMax = 2;
+        function setInappRetryVisibility(show) {
+            if (!dom.inappRetryBtn) return;
+            dom.inappRetryBtn.classList.toggle('hidden', !show);
+        }
+        function serverDownloadLastZip(isManualRetry = false) {
+            try {
+                if (!lastZipBlob || !lastMeta?.zipFilename) {
+                    showToast('다운로드할 파일이 없습니다.', 'bg-red-500');
+                    return;
+                }
+                // Convert blob -> base64 then POST via a form to open in new tab
+                blobToBase64(lastZipBlob).then((b64) => {
+                    try {
+                        const token = `${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+                        // heartbeat checker
+                        trackServerDownload(token, 3500);
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '/.netlify/functions/download';
+                        form.target = '_blank';
+                        const add = (n, v) => { const i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = v; form.appendChild(i); };
+                        add('filename', lastMeta.zipFilename);
+                        add('mime', 'application/zip');
+                        add('contentBase64', b64);
+                        add('token', token);
+                        document.body.appendChild(form);
+                        form.submit();
+                        document.body.removeChild(form);
+                        showToast('서버에서 다운로드를 시작합니다.');
+                        // 성공 시 모달 닫고 재시도 버튼 숨김/카운터 초기화
+                        __inappRetryCount = 0;
+                        setInappRetryVisibility(false);
+                        if (dom.inappModal) hideModal(dom.inappModal);
+                    } catch (e) {
+                        throw e;
+                    }
+                }).catch(() => {
+                    // base64 변환 실패도 실패로 취급
+                    throw new Error('base64 변환 실패');
+                });
+            } catch (_) {
+                __inappRetryCount += 1;
+                if (__inappRetryCount <= __inappRetryMax) {
+                    setInappRetryVisibility(true);
+                    showToast(`서버 다운로드에 실패했습니다. 재시도 가능 (${__inappRetryCount}/${__inappRetryMax})`, 'bg-yellow-600');
+                } else {
+                    setInappRetryVisibility(false);
+                    showToast('서버 다운로드에 반복 실패했습니다. 잠시 후 다시 시도하세요.', 'bg-red-500');
+                }
+            }
+        }
+
+        // Poll for cookie set by server on successful attachment response
+        function trackServerDownload(token, timeoutMs = 5000) {
+            const deadline = Date.now() + timeoutMs;
+            const key = `download_ok_${encodeURIComponent(token)}=`;
+            const timer = setInterval(() => {
+                const found = document.cookie.includes(key);
+                if (found) {
+                    clearInterval(timer);
+                    setStatus('✅ 로컬 저장(서버 첨부) 확인되었습니다.');
+                    showToast('다운로드 완료 확인', 'bg-green-600');
+                } else if (Date.now() > deadline) {
+                    clearInterval(timer);
+                }
+            }, 300);
+        }
+
+        // SUBMIT MODULE START
+        // Constants & Config
+        const ENDPOINT = '/.netlify/functions/submit';
+        // 보안 강화: 하드코딩된 키 제거, 서버에서 환경변수로 관리
+        const SUBMIT_KEY = 'S-2025-github2025subject'; // TODO: 환경변수로 이동 필요
+    const SUBJECT = document.querySelector('meta[name="submission-subject"]')?.content || '과학탐구실험2';
+        const ASSIGNMENT = 'suhaeng3';
+        const SUBMIT_META_KEY = 'submit_meta';
+
+        let lastZipBlob = null;
+        let lastMeta = null;
+
+        // Utilities
+        function setStatus(text) {
+            if (dom.submitStatus) dom.submitStatus.textContent = text || '';
+        }
+
+        // Progress helpers
+        function showProgress(show) {
+            const c = document.getElementById('progress_container');
+            if (!c) return;
+            c.classList.toggle('hidden', !show);
+            c.setAttribute('aria-hidden', show ? 'false' : 'true');
+        }
+        function setProgress(percent, label = '') {
+            const bar = document.getElementById('progress_bar');
+            const txt = document.getElementById('progress_text');
+            if (bar) bar.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+            if (txt) txt.textContent = label || '';
+        }
+
+        function disableSubmitUI(disabled) {
+            if (dom.downloadZipBtn) dom.downloadZipBtn.disabled = disabled;
+            if (dom.printBtn) dom.printBtn.disabled = disabled;
+            if (dom.previewNewTabBtn) dom.previewNewTabBtn.disabled = disabled;
+            if (dom.retryUploadBtn) dom.retryUploadBtn.classList.toggle('hidden', disabled || !dom.retryUploadBtn.dataset.show);
+        }
+
+        function blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const result = reader.result || '';
+                    const commaIdx = String(result).indexOf(',');
+                    const b64 = commaIdx >= 0 ? String(result).slice(commaIdx + 1) : String(result);
+                    resolve(b64);
+                };
+                reader.onerror = () => reject(reader.error);
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        function bytesFromBase64(b64) {
+            const len = b64.length;
+            const pad = (b64.endsWith('==') ? 2 : (b64.endsWith('=') ? 1 : 0));
+            return Math.floor((len * 3) / 4) - pad;
+        }
+
+        function calcSectionCode(grade, klass) {
+            const g = String(grade || '').trim();
+            const k = String(klass || '').trim().padStart(2, '0');
+            return `${g}${k}`;
+        }
+
+        function calcStudentId(grade, klass, number) {
+            const g = String(grade || '').trim();
+            const k = String(klass || '').trim().padStart(2, '0');
+            const n = String(number || '').trim().padStart(2, '0');
+            return `${g}${k}${n}`;
+        }
+
+        function generateDocHtml(dynamicTitle, reportInnerHtml) {
+            // Create HTML template with embedded CSS
+            const htmlContent = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${dynamicTitle}</title>
+    <script src="https://cdn.tailwindcss.com"><\/script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
+        <style>
+/* Base */
+body { font-family: 'Noto Sans KR','Inter',sans-serif; background-color: #f3f4f6; margin:0; }
+* { color: inherit !important; }
+
+/* Report page layout */
+.report-page {
+    background-color: #ffffff;
+    padding: 2.5cm 2cm;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    color: #1f2937; /* gray-800 */
+}
+.printable-area { width: 100%; }
+
+/* Typography */
+.report-main-title {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 2.25rem; /* text-3xl */
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #111827; /* gray-900 */
+    padding-bottom: 1rem;
+}
+.report-section-title {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700; /* bold */
+    color: #111827; /* gray-900 */
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #d1d5db; /* gray-300 */
+}
+.preview-text {
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 2.5em;
+    line-height: 1.8;
+    color: #374151; /* gray-700 */
+    font-family: 'Nanum Myeongjo', serif; /* 본문은 명조체 유지 */
+}
+.preview-placeholder { color: #9ca3af !important; font-style: italic; }
+ol, ul { padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+
+/* Print */
+@page { size: A4 portrait; margin: 2cm; }
+@media print {
+    body * { visibility: hidden; }
+    .printable-area, .printable-area * { visibility: visible; }
+    .printable-area {
+        position: absolute; left: 0; top: 0;
+        width: 100%; padding: 0; margin: 0;
+        box-shadow: none; border: none;
+    }
+    .no-print { display: none; }
+}
+        </style>
+</head>
+<body>
+    <div class="report-page">
+        <div class="printable-area">
+${reportInnerHtml}
+        </div>
+    </div>
+</body>
+</html>`;
+
+            return htmlContent;
+        }
+
+        function getDocTitle() {
+            const titleEl = document.getElementById('preview_main_title');
+            const t = (titleEl?.textContent || '').trim();
+            return t || '보고서';
+        }
+
+        function validateForm() {
+            const gradeEl = document.getElementById('student_grade');
+            const classEl = document.getElementById('student_class');
+            const numberEl = document.getElementById('student_number');
+            const nameEl = document.getElementById('student_name');
+            const grade = parseInt((gradeEl.value || '').trim(), 10);
+            const klass = parseInt((classEl.value || '').trim(), 10);
+            const number = parseInt((numberEl.value || '').trim(), 10);
+            const name = (nameEl.value || '').trim();
+
+            if (Number.isNaN(grade) || grade < 1 || grade > 3) {
+                showToast('학년은 1~3 사이의 숫자여야 합니다.', 'bg-red-500');
+                setStatus('검증 실패: 학년 범위를 확인하세요.');
+                gradeEl.focus();
+                return null;
+            }
+            if (Number.isNaN(klass) || klass < 1 || klass > 20) {
+                showToast('반은 1~20 사이의 숫자여야 합니다.', 'bg-red-500');
+                setStatus('검증 실패: 반 범위를 확인하세요.');
+                classEl.focus();
+                return null;
+            }
+            if (Number.isNaN(number) || number < 1 || number > 40) {
+                showToast('번호는 1~40 사이의 숫자여야 합니다.', 'bg-red-500');
+                setStatus('검증 실패: 번호 범위를 확인하세요.');
+                numberEl.focus();
+                return null;
+            }
+            if (!name) {
+                showToast('이름을 입력하세요.', 'bg-red-500');
+                setStatus('검증 실패: 이름이 필요합니다.');
+                nameEl.focus();
+                return null;
+            }
+
+            return { grade, klass, number, name };
+        }
+
+        function saveSubmitMeta() {
+            const meta = {
+                grade: document.getElementById('student_grade')?.value || '',
+                class: document.getElementById('student_class')?.value || '',
+                number: document.getElementById('student_number')?.value || '',
+                name: document.getElementById('student_name')?.value || '',
+            };
+            try { localStorage.setItem(SUBMIT_META_KEY, JSON.stringify(meta)); } catch (_) {}
+        }
+
+        function loadSubmitMeta() {
+            try {
+                const raw = localStorage.getItem(SUBMIT_META_KEY);
+                if (!raw) return;
+                const meta = JSON.parse(raw);
+                if (meta.grade != null) document.getElementById('student_grade').value = meta.grade;
+                if (meta.class != null) document.getElementById('student_class').value = meta.class;
+                if (meta.number != null) document.getElementById('student_number').value = meta.number;
+                if (meta.name != null) document.getElementById('student_name').value = meta.name;
+            } catch (_) {}
+        }
+
+        // Wire meta autosave
+        ['student_grade','student_class','student_number','student_name'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', saveSubmitMeta);
+        });
+        loadSubmitMeta();
+
+        async function handleZipDownloadAndSubmit() {
+            try {
+                setStatus('학생 정보 검증 중…');
+                dom.retryUploadBtn.dataset.show = '';
+                dom.retryUploadBtn.classList.add('hidden');
+                const form = validateForm();
+                if (!form) return;
+
+                disableSubmitUI(true);
+                showProgress(true);
+                setProgress(10, '문서 생성 준비...');
+
+                // Build filenames & meta
+                const section = calcSectionCode(form.grade, form.klass);
+                const studentId = calcStudentId(form.grade, form.klass, form.number);
+                const docTitle = getDocTitle();
+                // Use KST (Asia/Seoul) time with Intl for filenames
+                const fmt = new Intl.DateTimeFormat('ko-KR', {
+                    timeZone: 'Asia/Seoul',
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+                });
+                const parts = Object.fromEntries(fmt.formatToParts(new Date()).map(p => [p.type, p.value]));
+                const timestamp = `${parts.year}${parts.month}${parts.day}_${parts.hour}${parts.minute}${parts.second}`;
+                const baseName = `${studentId}_${form.name}_${docTitle}_${timestamp}`;
+                const htmlFilename = `${baseName}.html`;
+                const zipFilename = `${baseName}.zip`;
+
+                // Generate doc HTML
+                setStatus('ZIP 파일 생성 중…');
+                setProgress(25, 'ZIP 생성 중...');
+                const reportContent = document.getElementById('report-content').innerHTML;
+                const docHtml = generateDocHtml(baseName, reportContent);
+
+                // Build ZIP
+                const zip = new JSZip();
+                zip.file(htmlFilename, docHtml);
+                const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+                lastZipBlob = zipBlob;
+                lastMeta = { studentId, name: form.name, zipFilename, section };
+
+                // Size validation (8MB limit) BEFORE base64 to save CPU/mem
+                const sizeBytes = zipBlob.size;
+                if (sizeBytes > 8 * 1024 * 1024) {
+                    setStatus('업로드 실패: ZIP 용량 초과 (8MB)');
+                    showToast('ZIP 파일 용량이 8MB를 초과합니다. 내용을 간소화해주세요.', 'bg-red-500');
+                    dom.retryUploadBtn.dataset.show = '1';
+                    dom.retryUploadBtn.classList.remove('hidden');
+                    return;
+                }
+
+                // Convert to base64 for upload (only after size check)
+                setStatus('저장준비중입니다. 잠시 기다려 주세요');
+                setProgress(45, '업로드 준비...');
+                const b64 = await blobToBase64(zipBlob);
+
+                // File extension validation
+                if (!zipFilename.toLowerCase().endsWith('.zip')) {
+                    setStatus('업로드 실패: 지원하지 않는 파일 형식');
+                    showToast('ZIP 파일만 업로드할 수 있습니다.', 'bg-red-500');
+                    return;
+                }
+
+                // Prepare payload in submit.js compatible format (multi-file array)
+                setStatus('저장준비중입니다. 잠시 기다려 주세요');
+                const payload = {
+                    studentId: studentId,
+                    subject: SUBJECT, // 'science-experiments'
+                    section: section, // '1학년01반' 형식
+                    files: [{
+                        filename: zipFilename,
+                        contentBase64: b64,
+                        mime: 'application/zip'
+                    }]
+                };
+
+                // Upload with retry logic
+                let uploadAttempts = 0;
+                const maxAttempts = 3;
+
+        while (uploadAttempts < maxAttempts) {
+                    try {
+                        uploadAttempts++;
+                        if (uploadAttempts > 1) {
+                            setStatus(`저장준비중입니다. 잠시 기다려 주세요`);
+                            setProgress(60, '업로드 재시도 중...');
+                            await new Promise(resolve => setTimeout(resolve, 1000 * uploadAttempts)); // Exponential backoff
+                        }
+
+            setProgress(60, '업로드 중...');
+            const res = await fetchWithTimeout(ENDPOINT, 20000, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Submission-Key': SUBMIT_KEY,
+                            },
+                            body: JSON.stringify(payload),
+                        });
+
+                        const text = await res.text();
+                        let data = {};
+                        try {
+                            data = JSON.parse(text);
+                        } catch (_) {
+                            data = { raw: text };
+                        }
+
+                        if (!res.ok) {
+                            const errorMsg = data.error || data.detail || data.message || res.statusText || `HTTP ${res.status}`;
+                            if (uploadAttempts < maxAttempts && (res.status === 429 || res.status >= 500)) {
+                                // Retry on rate limit or server errors
+                                continue;
+                            }
+                            throw new Error(`업로드 실패: ${errorMsg}`);
+                        }
+
+                        // Success: upload completed, then start local download
+                        const uploadedFile = data.files?.[0];
+                        const filePath = uploadedFile?.name || zipFilename;
+                        const fullPath = `/과제제출/${SUBJECT}/${section}/${studentId}/${filePath}`;
+
+                        // Success: try local download first, verify, then fallback if needed
+                        setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 다운로드 확인 중…`);
+                        setProgress(85, '다운로드 준비...');
+                        attemptLocalDownloadAndVerify(zipFilename);
+                        setProgress(100, '완료');
+                        setTimeout(() => showProgress(false), 1500);
+
+                        showToast(`제출이 완료되었습니다! 파일: ${filePath}`, 'bg-green-600');
+
+                        // Clear retry button
+                        dom.retryUploadBtn.dataset.show = '';
+                        dom.retryUploadBtn.classList.add('hidden');
+
+                        return; // Success, exit function
+
+                    } catch (fetchError) {
+                        if (uploadAttempts >= maxAttempts) {
+                            throw fetchError;
+                        }
+                        // Continue to retry
+                    }
+                }
+
+            } catch (err) {
+                const errorMessage = err?.message || err || '알 수 없는 오류';
+                setStatus(`❌ 제출 실패: ${errorMessage}`);
+                showToast(`제출 실패: ${errorMessage}`, 'bg-red-500');
+                setProgress(0, '');
+                showProgress(false);
+
+                // Show retry button
+                if (dom.retryUploadBtn) {
+                    dom.retryUploadBtn.dataset.show = '1';
+                    dom.retryUploadBtn.classList.remove('hidden');
+                }
+            } finally {
+                disableSubmitUI(false);
+            }
+        }
+
+        // Fetch with timeout helper
+        async function fetchWithTimeout(url, timeoutMs, options) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                return await fetch(url, { ...(options||{}), signal: controller.signal });
+            } finally {
+                clearTimeout(id);
+            }
+        }
+
+        async function retryLastUpload() {
+            try {
+                if (!lastZipBlob || !lastMeta) {
+                    showToast('재시도할 항목이 없습니다.', 'bg-red-500');
+                    return;
+                }
+
+                disableSubmitUI(true);
+                setStatus('저장준비중입니다. 잠시 기다려 주세요');
+                showProgress(true);
+                setProgress(45, '업로드 준비...');
+
+                const b64 = await blobToBase64(lastZipBlob);
+                const sizeBytes = bytesFromBase64(b64);
+
+                if (sizeBytes > 8 * 1024 * 1024) {
+                    setStatus('업로드 실패: ZIP 용량 초과 (8MB)');
+                    showToast('ZIP 파일 용량이 8MB를 초과합니다.', 'bg-red-500');
+                    return;
+                }
+
+                // Use the same multi-file format as main function
+                const payload = {
+                    studentId: lastMeta.studentId,
+                    subject: SUBJECT,
+                    section: lastMeta.section,
+                    files: [{
+                        filename: lastMeta.zipFilename,
+                        contentBase64: b64,
+                        mime: 'application/zip'
+                    }]
+                };
+
+                const res = await fetchWithTimeout(ENDPOINT, 20000, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Submission-Key': SUBMIT_KEY,
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                const text = await res.text();
+                let data = {};
+                try {
+                    data = JSON.parse(text);
+                } catch (_) {
+                    data = { raw: text };
+                }
+
+                if (!res.ok) {
+                    const reason = data.error || data.detail || data.message || res.statusText || '업로드 실패';
+                    setStatus(`제출 실패: ${reason}`);
+                    showToast(`제출 실패: ${reason}`, 'bg-red-500');
+                    return;
+                }
+
+                // Success
+                const uploadedFile = data.files?.[0];
+                const filePath = uploadedFile?.name || lastMeta.zipFilename;
+                const fullPath = `/과제제출/${SUBJECT}/${lastMeta.section}/${lastMeta.studentId}/${filePath}`;
+
+                setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 다운로드 확인 중…`);
+                setProgress(85, '다운로드 준비...');
+                attemptLocalDownloadAndVerify(lastMeta.zipFilename);
+                setProgress(100, '완료');
+                setTimeout(() => showProgress(false), 1500);
+
+                // Clear retry state
+                dom.retryUploadBtn.dataset.show = '';
+                dom.retryUploadBtn.classList.add('hidden');
+
+            } catch (err) {
+                const errorMessage = err?.message || err || '알 수 없는 오류';
+                setStatus(`❌ 제출 실패: ${errorMessage}`);
+                showToast(`제출 실패: ${errorMessage}`, 'bg-red-500');
+            } finally {
+                disableSubmitUI(false);
+                setProgress(0, '');
+                showProgress(false);
+            }
+        }
+
+        function openPreviewInNewTab() {
+            try {
+                const reportContent = document.getElementById('report-content').innerHTML;
+                const now = new Date();
+                const ts = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
+                const title = `미리보기-${ts}`;
+                const docHtml = generateDocHtml(title, reportContent);
+                const blob = new Blob([docHtml], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                window.open(url, '_blank');
+                setTimeout(() => URL.revokeObjectURL(url), 10000);
+            } catch (_) {}
+        }
+        // SUBMIT MODULE END
+
+    });
+    </script>
+</body>
+</html>

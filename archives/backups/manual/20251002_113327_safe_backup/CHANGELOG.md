@@ -1,0 +1,20 @@
+# 변경 로그
+
+모든 중요한 변경 사항은 이 파일에 기록합니다.
+
+## 2025-08-30
+
+- suhaeng3 제출 흐름을 "업로드 먼저 → 성공 후 다운로드"로 재정렬
+- 인앱 브라우저 대응: 서버 첨부 응답 다운로드 함수(`download.js`) 추가 및 UI에서 인앱 시 해당 경로만 제공
+- iOS Safari 전용 UX: 공유 시트를 통한 "파일에 저장" 안내 모달 추가
+- iOS/인앱에서 PDF 인쇄 버튼 숨김 처리
+- 미리보기/새 탭/ZIP HTML을 단일 생성기(`generateDocHtml`)로 통일, 스타일/폰트 일관성 확보
+- 과목 메타(`submission-subject`) 도입 및 기본값 ‘과학탐구실험2’
+- 파일명 타임스탬프를 KST 기준으로 생성
+
+## 2025-09-01
+
+- PROJECT.md를 현재 구현 상태(업로드 우선, 인앱/iOS 안내, KST, 8MB 클라 제한)로 동기화
+- docs/api.md에 activity 필드 및 폴더 경로(`/과제제출/{subject}/{activity}/{section}/{studentId}`) 반영
+- suhaeng3 문서에 활동 메타 우선 정책 및 입력 UI 제거 사실 반영
+- docs/deployment.md에 Node 18, esbuild/ESM, 캐시 팁 및 인앱 다운로드 확인 추가

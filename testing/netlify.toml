@@ -1,0 +1,49 @@
+[build]
+  base    = "."
+  publish = "src"
+
+[functions]
+  directory = "functions"
+  node_bundler = "esbuild"
+
+# Testing-specific routing
+[[edge_functions]]
+path = "/science-experiments/suhaeng3-test/session2"
+function = "gate-session2"
+
+[[edge_functions]]
+path = "/science-experiments/suhaeng3-test/session2.html"
+function = "gate-session2"
+
+[[edge_functions]]
+path = "/science-experiments/suhaeng3-test/session2/*"
+function = "gate-session2"
+
+# Test functions routing
+[[redirects]]
+from = "/.netlify/functions/submit_test"
+to = "/.netlify/functions/submit_test"
+status = 200
+
+[[redirects]]
+from = "/.netlify/functions/download_test"
+to = "/.netlify/functions/download_test"
+status = 200
+
+# Testing-specific headers
+[[headers]]
+for = "/science-experiments/suhaeng3-test/index.html"
+  [headers.values]
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/science-experiments/suhaeng3-test/session2.html"
+  [headers.values]
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/*"
+  [headers.values]
+  X-Environment = "testing"
+  X-Version = "1.2.0"
+  X-Testing = "true"
