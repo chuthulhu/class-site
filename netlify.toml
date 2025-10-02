@@ -3,7 +3,7 @@
   publish = "."
 
 [functions]
-  directory = "netlify/functions"
+  directory = "class-site/netlify/functions"
   node_bundler = "esbuild"
 
 # Edge Functions routing for session2 gate
@@ -19,16 +19,8 @@ function = "gate-session2"
 path = "/science-experiments/suhaeng3/session2/*"
 function = "gate-session2"
 
-# Test functions routing for suhaeng3-test
-[[redirects]]
-from = "/.netlify/functions/submit_test"
-to = "/.netlify/functions/submit_test"
-status = 200
-
-[[redirects]]
-from = "/.netlify/functions/download_test"
-to = "/.netlify/functions/download_test"
-status = 200
+# Test functions are automatically available at /.netlify/functions/
+# No redirect rules needed for internal Netlify function paths
 
 # Reduce caching to ensure timely UI updates around release window
 [[headers]]
