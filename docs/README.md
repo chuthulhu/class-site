@@ -19,6 +19,7 @@
 - [suhaeng3 테스트 가이드](suhaeng3-test-guide.md) - suhaeng3 테스트 가이드
 - [suhaeng3 사용자 매뉴얼](suhaeng3-user-manual.md) - suhaeng3 사용자 매뉴얼
 - [교사키 가이드](teacher-key-guide.md) - 교사키 기능 사용법
+- [Git 무시 규칙 가이드](gitignore-guide.md) - .gitignore 파일 관리
 
 ## 🔧 기술 문서
 
