@@ -867,6 +867,12 @@
         // 초기 상태 설정
         updateOnlineStatus();
 
+        // --- 탭 기능 초기화 ---
+        initTabs();
+        
+        // --- 아코디언 기능 초기화 ---
+        initAccordions();
+
         // --- 이벤트 리스너 설정 ---
         // Replace default ZIP download with simultaneous download + upload
         if (dom.downloadZipBtn) dom.downloadZipBtn.addEventListener('click', () => uploadManager.handleZipDownloadAndSubmit());
@@ -1019,8 +1025,57 @@
             localStorage.setItem('suhaeng3_data', JSON.stringify({}));
         }
 
-        // 초기화
-        updatePreviewAndSave();
+        // --- 탭 기능 정의 ---
+        function initTabs() {
+            const tabs = document.querySelectorAll('.tab-button');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = btn.dataset.tab;
+                    
+                    // 모든 탭 버튼에서 active 클래스 제거
+                    tabs.forEach(b => b.classList.remove('active'));
+                    // 클릭된 버튼에 active 클래스 추가
+                    btn.classList.add('active');
+                    
+                    // 모든 탭 콘텐츠에서 active 클래스 제거
+                    contents.forEach(c => c.classList.remove('active'));
+                    // 해당하는 콘텐츠에 active 클래스 추가
+                    const targetContent = document.getElementById(target);
+                    if (targetContent) {
+                        targetContent.classList.add('active');
+                    }
+                    
+                    // 페이지 상단으로 스크롤
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            });
+        }
+        
+        // --- 아코디언 기능 정의 ---
+        function initAccordions() {
+            const accordionButtons = document.querySelectorAll('.accordion-header button');
+            
+            accordionButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const content = button.nextElementSibling;
+                    const isOpen = content.classList.contains('open');
+                    
+                    // 모든 아코디언 닫기
+                    accordionButtons.forEach(btn => {
+                        btn.classList.remove('open');
+                        btn.nextElementSibling.classList.remove('open');
+                    });
+                    
+                    // 클릭된 아코디언이 닫혀있었다면 열기
+                    if (!isOpen) {
+                        button.classList.add('open');
+                        content.classList.add('open');
+                    }
+                });
+            });
+        }
     });
     </script>
 </body>
