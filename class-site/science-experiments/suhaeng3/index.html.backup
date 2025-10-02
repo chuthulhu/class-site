@@ -1168,8 +1168,7 @@
         // SUBMIT MODULE START
         // Constants & Config
         const ENDPOINT = '/.netlify/functions/submit';
-        // 보안 강화: 하드코딩된 키 제거, 서버에서 환경변수로 관리
-        const SUBMIT_KEY = 'S-2025-github2025subject'; // TODO: 환경변수로 이동 필요
+        const SUBMIT_KEY = 'S-2025-github2025subject'; // 서버에서 401 응답 시 UI 안내
     const SUBJECT = document.querySelector('meta[name="submission-subject"]')?.content || '과학탐구실험2';
         const ASSIGNMENT = 'suhaeng3';
         const SUBMIT_META_KEY = 'submit_meta';

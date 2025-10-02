@@ -32,71 +32,227 @@ export const handler = async (event) => {
       return withCors(405, { ok:false, error: "method not allowed" });
     }
 
-    // 1) 인증 키
+    // 1) 환경변수 보안 검증 (우선순위 높음)
+    const requiredEnvVars = [
+      'SUBMIT_KEY', 'MS_TENANT_ID', 'MS_CLIENT_ID', 
+      'MS_CLIENT_SECRET', 'MS_REFRESH_TOKEN'
+    ];
+    
+    for (const envVar of requiredEnvVars) {
+      if (!process.env[envVar]) {
+        logError(new Error(`Missing environment variable: ${envVar}`), {
+          context: 'env_validation',
+          missingVar: envVar,
+          timestamp: new Date().toISOString()
+        });
+        return createErrorResponse(500, 'server misconfigured', `Missing environment variable: ${envVar}`);
+      }
+    }
+
+    // 2) 인증 키 검증
     const clientKey = event.headers["x-submission-key"] || event.headers["X-Submission-Key"];
     const serverKey = process.env.SUBMIT_KEY;
-    if (!serverKey) return withCors(500, { ok:false, error: "server misconfigured: SUBMIT_KEY not set" });
-    if (!clientKey || clientKey !== serverKey) return withCors(401, { ok:false, error: "unauthorized" });
+    
+    if (!clientKey) {
+      logError(new Error('Missing submission key'), {
+        context: 'auth_validation',
+        hasClientKey: false,
+        timestamp: new Date().toISOString()
+      });
+      return createErrorResponse(401, 'unauthorized', 'Missing X-Submission-Key header');
+    }
+    
+    if (clientKey !== serverKey) {
+      logError(new Error('Invalid submission key'), {
+        context: 'auth_validation',
+        hasClientKey: true,
+        keyLength: clientKey.length,
+        timestamp: new Date().toISOString()
+      });
+      return createErrorResponse(401, 'unauthorized', 'Invalid submission key');
+    }
 
-    // 2) 환경변수
+    // 3) 환경변수 추출
     const {
       MS_TENANT_ID, MS_CLIENT_ID, MS_CLIENT_SECRET, MS_REFRESH_TOKEN,
       ROOT_FOLDER_PATH = "/과제제출",
     } = process.env;
-    for (const [k, v] of Object.entries({ MS_TENANT_ID, MS_CLIENT_ID, MS_CLIENT_SECRET, MS_REFRESH_TOKEN })) {
-      if (!v) return withCors(500, { ok:false, error: `server misconfigured: ${k} not set` });
-    }
 
-    // 3) 본문 파싱
-    if (!event.body) return withCors(400, { ok:false, error: "missing fields" });
+    // 4) 본문 파싱 및 검증
+    if (!event.body) {
+      logError(new Error('Missing request body'), {
+        context: 'request_validation',
+        hasBody: false,
+        timestamp: new Date().toISOString()
+      });
+      return createErrorResponse(400, 'missing fields', 'Request body is required');
+    }
+    
     let payload;
-    try { payload = JSON.parse(event.body); } catch { return withCors(400, { ok:false, error: "invalid json" }); }
+    try { 
+      payload = JSON.parse(event.body); 
+    } catch (parseError) {
+      logError(parseError, {
+        context: 'json_parsing',
+        bodyLength: event.body.length,
+        timestamp: new Date().toISOString()
+      });
+      return createErrorResponse(400, 'invalid json', 'Request body must be valid JSON');
+    }
 
     const { studentId, subject, activity, section } = payload || {};
     if (!studentId || !subject || !activity || !section) {
-      return withCors(400, { ok:false, error: "missing fields (studentId/subject/activity/section)" });
+      logError(new Error('Missing required fields'), {
+        context: 'field_validation',
+        hasStudentId: !!studentId,
+        hasSubject: !!subject,
+        hasActivity: !!activity,
+        hasSection: !!section,
+        timestamp: new Date().toISOString()
+      });
+      return createErrorResponse(400, 'missing fields', 'studentId, subject, activity, and section are required');
     }
 
-    // 4) 단일/다중 통일
+    // 5) 파일 배열 정규화 및 검증
     const files = normalizeToArray(payload);
-    if (files.length === 0) return withCors(400, { ok:false, error: "no files" });
+    if (files.length === 0) {
+      logError(new Error('No files provided'), {
+        context: 'file_validation',
+        studentId,
+        subject,
+        activity,
+        section,
+        timestamp: new Date().toISOString()
+      });
+      return createErrorResponse(400, 'no files', 'At least one file is required');
+    }
+    
     if (files.length > MAX_FILES_PER_SUBMISSION) {
-      return withCors(400, { ok:false, error: "too many files", detail: `max ${MAX_FILES_PER_SUBMISSION} files allowed` });
+      logError(new Error('Too many files'), {
+        context: 'file_validation',
+        fileCount: files.length,
+        maxAllowed: MAX_FILES_PER_SUBMISSION,
+        studentId,
+        timestamp: new Date().toISOString()
+      });
+      return createErrorResponse(400, 'too many files', `Maximum ${MAX_FILES_PER_SUBMISSION} files allowed per submission`);
     }
 
-    // 5) base64→Buffer, 확장자/용량/스니핑 검증 + 총합
+    // 6) 파일별 검증 및 처리
     let totalBytes = 0;
     const enriched = [];
     for (const [idx, f] of files.entries()) {
+      // 파일 필드 검증
       if (!f?.filename || !f?.contentBase64) {
-        return withCors(400, { ok:false, error: "missing file fields", detail: `index ${idx}` });
+        logError(new Error('Missing file fields'), {
+          context: 'file_field_validation',
+          fileIndex: idx,
+          hasFilename: !!f?.filename,
+          hasContentBase64: !!f?.contentBase64,
+          studentId,
+          timestamp: new Date().toISOString()
+        });
+        return createErrorResponse(400, 'missing file fields', `File at index ${idx} is missing required fields`);
       }
+      
       const ext = getExt(f.filename);
       if (!ALLOWED_EXT.has(ext)) {
-        return withCors(400, { ok:false, error: "unsupported file type", detail: `${f.filename}` });
+        logError(new Error('Unsupported file type'), {
+          context: 'file_type_validation',
+          filename: f.filename,
+          extension: ext,
+          allowedExtensions: Array.from(ALLOWED_EXT),
+          studentId,
+          timestamp: new Date().toISOString()
+        });
+        return createErrorResponse(400, 'unsupported file type', `File type '${ext}' is not allowed. Allowed types: ${Array.from(ALLOWED_EXT).join(', ')}`);
       }
 
+      // Base64 디코딩
       let buf;
-      try { buf = Buffer.from(f.contentBase64, "base64"); }
-      catch { return withCors(400, { ok:false, error: "invalid base64", detail: `${f.filename}` }); }
-      if (!buf.length) return withCors(400, { ok:false, error: "empty file", detail: `${f.filename}` });
-
-      if (!checkSizeLimit(ext, buf.length)) {
-        return withCors(400, { ok:false, error: "file too large", detail: `${ext} max ${EXT_LIMIT_MB[ext]}MB` });
+      try { 
+        buf = Buffer.from(f.contentBase64, "base64"); 
+      } catch (decodeError) {
+        logError(decodeError, {
+          context: 'base64_decoding',
+          filename: f.filename,
+          contentLength: f.contentBase64.length,
+          studentId,
+          timestamp: new Date().toISOString()
+        });
+        return createErrorResponse(400, 'invalid base64', `Invalid base64 encoding for file: ${f.filename}`);
       }
-      // 간이 매직넘버 스니핑(가능한 형식만)
+      
+      if (!buf.length) {
+        logError(new Error('Empty file'), {
+          context: 'file_size_validation',
+          filename: f.filename,
+          bufferSize: buf.length,
+          studentId,
+          timestamp: new Date().toISOString()
+        });
+        return createErrorResponse(400, 'empty file', `File is empty: ${f.filename}`);
+      }
+
+      // 파일 크기 검증
+      if (!checkSizeLimit(ext, buf.length)) {
+        logError(new Error('File too large'), {
+          context: 'file_size_validation',
+          filename: f.filename,
+          extension: ext,
+          fileSizeBytes: buf.length,
+          maxSizeBytes: EXT_LIMIT_MB[ext] * 1024 * 1024,
+          maxSizeMB: EXT_LIMIT_MB[ext],
+          studentId,
+          timestamp: new Date().toISOString()
+        });
+        return createErrorResponse(400, 'file too large', `File '${f.filename}' exceeds maximum size of ${EXT_LIMIT_MB[ext]}MB`);
+      }
+      
+      // 매직넘버 검증
       if (!sniffMagic(ext, buf)) {
-        return withCors(415, { ok:false, error: "content mismatch", detail: `${f.filename} (${ext})` });
+        logError(new Error('Content mismatch'), {
+          context: 'magic_number_validation',
+          filename: f.filename,
+          extension: ext,
+          fileSizeBytes: buf.length,
+          studentId,
+          timestamp: new Date().toISOString()
+        });
+        return createErrorResponse(415, 'content mismatch', `File content does not match extension '${ext}': ${f.filename}`);
       }
 
       totalBytes += buf.length;
       enriched.push({ filename: f.filename, mime: f.mime, buffer: buf, ext });
     }
     if (totalBytes > TOTAL_SUM_LIMIT_MB * 1024 * 1024) {
-      return withCors(400, { ok:false, error: "total size exceeded", detail: `max ${TOTAL_SUM_LIMIT_MB}MB per submission` });
+      logError(new Error('Total size exceeded'), {
+        context: 'total_size_validation',
+        totalBytes,
+        maxBytes: TOTAL_SUM_LIMIT_MB * 1024 * 1024,
+        maxMB: TOTAL_SUM_LIMIT_MB,
+        fileCount: files.length,
+        studentId,
+        timestamp: new Date().toISOString()
+      });
+      return createErrorResponse(400, 'total size exceeded', `Total file size ${Math.round(totalBytes / 1024 / 1024 * 100) / 100}MB exceeds maximum ${TOTAL_SUM_LIMIT_MB}MB per submission`);
     }
 
-    // 6) Access Token
+    // 파일 검증 성공 로깅
+    logSuccess('File validation completed successfully', {
+      context: 'file_validation_success',
+      studentId,
+      subject,
+      activity,
+      section,
+      fileCount: files.length,
+      totalBytes,
+      totalMB: Math.round(totalBytes / 1024 / 1024 * 100) / 100,
+      fileTypes: enriched.map(f => f.ext),
+      timestamp: new Date().toISOString()
+    });
+
+    // 7) Access Token
     const accessToken = await getMsAccessToken({
       tenantId: MS_TENANT_ID,
       clientId: MS_CLIENT_ID,
@@ -130,20 +286,86 @@ export const handler = async (event) => {
       });
     }
 
-    // 9) 응답
-    return withCors(200, {
+    // 9) 성공 응답
+    const successResponse = {
       ok: true,
       studentId, subject, activity, section,
       submittedAt: new Date().toISOString(),
       files: results,
+    };
+
+    // 성공 로깅
+    logSuccess('File upload completed successfully', {
+      context: 'upload_success',
+      studentId,
+      subject,
+      activity,
+      section,
+      uploadedFiles: results.length,
+      totalSizeBytes: results.reduce((sum, f) => sum + f.size, 0),
+      chunkedFiles: results.filter(f => f.chunked).length,
+      timestamp: new Date().toISOString()
     });
+
+    return withCors(200, successResponse);
   } catch (err) {
-    console.error(err);
-    return withCors(500, { ok:false, error: "internal error" });
+    // 구조화된 에러 로깅
+    logError(err, {
+      context: 'handler_exception',
+      errorType: err.constructor.name,
+      timestamp: new Date().toISOString()
+    });
+    
+    return createErrorResponse(500, 'internal error', 'An unexpected error occurred while processing the request');
   }
 };
 
 /* ============ 유틸/검증 ============ */
+
+// 구조화된 에러 로깅 시스템
+function logError(error, context = {}) {
+  const logEntry = {
+    timestamp: new Date().toISOString(),
+    level: 'ERROR',
+    error: error.message || error,
+    context: {
+      ...context,
+      userAgent: context.userAgent || 'unknown',
+      ip: context.ip || 'unknown'
+    },
+    stack: error.stack || 'No stack trace available'
+  };
+  
+  console.error(JSON.stringify(logEntry));
+}
+
+// 성공 로깅 시스템
+function logSuccess(message, context = {}) {
+  const logEntry = {
+    timestamp: new Date().toISOString(),
+    level: 'INFO',
+    message,
+    context: {
+      ...context,
+      userAgent: context.userAgent || 'unknown',
+      ip: context.ip || 'unknown'
+    }
+  };
+  
+  console.log(JSON.stringify(logEntry));
+}
+
+// 표준화된 에러 응답 생성
+function createErrorResponse(statusCode, error, detail = null) {
+  return {
+    statusCode,
+    headers: { 
+      "Content-Type": "application/json", 
+      ...CORS_HEADERS 
+    },
+    body: JSON.stringify({ ok: false, error, detail })
+  };
+}
 
 function withCors(statusCode, bodyObj) {
   return { statusCode, headers: { "Content-Type": "application/json", ...CORS_HEADERS }, body: JSON.stringify(bodyObj) };
@@ -160,7 +382,17 @@ function getExt(name) {
   return m ? m[1].toLowerCase() : "";
 }
 function sanitizeFileName(name) {
-  return String(name).replace(/[\/\\\u0000-\u001F\u007F]/g, "_");
+  // 경로 조작 공격 방지를 위한 강화된 sanitize
+  const sanitized = String(name)
+    .replace(/[\/\\\u0000-\u001F\u007F]/g, "_")  // 기본 제어문자
+    .replace(/[<>:"|?*]/g, "_")                  // Windows 금지문자
+    .replace(/\.{2,}/g, ".")                     // 연속된 점 제거
+    .replace(/^\.+|\.+$/g, "")                   // 시작/끝 점 제거
+    .replace(/\s+/g, "_")                       // 공백을 언더스코어로
+    .substring(0, 255);                         // 파일명 길이 제한
+  
+  // 빈 문자열이나 점만 있는 경우 기본값 반환
+  return sanitized || "unnamed_file";
 }
 function normalizeRoot(p) {
   if (!p) return "과제제출";
@@ -172,16 +404,60 @@ function checkSizeLimit(ext, sizeBytes) {
 }
 function sniffMagic(ext, buf) {
   try {
-    const head = buf.subarray(0, 12);
+    if (buf.length < 4) return false; // 최소 헤더 크기 확인
+    
+    const head = buf.subarray(0, Math.min(1024, buf.length)); // 더 많은 바이트 확인
     const asStr = head.toString("utf8");
-    if (ext === "pdf")   return asStr.startsWith("%PDF-");
-    if (ext === "jpg" || ext === "jpeg") return head[0]===0xFF && head[1]===0xD8 && head[2]===0xFF;
-    if (ext === "png")   return head[0]===0x89 && asStr.startsWith("\x89PNG");
-    if (ext === "zip" || ext==="pptx" || ext==="xlsx" || ext==="hwpx") return head[0]===0x50 && head[1]===0x4B; // 'PK'
-    if (ext === "mp4")   return buf.subarray(0, 1024).toString("utf8").includes("ftyp");
-    // hwp/html/csv/txt/ppt 등은 스니핑 생략(확장자/용량 검증만)
-    return true;
-  } catch { return true; }
+    
+    // PDF 검증 강화
+    if (ext === "pdf") {
+      return asStr.startsWith("%PDF-") && asStr.includes("obj");
+    }
+    
+    // JPEG 검증 강화
+    if (ext === "jpg" || ext === "jpeg") {
+      return head[0] === 0xFF && head[1] === 0xD8 && head[2] === 0xFF && 
+             (head[3] === 0xE0 || head[3] === 0xE1 || head[3] === 0xDB);
+    }
+    
+    // PNG 검증 강화
+    if (ext === "png") {
+      return head[0] === 0x89 && head[1] === 0x50 && head[2] === 0x4E && head[3] === 0x47 &&
+             head[4] === 0x0D && head[5] === 0x0A && head[6] === 0x1A && head[7] === 0x0A;
+    }
+    
+    // ZIP 계열 검증 강화 (ZIP, PPTX, XLSX, HWPX)
+    if (ext === "zip" || ext === "pptx" || ext === "xlsx" || ext === "hwpx") {
+      return head[0] === 0x50 && head[1] === 0x4B && 
+             (head[2] === 0x03 || head[2] === 0x05 || head[2] === 0x07);
+    }
+    
+    // MP4 검증 강화
+    if (ext === "mp4") {
+      return asStr.includes("ftyp") && (asStr.includes("mp41") || asStr.includes("mp42"));
+    }
+    
+    // HTML 검증 추가
+    if (ext === "html" || ext === "htm") {
+      const htmlContent = asStr.toLowerCase();
+      return htmlContent.includes("<html") || htmlContent.includes("<!doctype");
+    }
+    
+    // TXT/CSV는 기본적으로 허용 (텍스트 파일이므로)
+    if (ext === "txt" || ext === "csv") {
+      return true;
+    }
+    
+    // HWP/PPT는 기본적으로 허용 (바이너리 형식이 복잡함)
+    if (ext === "hwp" || ext === "ppt") {
+      return true;
+    }
+    
+    return false; // 알 수 없는 형식은 거부
+  } catch (error) {
+    logError(error, { context: 'magic_sniffing', ext, bufferSize: buf.length });
+    return false; // 에러 시 안전하게 거부
+  }
 }
 function appendTimestamp(name) {
   const idx = name.lastIndexOf(".");
