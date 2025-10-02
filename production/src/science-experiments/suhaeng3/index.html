@@ -581,6 +581,32 @@
 
         (async () => {
             if (!s1Link || !s2Link) return;
+            
+            // Check teacher key first (independent of time function)
+            const teacherKey = sessionStorage.getItem('teacher_key') || '';
+            const hasValidTeacherKey = teacherKey && teacherKey.trim().length > 0;
+            
+            // If teacher key exists, unlock immediately
+            if (hasValidTeacherKey) {
+                console.log('Teacher key found:', teacherKey.slice(0, 8) + '...');
+                
+                // Append teacher key to links
+                [s1Link, s2Link].forEach(a => {
+                    if (!a) return; 
+                    const url = new URL(a.getAttribute('href'), window.location.origin); 
+                    url.searchParams.set('key', teacherKey); 
+                    a.setAttribute('href', url.pathname + url.search);
+                });
+                
+                s1Link.classList.remove('hidden');
+                s2Link.classList.remove('hidden');
+                s1Link.setAttribute('aria-disabled','false');
+                s2Link.setAttribute('aria-disabled','false');
+                if (notice) notice.classList.add('hidden');
+                return; // Exit early if teacher key is valid
+            }
+            
+            // If no teacher key, check time-based unlock
             try {
                 const res = await fetch('/.netlify/functions/time', { cache: 'no-store' });
                 if (!res.ok) throw new Error('time fetch failed');
@@ -590,16 +616,9 @@
 
                 // KST 2025-10-13 00:00 == UTC 2025-10-12T15:00:00Z
                 const SHOW_UTC = Date.parse('2025-10-12T15:00:00Z');
-                const teacherKey = sessionStorage.getItem('teacher_key') || '';
-                const unlock = teacherKey || nowUTC >= SHOW_UTC;
+                const timeUnlock = nowUTC >= SHOW_UTC;
 
-                if (unlock) {
-                    // Append teacher key to links if present
-                    if (teacherKey) {
-                        [s1Link, s2Link].forEach(a => {
-                            if (!a) return; const url = new URL(a.getAttribute('href'), window.location.origin); url.searchParams.set('key', teacherKey); a.setAttribute('href', url.pathname + url.search);
-                        });
-                    }
+                if (timeUnlock) {
                     s1Link.classList.remove('hidden');
                     s2Link.classList.remove('hidden');
                     s1Link.setAttribute('aria-disabled','false');
@@ -613,8 +632,9 @@
                     s2Link.setAttribute('aria-disabled','true');
                     if (notice) notice.classList.remove('hidden');
                 }
-            } catch (_) {
-                // On failure keep everything hidden (fail-safe)
+            } catch (error) {
+                console.error('Time function failed:', error);
+                // On failure, keep everything hidden (fail-safe)
                 if (s1Link) { s1Link.classList.add('hidden'); s1Link.setAttribute('aria-disabled','true'); }
                 if (s2Link) { s2Link.classList.add('hidden'); s2Link.setAttribute('aria-disabled','true'); }
                 if (notice) notice.classList.remove('hidden');
