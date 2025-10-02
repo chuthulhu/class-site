@@ -1059,7 +1059,8 @@
         
         accordionButtons.forEach(button => {
             button.addEventListener('click', () => {
-                const content = button.nextElementSibling;
+                // button의 부모인 accordion-header의 다음 형제인 accordion-content를 찾기
+                const content = button.closest('.accordion-header').nextElementSibling;
                 if (!content) return; // 안전성 검사
                 
                 const isOpen = content.classList.contains('open');
@@ -1067,7 +1068,7 @@
                 // 모든 아코디언 닫기
                 accordionButtons.forEach(btn => {
                     btn.classList.remove('open');
-                    const btnContent = btn.nextElementSibling;
+                    const btnContent = btn.closest('.accordion-header').nextElementSibling;
                     if (btnContent) {
                         btnContent.classList.remove('open');
                     }
