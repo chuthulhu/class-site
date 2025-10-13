@@ -1,6 +1,7 @@
 [build]
   base    = "class-site"
   publish = "."
+  ignore  = "BACKUPS/"
 
 [functions]
   directory = "netlify/functions"
