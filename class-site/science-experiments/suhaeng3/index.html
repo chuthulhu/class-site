@@ -172,7 +172,7 @@
             <div class="mt-4 flex flex-wrap gap-3 justify-center" id="session_links_wrapper">
                 <a id="session1_link" href="./session1.html" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hidden" aria-disabled="true">1차시 활동 (현황 분석·고려사항)</a>
                 <a id="session2_link" href="./session2.html" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 hidden" aria-disabled="true">2차시 활동 (3가지 지렛대·기대효과)</a>
-                <span id="session_locked_notice" class="px-4 py-2 bg-gray-300 text-gray-600 rounded-lg select-none hidden">활동 버튼은 10/13 00:00 공개 예정</span>
+                <span id="session_locked_notice" class="px-4 py-2 bg-gray-300 text-gray-600 rounded-lg select-none hidden">활동 버튼은 10/13 11:13 공개 예정</span>
             </div>
         </header>
         
@@ -599,12 +599,214 @@
                 });
             }
             
-            // Always unlock buttons regardless of time
-            s1Link.classList.remove('hidden');
-            s2Link.classList.remove('hidden');
-            s1Link.setAttribute('aria-disabled','false');
-            s2Link.setAttribute('aria-disabled','false');
-            if (notice) notice.classList.add('hidden');
+            // Check time-based control if no teacher key
+            try {
+                console.log('Checking time-based control...');
+                
+                // Try server time function first, fallback to local time for localhost
+                let data;
+                try {
+                    // Determine page type for specific time configuration
+                    const currentPath = window.location.pathname;
+                    let pageType = 'default';
+                    
+                    if (currentPath.includes('suhaeng3/index.html')) {
+                        pageType = 'suhaeng3-index';
+                    } else if (currentPath.includes('suhaeng3/session1.html')) {
+                        pageType = 'suhaeng3-session1';
+                    } else if (currentPath.includes('suhaeng3/session2.html')) {
+                        pageType = 'suhaeng3-session2';
+                    }
+                    
+                    const res = await fetch(`/.netlify/functions/time?page=${pageType}`, { cache: 'no-store' });
+                    if (!res.ok) throw new Error(`time fetch failed: ${res.status} ${res.statusText}`);
+                    data = await res.json();
+                    console.log('Using server time function for page:', pageType);
+                } catch (serverError) {
+                    console.log('Server time function failed, using local time:', serverError.message);
+                    // Fallback to local time for localhost testing
+                    const now = new Date();
+                    data = {
+                        now: now.getTime(),
+                        iso: now.toISOString(),
+                        timezone: 'UTC',
+                        debug: true,
+                        localFallback: true,
+                        page: 'default',
+                        config: { releaseTime: '2025-10-12 00:00 KST', description: '로컬 폴백' }
+                    };
+                }
+                
+                // Handle error response from time function
+                if (data.error) {
+                    throw new Error(data.message || data.error);
+                }
+                
+                const nowUTC = typeof data?.now === 'number' ? data.now : Date.parse(data?.iso || '');
+                if (!Number.isFinite(nowUTC)) throw new Error('bad time payload');
+                
+                console.log('Server time:', new Date(nowUTC).toISOString());
+                console.log('Local time:', new Date().toISOString());
+                
+                // Debug info from server
+                if (data.debug) {
+                    console.log('Debug info:', data.environment);
+                }
+                
+                // Page configuration info
+                console.log('📄 페이지 설정:', data.config?.description || '기본 설정');
+                console.log('🎯 페이지 타입:', data.page || 'default');
+                
+                // Local testing indicator
+                if (data.localFallback) {
+                    console.log('🔧 로컬 테스트 모드 - 서버 시간 함수 대신 로컬 시간 사용');
+                }
+
+                // Flexible time configuration - priority: URL param > Server env > Default
+                const urlParams = new URLSearchParams(window.location.search);
+                const customReleaseTime = urlParams.get('release_time');
+                
+                let timeUnlock = false;
+                let hoursUntilRelease = 0;
+                let statusMessage = '';
+                
+                if (customReleaseTime) {
+                    // URL parameter override (for testing)
+                    console.log('Using URL parameter:', customReleaseTime);
+                    
+                    // Parse URL parameter using same logic as server
+                    if (customReleaseTime.includes(',')) {
+                        // Time range format
+                        const [start, end] = customReleaseTime.split(',');
+                        let blockStart, blockEnd;
+                        
+                        // Check if it's Korean time format
+                        if (customReleaseTime.includes('KST') || customReleaseTime.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2},\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/)) {
+                            const kstTimeStr = customReleaseTime.replace(/KST|KOR/g, '').trim();
+                            const [startKst, endKst] = kstTimeStr.split(',');
+                            const startKstDate = new Date(startKst.trim());
+                            const endKstDate = new Date(endKst.trim());
+                            // Convert KST to UTC (subtract 9 hours)
+                            blockStart = startKstDate.getTime() - (9 * 60 * 60 * 1000);
+                            blockEnd = endKstDate.getTime() - (9 * 60 * 60 * 1000);
+                        } else {
+                            // UTC time range
+                            blockStart = Date.parse(start.trim());
+                            blockEnd = Date.parse(end.trim());
+                        }
+                        
+                        timeUnlock = nowUTC >= blockStart && nowUTC <= blockEnd;
+                        hoursUntilRelease = Math.ceil((blockEnd - nowUTC) / (1000 * 60 * 60));
+                        statusMessage = timeUnlock ? '활성화 기간 중' : '비활성화 기간';
+                    } else {
+                        // Single time format
+                        let releaseTime;
+                        
+                        // Check if it's Korean time format
+                        if (customReleaseTime.includes('KST') || customReleaseTime.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/)) {
+                            const kstTimeStr = customReleaseTime.replace(/KST|KOR/g, '').trim();
+                            const kstDate = new Date(kstTimeStr);
+                            // Convert KST to UTC (subtract 9 hours)
+                            releaseTime = kstDate.getTime() - (9 * 60 * 60 * 1000);
+                        } else {
+                            // UTC time
+                            releaseTime = Date.parse(customReleaseTime);
+                        }
+                        
+                        timeUnlock = nowUTC >= releaseTime;
+                        hoursUntilRelease = Math.ceil((releaseTime - nowUTC) / (1000 * 60 * 60));
+                        statusMessage = timeUnlock ? '활성화됨' : '비활성화됨';
+                    }
+                } else if (data.timeControl) {
+                    // Server environment variable with new time control system
+                    console.log('Using server time control:', data.timeControl);
+                    
+                    if (data.timeControl.type === 'range') {
+                        // Time range (block period)
+                        timeUnlock = data.timeControl.isInBlock;
+                        hoursUntilRelease = data.timeControl.hoursUntilBlockEnd;
+                        statusMessage = timeUnlock ? '활성화 기간 중' : '비활성화 기간';
+                    } else {
+                        // Single release time
+                        timeUnlock = data.timeControl.isReleased;
+                        hoursUntilRelease = data.timeControl.hoursUntilRelease;
+                        statusMessage = timeUnlock ? '활성화됨' : '비활성화됨';
+                    }
+                } else {
+                    // Default: 2025-10-13 11:13 KST (UTC: 2025-10-13T02:13:00Z)
+                    const defaultReleaseTime = Date.parse('2025-10-13T02:13:00Z'); // KST 2025-10-13 11:13
+                    timeUnlock = nowUTC >= defaultReleaseTime;
+                    hoursUntilRelease = Math.ceil((defaultReleaseTime - nowUTC) / (1000 * 60 * 60));
+                    statusMessage = timeUnlock ? '활성화됨 (2025-10-13 11:13부터)' : '비활성화됨 (2025-10-13 11:13까지 대기)';
+                    console.log('Using default: 2025-10-13 11:13 KST release');
+                }
+                
+                console.log('=== 시간 제어 상태 ===');
+                console.log('상태:', statusMessage);
+                console.log('변경까지 남은 시간:', hoursUntilRelease, '시간');
+                console.log('현재 서버 시간:', new Date(nowUTC).toISOString());
+                console.log('현재 로컬 시간:', new Date().toISOString());
+
+                if (timeUnlock) {
+                    s1Link.classList.remove('hidden');
+                    s2Link.classList.remove('hidden');
+                    s1Link.setAttribute('aria-disabled','false');
+                    s2Link.setAttribute('aria-disabled','false');
+                    if (notice) notice.classList.add('hidden');
+                    console.log('Buttons unlocked');
+                    
+                    // Show success message for normal time-based unlock
+                    if (statusMessage.includes('활성화됨') && !statusMessage.includes('기본')) {
+                        setTimeout(() => {
+                            const toast = document.getElementById('toast-notification');
+                            if (toast) {
+                                toast.textContent = '✅ 정상 활성화 - 설정된 시간에 도달했습니다';
+                                toast.className = 'fixed bottom-5 right-5 bg-green-600 text-white py-3 px-5 rounded-lg shadow-lg transition-opacity duration-300 no-print';
+                                toast.style.opacity = '1';
+                                setTimeout(() => { toast.style.opacity = '0'; }, 3000);
+                            }
+                        }, 1000);
+                    }
+                } else {
+                    // Keep hidden until release
+                    s1Link.classList.add('hidden');
+                    s2Link.classList.add('hidden');
+                    s1Link.setAttribute('aria-disabled','true');
+                    s2Link.setAttribute('aria-disabled','true');
+                    if (notice) {
+                        notice.classList.remove('hidden');
+                        // Update notice with remaining time
+                        if (hoursUntilRelease > 0) {
+                            notice.textContent = `활동 버튼은 ${hoursUntilRelease}시간 후 활성화 예정`;
+                        } else {
+                            notice.textContent = '활동 버튼은 곧 활성화 예정';
+                        }
+                    }
+                    console.log('Buttons locked');
+                }
+            } catch (error) {
+                console.error('Time function failed:', error);
+                // On failure, show buttons with warning (fail-open approach)
+                s1Link.classList.remove('hidden');
+                s2Link.classList.remove('hidden');
+                s1Link.setAttribute('aria-disabled','false');
+                s2Link.setAttribute('aria-disabled','false');
+                if (notice) {
+                    notice.classList.add('hidden');
+                }
+                console.log('Buttons unlocked due to time function failure (fail-open)');
+                
+                // Show warning toast with more specific message
+                setTimeout(() => {
+                    const toast = document.getElementById('toast-notification');
+                    if (toast) {
+                        toast.textContent = '⚠️ 서버 시간 확인 실패 - 임시로 활성화됨';
+                        toast.className = 'fixed bottom-5 right-5 bg-orange-600 text-white py-3 px-5 rounded-lg shadow-lg transition-opacity duration-300 no-print';
+                        toast.style.opacity = '1';
+                        setTimeout(() => { toast.style.opacity = '0'; }, 4000);
+                    }
+                }, 1000);
+            }
         })();
         // --- DOM Element Constants ---
         const dom = {
