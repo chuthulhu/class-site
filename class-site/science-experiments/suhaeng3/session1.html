@@ -269,6 +269,40 @@
 
     <div id="toast-notification" class="fixed bottom-5 right-5 bg-gray-800 text-white py-3 px-5 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 no-print">저장되었습니다!</div>
 
+    <!-- iOS Save Help Modal -->
+    <div id="ios-help-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 no-print" role="dialog" aria-modal="true" aria-labelledby="ios-help-title">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
+            <h3 id="ios-help-title" class="text-lg font-bold text-gray-800">iOS에서 ZIP 파일 저장하기</h3>
+            <ol class="text-gray-700 mt-3 list-decimal list-inside space-y-2">
+                <li>아래 "파일에 저장(공유 시트)" 버튼을 눌러 공유 시트를 여세요.</li>
+                <li>공유 시트에서 "파일에 저장"을 선택하세요.</li>
+                <li>원하는 저장 위치(예: iCloud Drive 또는 내 iPhone)와 폴더를 선택하고 저장하세요.</li>
+            </ol>
+            <p class="text-gray-500 text-sm mt-3">팁: 저장 후 "파일" 앱에서 방금 저장한 위치로 이동해 확인할 수 있어요.</p>
+            <div class="mt-6 flex flex-col sm:flex-row justify-end gap-3">
+                <button id="ios-help-download-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">대신 바로 다운로드</button>
+                <div class="flex-1"></div>
+                <button id="ios-help-close-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">닫기</button>
+                <button id="ios-help-confirm-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">파일에 저장(공유 시트)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Download Center Modal -->
+    <div id="inapp-download-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 no-print" role="dialog" aria-modal="true" aria-labelledby="inapp-title">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
+            <h3 id="inapp-title" class="text-lg font-bold text-gray-800">모바일 브라우저에서 저장하기</h3>
+            <p class="text-gray-600 mt-2">현재 사용 중인 브라우저에서는 파일 저장이 제한될 수 있어요. 아래 버튼으로 서버에서 직접 내려받아 주세요.</p>
+            <div class="mt-4 grid grid-cols-1 gap-3">
+                <button id="inapp-server-download-btn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">서버에서 다운로드(권장)</button>
+                <button id="inapp-retry-btn" class="hidden px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">재시도</button>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button id="inapp-close-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">닫기</button>
+            </div>
+        </div>
+    </div>
+
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const dom = {
@@ -285,6 +319,16 @@
             allInputs: document.querySelectorAll('#tab4 input, #tab4 textarea, input#student_grade, input#student_class, input#student_number, input#student_name'),
             clearBtn: document.getElementById('clear_inputs_btn'),
             submitStatus: document.getElementById('submit_status'),
+            // iOS Help Modal
+            iosHelpModal: document.getElementById('ios-help-modal'),
+            iosHelpConfirmBtn: document.getElementById('ios-help-confirm-btn'),
+            iosHelpCloseBtn: document.getElementById('ios-help-close-btn'),
+            iosHelpDownloadBtn: document.getElementById('ios-help-download-btn'),
+            // In-App Download Center
+            inappModal: document.getElementById('inapp-download-modal'),
+            inappCloseBtn: document.getElementById('inapp-close-btn'),
+            inappServerDownloadBtn: document.getElementById('inapp-server-download-btn'),
+            inappRetryBtn: document.getElementById('inapp-retry-btn'),
         };
 
         const fields = {
@@ -313,14 +357,73 @@
         if (dom.retryUploadBtn) dom.retryUploadBtn.addEventListener('click', retryLastUpload);
         if (dom.clearBtn) dom.clearBtn.addEventListener('click', handleClearAll);
 
+        // iOS Help Modal 이벤트 리스너
+        if (dom.iosHelpConfirmBtn) dom.iosHelpConfirmBtn.addEventListener('click', () => {
+            hideModal(dom.iosHelpModal);
+            if (lastZipBlob && lastMeta?.zipFilename) {
+                shareToFilesApp(lastZipBlob, lastMeta.zipFilename);
+            }
+        });
+        if (dom.iosHelpCloseBtn) dom.iosHelpCloseBtn.addEventListener('click', () => hideModal(dom.iosHelpModal));
+        if (dom.iosHelpDownloadBtn) dom.iosHelpDownloadBtn.addEventListener('click', () => {
+            hideModal(dom.iosHelpModal);
+            if (lastZipBlob && lastMeta?.zipFilename) {
+                triggerBlobDownload(lastZipBlob, lastMeta.zipFilename);
+            }
+        });
+
+        // In-App Download Center 이벤트 리스너
+        if (dom.inappCloseBtn) dom.inappCloseBtn.addEventListener('click', () => hideModal(dom.inappModal));
+        if (dom.inappServerDownloadBtn) dom.inappServerDownloadBtn.addEventListener('click', () => {
+            hideModal(dom.inappModal);
+            serverDownloadLastZip();
+        });
+        if (dom.inappRetryBtn) dom.inappRetryBtn.addEventListener('click', () => {
+            hideModal(dom.inappModal);
+            if (lastZipBlob && lastMeta?.zipFilename) {
+                attemptLocalDownloadAndVerify(lastMeta.zipFilename);
+            }
+        });
+
         loadFromBrowser();
         switchTab('guide1');
         updatePreview();
 
-        // iOS 환경에서 PDF 버튼 숨기기
-        const env = detectInApp();
-        if (env.isIOS && dom.printBtn) {
+        // Hide PDF print button only on iOS and in-app browsers (Android에서는 노출)
+        const __env = detectInApp();
+        if ((isIOS() || __env.isInApp) && dom.printBtn) {
             dom.printBtn.classList.add('hidden');
+        }
+
+        // --- Modal focus trap helpers ---
+        let __lastTriggerEl = null;
+        function getFocusable(el) {
+            return el.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        }
+        function showModal(el, triggerEl = null) {
+            __lastTriggerEl = triggerEl || document.activeElement;
+            el.classList.remove('hidden');
+            el.setAttribute('aria-hidden', 'false');
+            const focusable = getFocusable(el);
+            if (focusable.length > 0) {
+                focusable[0].focus();
+            }
+            // ESC 키로 닫기
+            const escHandler = (e) => {
+                if (e.key === 'Escape') {
+                    hideModal(el);
+                    document.removeEventListener('keydown', escHandler);
+                }
+            };
+            document.addEventListener('keydown', escHandler);
+        }
+        function hideModal(el) {
+            el.classList.add('hidden');
+            el.setAttribute('aria-hidden', 'true');
+            if (__lastTriggerEl) {
+                __lastTriggerEl.focus();
+                __lastTriggerEl = null;
+            }
         }
 
         // 아코디언 메뉴를 기본적으로 모두 펼칩니다.
@@ -564,7 +667,27 @@
             }
         }
         async function saveWithPicker(blob, filename){ try{ const opts={ suggestedName: filename, types:[{ description:'ZIP file', accept:{'application/zip':['.zip']} }] }; const handle=await window.showSaveFilePicker(opts); const writable=await handle.createWritable(); await writable.write(blob); await writable.close(); return true; }catch(_){ return false; } }
-        function detectInApp(){ const uaRaw=navigator.userAgent||navigator.vendor||''; const ua=uaRaw.toLowerCase(); const isIOS=/iphone|ipad|ipod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1); const isAndroid=/android/.test(ua); const isSamsung=/samsungbrowser/i.test(uaRaw); const isKakao=/kakaotalk/.test(ua); const isNaver=/naver/.test(ua); const isFB=/fban|fbav|fb_iab/.test(ua); const isIG=/instagram/.test(ua); const isLine=/ line\//.test(ua); const isIOSWebView=isIOS && !!window.webkit && !!window.webkit.messageHandlers && !/safari/i.test(uaRaw); const isInApp=isKakao||isNaver||isFB||isIG||isLine||isIOSWebView; return { isInApp, isIOS, isAndroid, isSamsung }; }
+        function detectInApp(){ 
+            const uaRaw=navigator.userAgent||navigator.vendor||''; 
+            const ua=uaRaw.toLowerCase(); 
+            const isIOS=/iphone|ipad|ipod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1); 
+            const isAndroid=/android/.test(ua); 
+            const isSamsung=/samsungbrowser/i.test(uaRaw); 
+            const isKakao=/kakaotalk/.test(ua); 
+            const isNaver=/naver/.test(ua); 
+            const isFB=/fban|fbav|fb_iab/.test(ua); 
+            const isIG=/instagram/.test(ua); 
+            const isLine=/ line\//.test(ua); 
+            const isIOSWebView=isIOS && !!window.webkit && !!window.webkit.messageHandlers && !/safari/i.test(uaRaw); 
+            const isInApp=isKakao||isNaver||isFB||isIG||isLine||isIOSWebView; 
+            return { isInApp, isIOS, isAndroid, isSamsung }; 
+        }
+
+        function isIOS() {
+            const ua = navigator.userAgent || navigator.vendor || '';
+            return /iphone|ipad|ipod/.test(ua.toLowerCase()) || 
+                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        }
 
         async function shareToFilesApp(blob, filename) {
             try {
@@ -629,11 +752,41 @@
             }
         }
 
-        async function attemptLocalDownloadAndVerify(zipFilename){ const env=detectInApp(); if (env.isInApp){ setStatus('로컬 다운로드가 제한되어 서버 다운로드로 전환합니다.'); serverDownloadLastZip(); return; } if (env.isIOS){ setStatus('iOS에서 파일 앱으로 공유합니다.'); if (lastZipBlob) await shareToFilesApp(lastZipBlob, zipFilename); return; }
-            let localSaved=false; let usedPicker=false; if (window.showSaveFilePicker && lastZipBlob){ usedPicker=true; localSaved=await saveWithPicker(lastZipBlob, zipFilename); }
-            if (!localSaved && lastZipBlob){ try{ localSaved=triggerBlobDownload(lastZipBlob, zipFilename)===true; }catch(_){ localSaved=false; } }
-            if (env.isAndroid || env.isSamsung){ if (!usedPicker) localSaved=false; }
-            if (localSaved){ setStatus('✅ 로컬 다운로드가 완료되었습니다.'); showToast('로컬 다운로드 완료'); } else { setStatus('로컬 다운로드 실패 또는 제한됨, 서버에서 다운로드합니다.'); serverDownloadLastZip(); }
+        async function attemptLocalDownloadAndVerify(zipFilename){ 
+            const env=detectInApp(); 
+            if (env.isInApp){ 
+                setStatus('로컬 다운로드가 제한되어 서버 다운로드로 전환합니다.'); 
+                serverDownloadLastZip(); 
+                return; 
+            } 
+            if (env.isIOS){ 
+                setStatus('iOS에서 파일 앱으로 공유합니다.'); 
+                if (lastZipBlob) await shareToFilesApp(lastZipBlob, zipFilename); 
+                return; 
+            }
+            let localSaved=false; 
+            let usedPicker=false; 
+            if (window.showSaveFilePicker && lastZipBlob){ 
+                usedPicker=true; 
+                localSaved=await saveWithPicker(lastZipBlob, zipFilename); 
+            }
+            if (!localSaved && lastZipBlob){ 
+                try{ 
+                    localSaved=triggerBlobDownload(lastZipBlob, zipFilename)===true; 
+                }catch(_){ 
+                    localSaved=false; 
+                } 
+            }
+            if (env.isAndroid || env.isSamsung){ 
+                if (!usedPicker) localSaved=false; 
+            }
+            if (localSaved){ 
+                setStatus('✅ 로컬 다운로드가 완료되었습니다.'); 
+                showToast('로컬 다운로드 완료'); 
+            } else { 
+                setStatus('로컬 다운로드 실패 또는 제한됨, 서버에서 다운로드합니다.'); 
+                serverDownloadLastZip(); 
+            } 
         }
 
         function trackServerDownload(token, timeoutMs=5000){ const deadline=Date.now()+timeoutMs; const key=`download_ok_${encodeURIComponent(token)}=`; const timer=setInterval(()=>{ const found=document.cookie.includes(key); if (found){ clearInterval(timer); setStatus('✅ 로컬 저장(서버 첨부) 확인되었습니다.'); showToast('다운로드 완료 확인'); } else if (Date.now()>deadline){ clearInterval(timer); } }, 300); }
