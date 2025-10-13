@@ -586,7 +586,7 @@
                 }
                 
                 // Web Share API가 지원되지 않는 경우 - 다른 방법 시도
-                // iOS에서 파일을 직접 저장할 수 있는 방법들
+                console.log('Web Share API 미지원 또는 파일 공유 불가능');
                 
                 // 방법 1: File System Access API 시도 (iOS에서는 제한적)
                 if (window.showSaveFilePicker) {
@@ -610,19 +610,20 @@
                     }
                 }
                 
-                // 방법 2: 일반 다운로드 시도
+                // 방법 2: 일반 다운로드 시도 (가장 안전한 방법)
                 const success = triggerBlobDownload(blob, filename);
                 if (success) {
                     setStatus('✅ ZIP 파일이 다운로드되었습니다. Safari 하단의 다운로드 아이콘을 눌러 파일 앱에 저장하세요.');
                     showToast('다운로드 완료 - Safari 하단 다운로드 아이콘을 눌러주세요');
+                    return true;
                 } else {
                     throw new Error('다운로드 실패');
                 }
-                return success;
             } catch (error) {
                 console.error('iOS 파일 공유 실패:', error);
-                // 최종 대체 방법으로 서버 다운로드
-                setStatus('파일 공유 실패, 서버 다운로드로 전환합니다.');
+                // 모든 방법이 실패한 경우에만 서버 다운로드로 전환
+                console.log('모든 로컬 저장 방법 실패, 서버 다운로드로 전환');
+                setStatus('로컬 저장 실패, 서버에서 다운로드합니다.');
                 serverDownloadLastZip();
                 return false;
             }
