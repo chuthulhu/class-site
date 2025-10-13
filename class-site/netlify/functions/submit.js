@@ -23,7 +23,7 @@ const TOTAL_SUM_LIMIT_MB = 300;
 const SINGLE_PUT_THRESHOLD = 10 * 1024 * 1024; // 10MB
 const CHUNK_SIZE = 8 * 1024 * 1024;            // 8MiB 권장
 
-export const handler = async (event) => {
+exports.handler = async (event) => {
   try {
     if (event.httpMethod === "OPTIONS") {
       return { statusCode: 200, headers: CORS_HEADERS, body: "" };
