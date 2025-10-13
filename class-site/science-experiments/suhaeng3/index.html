@@ -1173,7 +1173,7 @@
                 
                 // Web Share API가 지원되지 않거나 파일 공유가 불가능한 경우
                 // 공유창을 강제로 표시하기 위해 blob 다운로드 시도
-                const success = triggerBlobDownload(blob, filename);
+                const success = await triggerBlobDownloadWithShare(blob, filename);
                 if (success) {
                     setStatus('✅ ZIP 파일이 다운로드되었습니다. 공유 버튼을 눌러 파일 앱에 저장하세요.');
                     showToast('ZIP 파일 다운로드 완료 - 공유 버튼으로 파일 앱에 저장하세요');
@@ -1185,7 +1185,7 @@
                 console.error('iOS 파일 공유 실패:', error);
                 // 공유 실패 시에도 공유창이 뜨도록 blob 다운로드 시도
                 try {
-                    const success = triggerBlobDownload(blob, filename);
+                    const success = await triggerBlobDownloadWithShare(blob, filename);
                     if (success) {
                         setStatus('✅ ZIP 파일이 다운로드되었습니다. 공유 버튼을 눌러 파일 앱에 저장하세요.');
                         showToast('ZIP 파일 다운로드 완료 - 공유 버튼으로 파일 앱에 저장하세요');
@@ -1219,6 +1219,50 @@
                 showToast('ZIP 파일이 다운로드되었습니다.');
                 return true;
             } catch (_) {
+                return false;
+            }
+        }
+        
+        async function triggerBlobDownloadWithShare(blob, filename) {
+            try {
+                // iOS Safari에서 다운로드 후 공유 기능 활성화
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                // 다운로드 후 잠시 대기 후 공유 시도
+                setTimeout(async () => {
+                    try {
+                        // iOS에서 Web Share API로 파일 공유 시도
+                        if (navigator.share && navigator.canShare) {
+                            const file = new File([blob], filename, { type: 'application/zip' });
+                            const shareData = {
+                                files: [file],
+                                title: filename,
+                                text: '다운로드된 ZIP 파일을 파일 앱에 저장하세요'
+                            };
+                            
+                            if (navigator.canShare(shareData)) {
+                                await navigator.share(shareData);
+                                setStatus('✅ 파일이 다운로드되고 공유되었습니다.');
+                                showToast('다운로드 및 공유 완료');
+                            }
+                        }
+                    } catch (shareError) {
+                        console.log('공유 시도 실패:', shareError);
+                        // 공유 실패해도 다운로드는 성공했으므로 정상 처리
+                    }
+                }, 1000);
+                
+                URL.revokeObjectURL(url);
+                showToast('ZIP 파일이 다운로드되었습니다. 공유 옵션을 확인하세요.');
+                return true;
+            } catch (error) {
+                console.error('다운로드 실패:', error);
                 return false;
             }
         }
