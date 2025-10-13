@@ -3,7 +3,7 @@
   publish = "."
 
 [functions]
-  directory = "class-site/netlify/functions"
+  directory = "netlify/functions"
   node_bundler = "esbuild"
 
 # Edge Functions routing for session2 gate
