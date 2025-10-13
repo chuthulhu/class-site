@@ -172,7 +172,7 @@
             <div class="mt-4 flex flex-wrap gap-3 justify-center" id="session_links_wrapper">
                 <a id="session1_link" href="./session1.html" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hidden" aria-disabled="true">1차시 활동 (현황 분석·고려사항)</a>
                 <a id="session2_link" href="./session2.html" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 hidden" aria-disabled="true">2차시 활동 (3가지 지렛대·기대효과)</a>
-                <span id="session_locked_notice" class="px-4 py-2 bg-gray-300 text-gray-600 rounded-lg select-none">활동 버튼은 10/13 00:00 공개 예정</span>
+                <span id="session_locked_notice" class="px-4 py-2 bg-gray-300 text-gray-600 rounded-lg select-none hidden">활동 버튼은 10/13 00:00 공개 예정</span>
             </div>
         </header>
         
@@ -586,7 +586,7 @@
             const teacherKey = sessionStorage.getItem('teacher_key') || '';
             const hasValidTeacherKey = teacherKey && teacherKey.trim().length > 0;
             
-            // If teacher key exists, unlock immediately
+            // If teacher key exists, append it to links
             if (hasValidTeacherKey) {
                 console.log('Teacher key found:', teacherKey.slice(0, 8) + '...');
                 
@@ -597,48 +597,14 @@
                     url.searchParams.set('key', teacherKey); 
                     a.setAttribute('href', url.pathname + url.search);
                 });
-                
-                s1Link.classList.remove('hidden');
-                s2Link.classList.remove('hidden');
-                s1Link.setAttribute('aria-disabled','false');
-                s2Link.setAttribute('aria-disabled','false');
-                if (notice) notice.classList.add('hidden');
-                return; // Exit early if teacher key is valid
             }
             
-            // If no teacher key, check time-based unlock
-            try {
-                const res = await fetch('/.netlify/functions/time', { cache: 'no-store' });
-                if (!res.ok) throw new Error('time fetch failed');
-                const data = await res.json();
-                const nowUTC = typeof data?.now === 'number' ? data.now : Date.parse(data?.iso || '');
-                if (!Number.isFinite(nowUTC)) throw new Error('bad time payload');
-
-                // KST 2025-10-13 00:00 == UTC 2025-10-12T15:00:00Z
-                const SHOW_UTC = Date.parse('2025-10-12T15:00:00Z');
-                const timeUnlock = nowUTC >= SHOW_UTC;
-
-                if (timeUnlock) {
-                    s1Link.classList.remove('hidden');
-                    s2Link.classList.remove('hidden');
-                    s1Link.setAttribute('aria-disabled','false');
-                    s2Link.setAttribute('aria-disabled','false');
-                    if (notice) notice.classList.add('hidden');
-                } else {
-                    // Keep hidden until release
-                    s1Link.classList.add('hidden');
-                    s2Link.classList.add('hidden');
-                    s1Link.setAttribute('aria-disabled','true');
-                    s2Link.setAttribute('aria-disabled','true');
-                    if (notice) notice.classList.remove('hidden');
-                }
-            } catch (error) {
-                console.error('Time function failed:', error);
-                // On failure, keep everything hidden (fail-safe)
-                if (s1Link) { s1Link.classList.add('hidden'); s1Link.setAttribute('aria-disabled','true'); }
-                if (s2Link) { s2Link.classList.add('hidden'); s2Link.setAttribute('aria-disabled','true'); }
-                if (notice) notice.classList.remove('hidden');
-            }
+            // Always unlock buttons regardless of time
+            s1Link.classList.remove('hidden');
+            s2Link.classList.remove('hidden');
+            s1Link.setAttribute('aria-disabled','false');
+            s2Link.setAttribute('aria-disabled','false');
+            if (notice) notice.classList.add('hidden');
         })();
         // --- DOM Element Constants ---
         const dom = {
