@@ -458,6 +458,40 @@
 
     <div id="toast-notification" class="fixed bottom-5 right-5 bg-gray-800 text-white py-3 px-5 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 no-print">저장되었습니다!</div>
 
+    <!-- iOS Save Help Modal -->
+    <div id="ios-help-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 no-print" role="dialog" aria-modal="true" aria-labelledby="ios-help-title">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
+            <h3 id="ios-help-title" class="text-lg font-bold text-gray-800">iOS에서 ZIP 파일 저장하기</h3>
+            <ol class="text-gray-700 mt-3 list-decimal list-inside space-y-2">
+                <li>아래 "파일에 저장(공유 시트)" 버튼을 눌러 공유 시트를 여세요.</li>
+                <li>공유 시트에서 "파일에 저장"을 선택하세요.</li>
+                <li>원하는 저장 위치(예: iCloud Drive 또는 내 iPhone)와 폴더를 선택하고 저장하세요.</li>
+            </ol>
+            <p class="text-gray-500 text-sm mt-3">팁: 저장 후 "파일" 앱에서 방금 저장한 위치로 이동해 확인할 수 있어요.</p>
+            <div class="mt-6 flex flex-col sm:flex-row justify-end gap-3">
+                <button id="ios-help-download-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">대신 바로 다운로드</button>
+                <div class="flex-1"></div>
+                <button id="ios-help-close-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">닫기</button>
+                <button id="ios-help-confirm-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">파일에 저장(공유 시트)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Download Center Modal -->
+    <div id="inapp-download-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 no-print" role="dialog" aria-modal="true" aria-labelledby="inapp-title">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
+            <h3 id="inapp-title" class="text-lg font-bold text-gray-800">모바일 브라우저에서 저장하기</h3>
+            <p class="text-gray-600 mt-2">현재 사용 중인 브라우저에서는 파일 저장이 제한될 수 있어요. 아래 버튼으로 서버에서 직접 내려받아 주세요.</p>
+            <div class="mt-4 grid grid-cols-1 gap-3">
+                <button id="inapp-server-download-btn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">서버에서 다운로드(권장)</button>
+                <button id="inapp-retry-btn" class="hidden px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">재시도</button>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button id="inapp-close-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">닫기</button>
+            </div>
+        </div>
+    </div>
+
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const dom = {
@@ -472,6 +506,16 @@
             toast: document.getElementById('toast-notification'),
             allInputs: document.querySelectorAll('#tab4 input, #tab4 textarea, input#student_grade, input#student_class, input#student_number, input#student_name'),
             submitStatus: document.getElementById('submit_status'),
+            // iOS Help Modal
+            iosHelpModal: document.getElementById('ios-help-modal'),
+            iosHelpConfirmBtn: document.getElementById('ios-help-confirm-btn'),
+            iosHelpCloseBtn: document.getElementById('ios-help-close-btn'),
+            iosHelpDownloadBtn: document.getElementById('ios-help-download-btn'),
+            // In-App Download Center
+            inappModal: document.getElementById('inapp-download-modal'),
+            inappCloseBtn: document.getElementById('inapp-close-btn'),
+            inappServerDownloadBtn: document.getElementById('inapp-server-download-btn'),
+            inappRetryBtn: document.getElementById('inapp-retry-btn'),
         };
 
         const fields = {
@@ -505,12 +549,74 @@
         if (dom.retryUploadBtn) dom.retryUploadBtn.addEventListener('click', retryLastUpload);
         if (dom.clearBtn) dom.clearBtn.addEventListener('click', handleClearAll);
 
+        // iOS Help Modal events
+        if (dom.iosHelpCloseBtn) dom.iosHelpCloseBtn.addEventListener('click', () => hideModal(dom.iosHelpModal));
+        if (dom.iosHelpDownloadBtn) dom.iosHelpDownloadBtn.addEventListener('click', () => {
+            // Fallback direct download
+            if (lastZipBlob && lastMeta?.zipFilename) triggerBlobDownload(lastZipBlob, lastMeta.zipFilename);
+            dom.iosHelpModal.classList.add('hidden');
+        });
+        if (dom.iosHelpConfirmBtn) dom.iosHelpConfirmBtn.addEventListener('click', openIOSShare);
+
+        // In-App Download Center events
+        if (dom.inappCloseBtn) dom.inappCloseBtn.addEventListener('click', () => hideModal(dom.inappModal));
+        if (dom.inappServerDownloadBtn) dom.inappServerDownloadBtn.addEventListener('click', () => {
+            serverDownloadLastZip();
+        });
+        if (dom.inappRetryBtn) dom.inappRetryBtn.addEventListener('click', () => {
+            serverDownloadLastZip(true);
+        });
+
+        // Close modals on ESC for accessibility
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (dom.iosHelpModal && !dom.iosHelpModal.classList.contains('hidden')) hideModal(dom.iosHelpModal);
+                if (dom.inappModal && !dom.inappModal.classList.contains('hidden')) hideModal(dom.inappModal);
+            }
+        });
+
         loadFromBrowser();
         switchTab('guide1');
         updatePreview();
 
         // 아코디언 메뉴를 기본적으로 모두 펼칩니다.
         if (dom.accordions) dom.accordions.forEach(button => setAccordionState(button, true));
+
+        // Hide PDF print button only on iOS and in-app browsers (Android에서는 노출)
+        const __env = detectInApp();
+        if ((isIOS() || __env.isInApp) && dom.printBtn) {
+            dom.printBtn.classList.add('hidden');
+        }
+
+        // --- Modal focus trap helpers ---
+        let __lastTriggerEl = null;
+        function getFocusable(el) {
+            return el.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        }
+        function showModal(el, triggerEl = null) {
+            __lastTriggerEl = triggerEl || document.activeElement;
+            el.classList.remove('hidden');
+            const f = getFocusable(el);
+            if (f.length) f[0].focus();
+            function onKey(e) {
+                if (e.key !== 'Tab') return;
+                const focusables = Array.from(getFocusable(el));
+                if (!focusables.length) return;
+                const first = focusables[0];
+                const last = focusables[focusables.length - 1];
+                if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+            }
+            el.__trapHandler = onKey;
+            el.addEventListener('keydown', onKey);
+        }
+        function hideModal(el) {
+            el.classList.add('hidden');
+            if (el.__trapHandler) el.removeEventListener('keydown', el.__trapHandler);
+            if (__lastTriggerEl && typeof __lastTriggerEl.focus === 'function') {
+                __lastTriggerEl.focus();
+            }
+        }
 
         function switchTab(targetTabId) { 
             dom.tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === targetTabId)); 
@@ -783,6 +889,14 @@
             }catch(_){ return false; } 
         }
         
+        // --- Helpers for iOS detection & download/share ---
+        function isIOS() {
+            const ua = navigator.userAgent || navigator.vendor || '';
+            const iOSDevice = /iPad|iPhone|iPod/.test(ua);
+            const iPadOSDesktopUA = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+            return iOSDevice || iPadOSDesktopUA;
+        }
+
         function detectInApp(){ 
             const uaRaw=navigator.userAgent||navigator.vendor||''; 
             const ua=uaRaw.toLowerCase(); 
@@ -796,19 +910,44 @@
             const isLine=/ line\//.test(ua); 
             const isIOSWebView=isIOS && !!window.webkit && !!window.webkit.messageHandlers && !/safari/i.test(uaRaw); 
             const isInApp=isKakao||isNaver||isFB||isIG||isLine||isIOSWebView; 
-            return { isInApp, isIOS, isAndroid, isSamsung }; 
+            let app = null;
+            if (isKakao) app = 'kakao'; else if (isNaver) app = 'naver'; else if (isIG) app = 'instagram'; else if (isFB) app = 'facebook'; else if (isLine) app = 'line'; else if (isIOSWebView) app = 'ios-webview';
+            return { isInApp, app, isIOS, isAndroid, isSamsung }; 
+        }
+
+        async function openIOSShare() {
+            try {
+                if (!lastZipBlob || !lastMeta?.zipFilename) {
+                    showToast('공유할 파일이 없습니다.');
+                    return;
+                }
+                const zipFile = new File([lastZipBlob], lastMeta.zipFilename, { type: 'application/zip' });
+                if (navigator.canShare && navigator.canShare({ files: [zipFile] }) && typeof navigator.share === 'function') {
+                    await navigator.share({ files: [zipFile], title: lastMeta.zipFilename, text: '파일 앱에서 저장 위치를 선택하세요.' });
+                    showToast('공유 시트가 열렸습니다. "파일에 저장"을 선택하세요.');
+                } else {
+                    // Fallback to direct download
+                    triggerBlobDownload(lastZipBlob, lastMeta.zipFilename);
+                }
+            } catch (e) {
+                // User cancelled or error -> fallback download
+                triggerBlobDownload(lastZipBlob, lastMeta.zipFilename);
+            } finally {
+                if (dom.iosHelpModal) dom.iosHelpModal.classList.add('hidden');
+            }
         }
 
         async function attemptLocalDownloadAndVerify(zipFilename){ 
             const env=detectInApp(); 
             if (env.isInApp){ 
                 setStatus('로컬 다운로드가 제한되어 서버 다운로드로 전환합니다.'); 
-                serverDownloadLastZip(); 
+                if (dom.inappModal) showModal(dom.inappModal, dom.downloadZipBtn);
+                try { serverDownloadLastZip(); } catch(_) {}
                 return; 
             } 
-            if (env.isIOS){ 
+            if (isIOS()){ 
                 setStatus('iOS 저장 안내를 표시합니다.'); 
-                if (lastZipBlob) triggerBlobDownload(lastZipBlob, zipFilename); 
+                if (dom.iosHelpModal) showModal(dom.iosHelpModal, dom.downloadZipBtn);
                 return; 
             }
             let localSaved=false; 
@@ -830,7 +969,8 @@
                 showToast('로컬 다운로드 완료'); 
             } else { 
                 setStatus('로컬 다운로드 실패 또는 제한됨, 서버에서 다운로드합니다.'); 
-                serverDownloadLastZip(); 
+                if (dom.inappModal) showModal(dom.inappModal, dom.downloadZipBtn);
+                try { serverDownloadLastZip(); } catch(_) {}
             }
         }
 
@@ -849,30 +989,58 @@
             }, 300); 
         }
 
-        function serverDownloadLastZip(){ 
-            try{ 
-                if (!lastZipBlob || !lastMeta?.zipFilename){ 
-                    showToast('다운로드할 파일이 없습니다.'); 
-                    return; 
-                } 
-                blobToBase64(lastZipBlob).then((b64)=>{ 
-                    const token=`${Date.now()}_${Math.random().toString(36).slice(2,8)}`; 
-                    trackServerDownload(token, 3500); 
-                    const form=document.createElement('form'); 
-                    form.method='POST'; 
-                    form.action='/.netlify/functions/download'; 
-                    form.target='_blank'; 
-                    const add=(n,v)=>{ const i=document.createElement('input'); i.type='hidden'; i.name=n; i.value=v; form.appendChild(i); }; 
-                    add('filename', lastMeta.zipFilename); 
-                    add('mime', 'application/zip'); 
-                    add('contentBase64', b64); 
-                    add('token', token); 
-                    document.body.appendChild(form); 
-                    form.submit(); 
-                    document.body.removeChild(form); 
-                    showToast('서버에서 다운로드를 시작합니다.'); 
-                }).catch(()=>{ throw new Error('base64 변환 실패'); }); 
-            }catch(_){ showToast('서버 다운로드에 실패했습니다.'); }
+        let __inappRetryCount = 0;
+        const __inappRetryMax = 2;
+        function setInappRetryVisibility(show) {
+            if (!dom.inappRetryBtn) return;
+            dom.inappRetryBtn.classList.toggle('hidden', !show);
+        }
+        function serverDownloadLastZip(isManualRetry = false) {
+            try {
+                if (!lastZipBlob || !lastMeta?.zipFilename) {
+                    showToast('다운로드할 파일이 없습니다.');
+                    return;
+                }
+                // Convert blob -> base64 then POST via a form to open in new tab
+                blobToBase64(lastZipBlob).then((b64) => {
+                    try {
+                        const token = `${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+                        // heartbeat checker
+                        trackServerDownload(token, 3500);
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '/.netlify/functions/download';
+                        form.target = '_blank';
+                        const add = (n, v) => { const i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = v; form.appendChild(i); };
+                        add('filename', lastMeta.zipFilename);
+                        add('mime', 'application/zip');
+                        add('contentBase64', b64);
+                        add('token', token);
+                        document.body.appendChild(form);
+                        form.submit();
+                        document.body.removeChild(form);
+                        showToast('서버에서 다운로드를 시작합니다.');
+                        // 성공 시 모달 닫고 재시도 버튼 숨김/카운터 초기화
+                        __inappRetryCount = 0;
+                        setInappRetryVisibility(false);
+                        if (dom.inappModal) hideModal(dom.inappModal);
+                    } catch (e) {
+                        throw e;
+                    }
+                }).catch(() => {
+                    // base64 변환 실패도 실패로 취급
+                    throw new Error('base64 변환 실패');
+                });
+            } catch (_) {
+                __inappRetryCount += 1;
+                if (__inappRetryCount <= __inappRetryMax) {
+                    setInappRetryVisibility(true);
+                    showToast(`서버 다운로드에 실패했습니다. 재시도 가능 (${__inappRetryCount}/${__inappRetryMax})`);
+                } else {
+                    setInappRetryVisibility(false);
+                    showToast('서버 다운로드에 반복 실패했습니다. 잠시 후 다시 시도하세요.');
+                }
+            }
         }
 
         let lastZipBlob=null; 
