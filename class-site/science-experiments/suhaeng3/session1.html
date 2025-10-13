@@ -516,8 +516,44 @@
         async function saveWithPicker(blob, filename){ try{ const opts={ suggestedName: filename, types:[{ description:'ZIP file', accept:{'application/zip':['.zip']} }] }; const handle=await window.showSaveFilePicker(opts); const writable=await handle.createWritable(); await writable.write(blob); await writable.close(); return true; }catch(_){ return false; } }
         function detectInApp(){ const uaRaw=navigator.userAgent||navigator.vendor||''; const ua=uaRaw.toLowerCase(); const isIOS=/iphone|ipad|ipod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1); const isAndroid=/android/.test(ua); const isSamsung=/samsungbrowser/i.test(uaRaw); const isKakao=/kakaotalk/.test(ua); const isNaver=/naver/.test(ua); const isFB=/fban|fbav|fb_iab/.test(ua); const isIG=/instagram/.test(ua); const isLine=/ line\//.test(ua); const isIOSWebView=isIOS && !!window.webkit && !!window.webkit.messageHandlers && !/safari/i.test(uaRaw); const isInApp=isKakao||isNaver||isFB||isIG||isLine||isIOSWebView; return { isInApp, isIOS, isAndroid, isSamsung }; }
 
-        async function attemptLocalDownloadAndVerify(zipFilename){ const env=detectInApp(); if (env.isInApp){ setStatus('로컬 다운로드가 제한되어 서버 다운로드로 전환합니다.'); serverDownloadLastZip(); return; } if (env.isIOS){ setStatus('iOS 저장 안내를 표시합니다.'); // 간소화: iOS 공유 시트 대신 기본 다운로드 시도
-            if (lastZipBlob) triggerBlobDownload(lastZipBlob, zipFilename); return; }
+        async function shareToFilesApp(blob, filename) {
+            try {
+                // iOS에서 Web Share API를 사용하여 파일 앱으로 공유
+                if (navigator.share && navigator.canShare) {
+                    const file = new File([blob], filename, { type: 'application/zip' });
+                    const shareData = {
+                        files: [file],
+                        title: filename,
+                        text: 'ZIP 파일을 파일 앱에 저장하세요'
+                    };
+                    
+                    if (navigator.canShare(shareData)) {
+                        await navigator.share(shareData);
+                        setStatus('✅ 파일 앱으로 공유되었습니다.');
+                        showToast('파일 앱으로 공유 완료');
+                        return true;
+                    }
+                }
+                
+                // Web Share API가 지원되지 않거나 파일 공유가 불가능한 경우
+                // 대체 방법으로 blob 다운로드 시도
+                const success = triggerBlobDownload(blob, filename);
+                if (success) {
+                    setStatus('✅ ZIP 파일이 다운로드되었습니다. 파일 앱에서 확인하세요.');
+                    showToast('ZIP 파일 다운로드 완료');
+                } else {
+                    throw new Error('다운로드 실패');
+                }
+                return success;
+            } catch (error) {
+                console.error('iOS 파일 공유 실패:', error);
+                setStatus('파일 공유 실패, 서버 다운로드로 전환합니다.');
+                serverDownloadLastZip();
+                return false;
+            }
+        }
+
+        async function attemptLocalDownloadAndVerify(zipFilename){ const env=detectInApp(); if (env.isInApp){ setStatus('로컬 다운로드가 제한되어 서버 다운로드로 전환합니다.'); serverDownloadLastZip(); return; } if (env.isIOS){ setStatus('iOS에서 파일 앱으로 공유합니다.'); if (lastZipBlob) await shareToFilesApp(lastZipBlob, zipFilename); return; }
             let localSaved=false; let usedPicker=false; if (window.showSaveFilePicker && lastZipBlob){ usedPicker=true; localSaved=await saveWithPicker(lastZipBlob, zipFilename); }
             if (!localSaved && lastZipBlob){ try{ localSaved=triggerBlobDownload(lastZipBlob, zipFilename)===true; }catch(_){ localSaved=false; } }
             if (env.isAndroid || env.isSamsung){ if (!usedPicker) localSaved=false; }
