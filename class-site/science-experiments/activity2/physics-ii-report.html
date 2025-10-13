@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>물리학II 2학기 수행평가 - 물리학연관기사탐구</title>
+    <meta name="submission-subject" content="물리학II">
+    <meta name="submission-activity" content="물리학연관기사탐구">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans KR','Inter',sans-serif; background-color:#f3f4f6; }
+        .tab-button-group { display:flex; flex-wrap:wrap; gap:0.5rem; background-color:#e5e7eb; padding:0.5rem; border-radius:0.75rem; }
+        .tab-button { flex-grow:1; text-align:center; padding:0.75rem 0.5rem; border-radius:0.625rem; font-weight:600; color:#374151; cursor:pointer; transition:all .2s ease; border:1px solid #d1d5db; background-color:#ffffff; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+        .tab-button:hover { background-color:#f9fafb; color:#111827; border-color:#c7d2fe; }
+        .tab-button.active { background-color:#ffffff; color:#4f46e5; border-color:#4f46e5; box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06); }
+        .tab-content { display:none; }
+        .tab-content.active { display:block; }
+        .report-page { background-color:#fff; padding:2.5cm 2cm; box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05); color:#1f2937; }
+        .report-main-title { font-family:'Noto Sans KR',sans-serif; font-size:1.875rem; font-weight:700; text-align:center; margin-bottom:1rem; border-bottom:2px solid #111827; padding-bottom:1rem; }
+        .report-section-title { font-family:'Noto Sans KR',sans-serif; font-size:1.5rem; font-weight:700; color:#111827; margin-top:2.5rem; margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:1px solid #d1d5db; }
+        .preview-text { white-space:pre-wrap; word-break:break-word; min-height:2.5em; line-height:1.8; color:#374151; font-family:'Nanum Myeongjo',serif; }
+        .preview-text a { color:#2563eb; text-decoration:underline; }
+        .preview-text a:hover { color:#1d4ed8; text-decoration:underline; }
+        .preview-placeholder { color:#9ca3af; font-style:italic; }
+        /* guidance styles */
+        .infographic-card { background-color:#f9fafb; border:1px solid #e5e7eb; border-radius:0.75rem; padding:1.5rem; text-align:center; }
+        .tip-card { background: linear-gradient(135deg,#f5f3ff,#eef2ff); border-left:4px solid #6366f1; padding:1rem; border-radius:0.5rem; }
+        /* accordion */
+        .accordion-header button.open { background-color:#eef2ff; color:#4338ca; }
+        .accordion-content { transition:max-height .3s ease-out, padding .3s ease-out; max-height:0; overflow:hidden; }
+        .accordion-content.open { max-height:1500px; }
+
+        /* Responsive typography & controls */
+        html { font-size:16px; }
+        @media (min-width: 640px) { html { font-size:16.5px; } }
+        @media (min-width: 768px) { html { font-size:17px; } }
+        @media (min-width: 1024px) { html { font-size:17.5px; } }
+        @media (min-width: 1280px) { html { font-size:18px; } }
+
+        .tab-button { font-size:.95rem; padding:.85rem .5rem; }
+        @media (min-width: 640px) { .tab-button { font-size:1rem; } }
+        @media (min-width: 1024px) { .tab-button { font-size:1.05rem; } }
+
+        #download_zip_btn,
+        #print_btn,
+        #preview_newtab_btn,
+        #retry_upload_btn,
+        #add_source_btn,
+        #clear_inputs_btn {
+            font-size:.95rem; padding:.6rem 1rem;
+        }
+        @media (min-width: 640px) {
+            #download_zip_btn,
+            #print_btn,
+            #preview_newtab_btn,
+            #retry_upload_btn,
+            #add_source_btn,
+            #clear_inputs_btn { font-size:1rem; padding:.7rem 1.1rem; }
+        }
+        @media (min-width: 1024px) {
+            #download_zip_btn,
+            #print_btn,
+            #preview_newtab_btn,
+            #retry_upload_btn,
+            #add_source_btn,
+            #clear_inputs_btn { font-size:1.0625rem; padding:.8rem 1.2rem; }
+        }
+
+        label { font-size:.95rem; }
+        textarea, input[type="text"], input[type="number"], select { font-size:1rem; }
+        @media (min-width: 1024px) {
+            textarea, input[type="text"], input[type="number"], select { font-size:1.0625rem; }
+        }
+        @page { size:A4 portrait; margin:2cm; }
+        @media print { body *{ visibility:hidden } .printable-area, .printable-area *{ visibility:visible } .printable-area{ position:absolute; left:0; top:0; width:100%; padding:0; margin:0; box-shadow:none; border:none } .no-print{ display:none } }
+    </style>
+    <link rel="icon" href="data:,">
+</head>
+<body class="p-4 sm:p-8">
+    <div class="max-w-5xl mx-auto">
+        <header class="text-center bg-white p-8 rounded-xl shadow-lg mb-6 no-print">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">물리학II 2학기 수행평가</h1>
+            <p class="text-lg text-gray-600 mt-2">물리학연관기사탐구 활동지</p>
+            <div class="mt-4">
+                <a href="../index.html" class="text-indigo-600 hover:underline">← 활동 허브로 돌아가기</a>
+            </div>
+        </header>
+
+        <div class="bg-white p-6 sm:p-8 rounded-lg shadow-md mb-6 no-print">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-6">
+                <div class="flex items-center space-x-2 flex-wrap justify-center">
+                    <input type="number" id="student_grade" min="1" max="3" step="1" inputmode="numeric" class="w-20 p-2 border border-gray-300 rounded-md text-center" placeholder="학년">
+                    <label for="student_grade" class="font-semibold">학년</label>
+                    <input type="number" id="student_class" min="1" max="20" step="1" inputmode="numeric" class="w-20 p-2 border border-gray-300 rounded-md text-center" placeholder="반">
+                    <label for="student_class" class="font-semibold">반</label>
+                    <input type="number" id="student_number" min="1" max="40" step="1" inputmode="numeric" class="w-20 p-2 border border-gray-300 rounded-md text-center" placeholder="번호">
+                    <label for="student_number" class="font-semibold">번</label>
+                    <input type="text" id="student_name" class="w-32 p-2 border border-gray-300 rounded-md" placeholder="이름">
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-8 no-print">
+            <div class="tab-button-group" aria-label="탭 메뉴">
+                <button class="tab-button active" data-tab="guide1">활동 안내</button>
+                <button class="tab-button" data-tab="tab4">활동지 작성</button>
+                <button class="tab-button" data-tab="tab5">미리보기 및 제출</button>
+            </div>
+        </div>
+        
+        <div id="guide1" class="tab-content active">
+            <div class="bg-white p-6 sm:p-8 rounded-lg shadow-md space-y-10">
+                <section>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">물리학연관기사탐구</h2>
+                    <p class="text-gray-600 mb-6">물리학과 관련된 최신 기사를 찾아 분석하고, 물리학적 원리를 탐구합니다.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="infographic-card"><span class="text-5xl mb-3">📰</span><h3 class="font-bold">기사 선정</h3><p class="text-gray-600 mt-2">최근 4년간(2022.10~2025.10) 물리학 관련 기사</p></div>
+                        <div class="infographic-card"><span class="text-5xl mb-3">🔬</span><h3 class="font-bold">물리학적 분석</h3><p class="text-gray-600 mt-2">기사 내용의 물리학적 원리 탐구</p></div>
+                    </div>
+                </section>
+                
+                <section>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">활동 목표</h2>
+                    <div class="tip-card">
+                        <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+                            <li>물리학과 관련된 최신 기사 5개 선정 및 분석</li>
+                            <li>각 기사의 내용 요약 및 물리학적 원리 탐구</li>
+                            <li>기사의 전반적 내용 정리 및 결론 도출</li>
+                        </ul>
+                    </div>
+                </section>
+                
+                <section>
+                    <div class="accordion-item border-t pt-4">
+                        <div class="accordion-header"><button class="w-full text-left p-4 rounded-lg font-semibold text-lg text-gray-800 hover:bg-gray-100 flex justify-between items-center"><span>📰 기사 선정 기준</span><svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button></div>
+                        <div class="accordion-content"><div class="p-4 text-gray-600 space-y-3">
+                            <p>물리학과 관련된 기사를 선정할 때는 다음 기준을 고려하세요.</p>
+                            <div class="tip-card p-4 rounded-lg">
+                                <h4 class="font-bold text-indigo-800">기사 선정 기준</h4>
+                                <ul class="list-disc list-inside mt-2 text-sm">
+                                    <li><strong>시기:</strong> 최근 4년간(2022.10~2025.10)의 기사</li>
+                                    <li><strong>내용:</strong> 물리학과 직접적으로 관련된 내용</li>
+                                    <li><strong>출처:</strong> 신뢰할 수 있는 언론사 기사</li>
+                                    <li><strong>분석 가능성:</strong> 물리학적 원리를 분석할 수 있는 내용</li>
+                                </ul>
+                                <div class="mt-4 p-3 rounded-lg bg-indigo-50 border border-indigo-200">
+                                    <h5 class="font-bold text-indigo-800 text-sm">💡 기사 예시</h5>
+                                    <ul class="text-sm text-indigo-900 mt-1 space-y-1">
+                                        <li>• 양자컴퓨터 기술 발전 관련 기사</li>
+                                        <li>• 우주 탐사 및 천체 물리학 관련 기사</li>
+                                        <li>• 에너지 기술 및 물리학적 원리 관련 기사</li>
+                                        <li>• 나노기술 및 물리학적 특성 관련 기사</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div></div>
+                    </div>
+                    
+                    <div class="accordion-item border-t pt-4">
+                        <div class="accordion-header"><button class="w-full text-left p-4 rounded-lg font-semibold text-lg text-gray-800 hover:bg-gray-100 flex justify-between items-center"><span>🔬 물리학적 분석 방법</span><svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button></div>
+                        <div class="accordion-content"><div class="p-4 text-gray-600 space-y-3">
+                            <p>기사를 물리학적 관점에서 분석할 때는 다음 요소들을 고려하세요.</p>
+                            <div class="tip-card p-4 rounded-lg">
+                                <h4 class="font-bold text-indigo-800">분석 요소</h4>
+                                <ul class="list-disc list-inside mt-2 text-sm">
+                                    <li><strong>물리학적 원리:</strong> 기사에서 다루는 핵심 물리학 개념</li>
+                                    <li><strong>실험/관찰:</strong> 언급된 실험 방법이나 관찰 결과</li>
+                                    <li><strong>수치적 데이터:</strong> 측정값, 계산 결과 등</li>
+                                    <li><strong>기술적 응용:</strong> 물리학 원리의 실제 적용 사례</li>
+                                </ul>
+                                <div class="mt-4 p-3 rounded-lg bg-indigo-50 border border-indigo-200">
+                                    <h5 class="font-bold text-indigo-800 text-sm">✍️ 분석 예시</h5>
+                                    <p class="text-sm text-indigo-900 mt-1">
+                                        <strong>기사:</strong> "양자컴퓨터로 복잡한 분자 구조 해석 성공"<br>
+                                        <strong>물리학적 분석:</strong> 양자 중첩 원리와 양자 얽힘 현상을 이용한 계산 방법, 슈뢰딩거 방정식의 응용 등
+                                    </p>
+                                </div>
+                            </div>
+                        </div></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <main>
+            <div id="tab4" class="tab-content">
+                <div class="bg-white p-6 sm:p-10 rounded-lg shadow-md space-y-8">
+                    <header class="text-center mb-4">
+                        <h2 class="text-2xl font-bold text-gray-800">물리학연관기사탐구 활동지</h2>
+                        <p class="text-gray-600">물리학과 관련된 기사 5개를 선정하여 분석하고 탐구하세요.</p>
+                    </header>
+                    <div class="flex justify-end -mt-2">
+                        <button id="clear_inputs_btn" class="bg-red-50 text-red-700 font-semibold py-2 px-4 rounded-lg border border-red-200 hover:bg-red-100 transition text-sm">🗑️ 입력 내용 삭제</button>
+                    </div>
+                    
+                    <!-- 기사 1 -->
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">기사 1</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="article1_title" class="font-semibold text-gray-700 block mb-2">기사 제목</label>
+                                <input type="text" id="article1_title" class="w-full p-3 border border-gray-300 rounded-md" placeholder="기사 제목을 입력하세요">
+                            </div>
+                            <div>
+                                <label for="article1_summary" class="font-semibold text-gray-700 block mb-2">기사 내용 요약</label>
+                                <textarea id="article1_summary" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="기사의 주요 내용을 요약하여 작성하세요"></textarea>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="article1_publisher" class="font-semibold text-gray-700 block mb-2">언론사</label>
+                                    <input type="text" id="article1_publisher" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 조선일보">
+                                </div>
+                                <div>
+                                    <label for="article1_date" class="font-semibold text-gray-700 block mb-2">게시일자</label>
+                                    <input type="text" id="article1_date" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 2024.03.15">
+                                </div>
+                                <div>
+                                    <label for="article1_url" class="font-semibold text-gray-700 block mb-2">URL</label>
+                                    <input type="url" id="article1_url" class="w-full p-3 border border-gray-300 rounded-md" placeholder="https://example.com">
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 기사 2 -->
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">기사 2</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="article2_title" class="font-semibold text-gray-700 block mb-2">기사 제목</label>
+                                <input type="text" id="article2_title" class="w-full p-3 border border-gray-300 rounded-md" placeholder="기사 제목을 입력하세요">
+                            </div>
+                            <div>
+                                <label for="article2_summary" class="font-semibold text-gray-700 block mb-2">기사 내용 요약</label>
+                                <textarea id="article2_summary" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="기사의 주요 내용을 요약하여 작성하세요"></textarea>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="article2_publisher" class="font-semibold text-gray-700 block mb-2">언론사</label>
+                                    <input type="text" id="article2_publisher" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 조선일보">
+                                </div>
+                                <div>
+                                    <label for="article2_date" class="font-semibold text-gray-700 block mb-2">게시일자</label>
+                                    <input type="text" id="article2_date" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 2024.03.15">
+                                </div>
+                                <div>
+                                    <label for="article2_url" class="font-semibold text-gray-700 block mb-2">URL</label>
+                                    <input type="url" id="article2_url" class="w-full p-3 border border-gray-300 rounded-md" placeholder="https://example.com">
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 기사 3 -->
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">기사 3</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="article3_title" class="font-semibold text-gray-700 block mb-2">기사 제목</label>
+                                <input type="text" id="article3_title" class="w-full p-3 border border-gray-300 rounded-md" placeholder="기사 제목을 입력하세요">
+                            </div>
+                            <div>
+                                <label for="article3_summary" class="font-semibold text-gray-700 block mb-2">기사 내용 요약</label>
+                                <textarea id="article3_summary" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="기사의 주요 내용을 요약하여 작성하세요"></textarea>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="article3_publisher" class="font-semibold text-gray-700 block mb-2">언론사</label>
+                                    <input type="text" id="article3_publisher" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 조선일보">
+                                </div>
+                                <div>
+                                    <label for="article3_date" class="font-semibold text-gray-700 block mb-2">게시일자</label>
+                                    <input type="text" id="article3_date" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 2024.03.15">
+                                </div>
+                                <div>
+                                    <label for="article3_url" class="font-semibold text-gray-700 block mb-2">URL</label>
+                                    <input type="url" id="article3_url" class="w-full p-3 border border-gray-300 rounded-md" placeholder="https://example.com">
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 기사 4 -->
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">기사 4</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="article4_title" class="font-semibold text-gray-700 block mb-2">기사 제목</label>
+                                <input type="text" id="article4_title" class="w-full p-3 border border-gray-300 rounded-md" placeholder="기사 제목을 입력하세요">
+                            </div>
+                            <div>
+                                <label for="article4_summary" class="font-semibold text-gray-700 block mb-2">기사 내용 요약</label>
+                                <textarea id="article4_summary" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="기사의 주요 내용을 요약하여 작성하세요"></textarea>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="article4_publisher" class="font-semibold text-gray-700 block mb-2">언론사</label>
+                                    <input type="text" id="article4_publisher" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 조선일보">
+                                </div>
+                                <div>
+                                    <label for="article4_date" class="font-semibold text-gray-700 block mb-2">게시일자</label>
+                                    <input type="text" id="article4_date" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 2024.03.15">
+                                </div>
+                                <div>
+                                    <label for="article4_url" class="font-semibold text-gray-700 block mb-2">URL</label>
+                                    <input type="url" id="article4_url" class="w-full p-3 border border-gray-300 rounded-md" placeholder="https://example.com">
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 기사 5 -->
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">기사 5</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="article5_title" class="font-semibold text-gray-700 block mb-2">기사 제목</label>
+                                <input type="text" id="article5_title" class="w-full p-3 border border-gray-300 rounded-md" placeholder="기사 제목을 입력하세요">
+                            </div>
+                            <div>
+                                <label for="article5_summary" class="font-semibold text-gray-700 block mb-2">기사 내용 요약</label>
+                                <textarea id="article5_summary" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="기사의 주요 내용을 요약하여 작성하세요"></textarea>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="article5_publisher" class="font-semibold text-gray-700 block mb-2">언론사</label>
+                                    <input type="text" id="article5_publisher" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 조선일보">
+                                </div>
+                                <div>
+                                    <label for="article5_date" class="font-semibold text-gray-700 block mb-2">게시일자</label>
+                                    <input type="text" id="article5_date" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 2024.03.15">
+                                </div>
+                                <div>
+                                    <label for="article5_url" class="font-semibold text-gray-700 block mb-2">URL</label>
+                                    <input type="url" id="article5_url" class="w-full p-3 border border-gray-300 rounded-md" placeholder="https://example.com">
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 전반적 내용 정리 -->
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">기사의 전반적 내용 정리</h3>
+                        <div>
+                            <label for="overall_summary" class="font-semibold text-gray-700 block mb-2">전반적 내용 정리</label>
+                            <div class="text-sm bg-blue-50 border border-blue-200 text-blue-900 rounded-md p-3 mb-2">
+                                <div class="font-semibold mb-1">작성 가이드</div>
+                                <ul class="list-disc list-inside space-y-0.5">
+                                    <li>5개 기사의 공통점과 차이점 분석</li>
+                                    <li>물리학적 관점에서의 전체적 흐름 파악</li>
+                                    <li>기술 발전의 방향성과 전망 제시</li>
+                                </ul>
+                            </div>
+                            <textarea id="overall_summary" rows="6" class="w-full p-3 border border-gray-300 rounded-md" placeholder="5개 기사를 종합하여 물리학적 관점에서 전반적인 내용을 정리하세요."></textarea>
+                        </div>
+                    </section>
+
+                    <!-- 결론 및 정리 -->
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">결론 및 정리</h3>
+                        <div>
+                            <label for="conclusion" class="font-semibold text-gray-700 block mb-2">결론 및 정리</label>
+                            <div class="text-sm bg-blue-50 border border-blue-200 text-blue-900 rounded-md p-3 mb-2">
+                                <div class="font-semibold mb-1">작성 가이드</div>
+                                <ul class="list-disc list-inside space-y-0.5">
+                                    <li>탐구를 통해 얻은 주요 인사이트</li>
+                                    <li>물리학의 중요성과 미래 전망</li>
+                                    <li>개인적 소감 및 학습 성과</li>
+                                </ul>
+                            </div>
+                            <textarea id="conclusion" rows="6" class="w-full p-3 border border-gray-300 rounded-md" placeholder="탐구 활동을 통해 얻은 결론과 개인적 소감을 작성하세요."></textarea>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <div id="tab5" class="tab-content">
+                <div class="bg-white p-6 sm:p-8 rounded-lg shadow-md mb-6 no-print">
+                    <div class="flex justify-center items-center gap-4 flex-wrap">
+                        <button id="download_zip_btn" class="bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition text-base">📦 ZIP으로 다운로드</button>
+                        <button id="print_btn" class="bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition text-base">🖨️ PDF로 저장</button>
+                        <button id="preview_newtab_btn" class="bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition text-base">👁️ 미리보기(새 탭)</button>
+                        <button id="retry_upload_btn" class="hidden bg-yellow-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-yellow-600 transition text-base">🔄 업로드 재시도</button>
+                    </div>
+                    <p class="text-center text-sm text-gray-600 mt-4" aria-live="polite" role="status"><span id="submit_status"></span></p>
+                    <div id="progress_container" class="w-full max-w-xl mx-auto mt-3 hidden" aria-hidden="true">
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div id="progress_bar" class="bg-indigo-600 h-3 rounded-full" style="width:0%"></div>
+                        </div>
+                        <p id="progress_text" class="text-center text-xs text-gray-600 mt-1"></p>
+                    </div>
+                </div>
+                <div class="bg-gray-200 p-4 sm:p-8 rounded-lg">
+                    <div class="printable-area report-page" id="report-content">
+                        <h1 id="preview_main_title" class="report-main-title">물리학II 2학기 수행평가 - 물리학연관기사탐구</h1>
+                        <p class="text-right text-gray-600 mb-10" style="font-family: 'Noto Sans KR', sans-serif;">
+                            <span id="preview_student_grade">1</span>학년 <span id="preview_student_class">0</span>반 <span id="preview_student_number">00</span>번 이름: <span id="preview_student_name">ㅇㅇㅇ</span>
+                        </p>
+                        
+                        <!-- 기사 1 -->
+                        <h2 class="report-section-title">기사 1</h2>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">기사 제목</h3>
+                        <p class="preview-text" id="preview_article1_title"><span class="preview-placeholder">기사 제목을 입력하세요</span></p>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">기사 내용 요약</h3>
+                        <p class="preview-text" id="preview_article1_summary"><span class="preview-placeholder">기사 내용을 요약하여 작성하세요</span></p>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">출처</h3>
+                        <p class="preview-text" id="preview_article1_source"><span class="preview-placeholder">언론사, 게시일자, URL을 입력하세요</span></p>
+
+                        <!-- 기사 2 -->
+                        <h2 class="report-section-title">기사 2</h2>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">기사 제목</h3>
+                        <p class="preview-text" id="preview_article2_title"><span class="preview-placeholder">기사 제목을 입력하세요</span></p>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">기사 내용 요약</h3>
+                        <p class="preview-text" id="preview_article2_summary"><span class="preview-placeholder">기사 내용을 요약하여 작성하세요</span></p>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">출처</h3>
+                        <p class="preview-text" id="preview_article2_source"><span class="preview-placeholder">언론사, 게시일자, URL을 입력하세요</span></p>
+
+                        <!-- 기사 3 -->
+                        <h2 class="report-section-title">기사 3</h2>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">기사 제목</h3>
+                        <p class="preview-text" id="preview_article3_title"><span class="preview-placeholder">기사 제목을 입력하세요</span></p>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">기사 내용 요약</h3>
+                        <p class="preview-text" id="preview_article3_summary"><span class="preview-placeholder">기사 내용을 요약하여 작성하세요</span></p>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">출처</h3>
+                        <p class="preview-text" id="preview_article3_source"><span class="preview-placeholder">언론사, 게시일자, URL을 입력하세요</span></p>
+
+                        <!-- 기사 4 -->
+                        <h2 class="report-section-title">기사 4</h2>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">기사 제목</h3>
+                        <p class="preview-text" id="preview_article4_title"><span class="preview-placeholder">기사 제목을 입력하세요</span></p>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">기사 내용 요약</h3>
+                        <p class="preview-text" id="preview_article4_summary"><span class="preview-placeholder">기사 내용을 요약하여 작성하세요</span></p>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">출처</h3>
+                        <p class="preview-text" id="preview_article4_source"><span class="preview-placeholder">언론사, 게시일자, URL을 입력하세요</span></p>
+
+                        <!-- 기사 5 -->
+                        <h2 class="report-section-title">기사 5</h2>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">기사 제목</h3>
+                        <p class="preview-text" id="preview_article5_title"><span class="preview-placeholder">기사 제목을 입력하세요</span></p>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">기사 내용 요약</h3>
+                        <p class="preview-text" id="preview_article5_summary"><span class="preview-placeholder">기사 내용을 요약하여 작성하세요</span></p>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">출처</h3>
+                        <p class="preview-text" id="preview_article5_source"><span class="preview-placeholder">언론사, 게시일자, URL을 입력하세요</span></p>
+
+                        <!-- 전반적 내용 정리 -->
+                        <h2 class="report-section-title">기사의 전반적 내용 정리</h2>
+                        <p class="preview-text" id="preview_overall_summary"><span class="preview-placeholder">전반적 내용을 정리하세요</span></p>
+
+                        <!-- 결론 및 정리 -->
+                        <h2 class="report-section-title">결론 및 정리</h2>
+                        <p class="preview-text" id="preview_conclusion"><span class="preview-placeholder">결론을 작성하세요</span></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast-notification" class="fixed bottom-5 right-5 bg-gray-800 text-white py-3 px-5 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 no-print">저장되었습니다!</div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const dom = {
+            tabs: document.querySelectorAll('.tab-button'),
+            tabContents: document.querySelectorAll('.tab-content'),
+            accordions: document.querySelectorAll('.accordion-header button'),
+            downloadZipBtn: document.getElementById('download_zip_btn'),
+            printBtn: document.getElementById('print_btn'),
+            previewNewTabBtn: document.getElementById('preview_newtab_btn'),
+            retryUploadBtn: document.getElementById('retry_upload_btn'),
+            clearBtn: document.getElementById('clear_inputs_btn'),
+            toast: document.getElementById('toast-notification'),
+            allInputs: document.querySelectorAll('#tab4 input, #tab4 textarea, input#student_grade, input#student_class, input#student_number, input#student_name'),
+            submitStatus: document.getElementById('submit_status'),
+        };
+
+        const fields = {
+            'student_grade': 'preview_student_grade',
+            'student_class': 'preview_student_class', 
+            'student_number': 'preview_student_number', 
+            'student_name': 'preview_student_name',
+            'article1_title': 'preview_article1_title',
+            'article1_summary': 'preview_article1_summary',
+            'article2_title': 'preview_article2_title',
+            'article2_summary': 'preview_article2_summary',
+            'article3_title': 'preview_article3_title',
+            'article3_summary': 'preview_article3_summary',
+            'article4_title': 'preview_article4_title',
+            'article4_summary': 'preview_article4_summary',
+            'article5_title': 'preview_article5_title',
+            'article5_summary': 'preview_article5_summary',
+            'overall_summary': 'preview_overall_summary',
+            'conclusion': 'preview_conclusion',
+        };
+
+        const storageKey = 'physicsIIReportData';
+
+        dom.tabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+        if (dom.accordions) dom.accordions.forEach(button => button.addEventListener('click', toggleAccordion));
+        dom.allInputs.forEach(input => input.addEventListener('input', updatePreviewAndSave));
+
+        if (dom.downloadZipBtn) dom.downloadZipBtn.addEventListener('click', handleZipDownloadAndSubmit);
+        if (dom.printBtn) dom.printBtn.addEventListener('click', printReport);
+        if (dom.previewNewTabBtn) dom.previewNewTabBtn.addEventListener('click', openPreviewInNewTab);
+        if (dom.retryUploadBtn) dom.retryUploadBtn.addEventListener('click', retryLastUpload);
+        if (dom.clearBtn) dom.clearBtn.addEventListener('click', handleClearAll);
+
+        loadFromBrowser();
+        switchTab('guide1');
+        updatePreview();
+
+        // 아코디언 메뉴를 기본적으로 모두 펼칩니다.
+        if (dom.accordions) dom.accordions.forEach(button => setAccordionState(button, true));
+
+        function switchTab(targetTabId) { 
+            dom.tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === targetTabId)); 
+            dom.tabContents.forEach(content => content.classList.toggle('active', content.id === targetTabId)); 
+            window.scrollTo(0,0); 
+        }
+        
+        function setAccordionState(button, open = true) {
+            const content = button.parentElement.nextElementSibling;
+            const icon = button.querySelector('svg');
+            button.classList.toggle('open', open);
+            content.classList.toggle('open', open);
+            if (open) {
+                setTimeout(() => {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                    content.style.paddingTop = '1rem';
+                    content.style.paddingBottom = '1rem';
+                }, 10);
+                if(icon) icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.style.maxHeight = '0';
+                content.style.paddingTop = '0';
+                content.style.paddingBottom = '0';
+                if(icon) icon.style.transform = 'rotate(0deg)';
+            }
+        }
+        
+        function toggleAccordion(event) { 
+            const button = event.currentTarget;
+            const isOpen = !button.classList.contains('open');
+            setAccordionState(button, isOpen);
+        }
+
+        function updatePreviewAndSave() { updatePreview(); saveToBrowser(); }
+        
+        function updatePreview() { 
+            // 일반 필드들 처리
+            Object.entries(fields).forEach(([fieldId, previewId]) => { 
+                const inputEl = document.getElementById(fieldId); 
+                const previewEl = document.getElementById(previewId); 
+                if (!inputEl || !previewEl) return; 
+                
+                const value = inputEl.value.trim(); 
+                const placeholderSpan = previewEl.querySelector('.preview-placeholder'); 
+                const placeholderText = placeholderSpan ? placeholderSpan.textContent : `[${fieldId}]`; 
+                if (value) { 
+                    previewEl.textContent = value; 
+                } else { 
+                    previewEl.innerHTML = `<span class="preview-placeholder">${placeholderText}</span>`; 
+                } 
+            });
+            
+            // 출처 필드들 처리 (언론사, 게시일자, URL 조합)
+            for (let i = 1; i <= 5; i++) {
+                const publisher = document.getElementById(`article${i}_publisher`)?.value.trim() || '';
+                const date = document.getElementById(`article${i}_date`)?.value.trim() || '';
+                const url = document.getElementById(`article${i}_url`)?.value.trim() || '';
+                
+                const parts = [];
+                if (publisher) parts.push(publisher);
+                if (date) parts.push(date);
+                
+                // URL을 하이퍼링크로 처리
+                let urlPart = '';
+                if (url) {
+                    // URL 유효성 검사 (http:// 또는 https://로 시작하는지 확인)
+                    const isValidUrl = url.match(/^https?:\/\//);
+                    if (isValidUrl) {
+                        urlPart = `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">${escapeHtml(url)}</a>`;
+                    } else {
+                        urlPart = escapeHtml(url);
+                    }
+                    parts.push(urlPart);
+                }
+                
+                const previewEl = document.getElementById(`preview_article${i}_source`);
+                if (previewEl) {
+                    if (parts.length > 0) {
+                        previewEl.innerHTML = parts.join(', ');
+                    } else {
+                        previewEl.innerHTML = `<span class="preview-placeholder">언론사, 게시일자, URL을 입력하세요</span>`;
+                    }
+                }
+            }
+        }
+
+        function getFormData() { 
+            const data = {}; 
+            dom.allInputs.forEach(input => data[input.id] = input.value); 
+            return data; 
+        }
+        
+        function saveToBrowser() { 
+            localStorage.setItem(storageKey, JSON.stringify(getFormData())); 
+            showToast('자동 저장되었습니다.'); 
+        }
+        
+        function loadFromBrowser() { 
+            const saved = localStorage.getItem(storageKey); 
+            if (!saved) return; 
+            const data = JSON.parse(saved); 
+            Object.entries(data).forEach(([k,v]) => { 
+                const el = document.getElementById(k); 
+                if (el) el.value = v; 
+            }); 
+            updatePreview(); 
+        }
+        
+        function showToast(message) { 
+            const toast = dom.toast; 
+            if (!toast) return; 
+            toast.textContent = message; 
+            toast.style.opacity = 1; 
+            setTimeout(()=>{ toast.style.opacity = 0; }, 1200); 
+        }
+        
+        function handleClearAll(){ 
+            try{ 
+                const ok=window.confirm('입력한 내용을 모두 삭제하시겠어요?\n이 작업은 되돌릴 수 없습니다.'); 
+                if(!ok) return; 
+                clearFormAndStorage(); 
+                showToast('입력 내용이 삭제되었습니다.'); 
+            }catch(_){} 
+        }
+        
+        function clearFormAndStorage(){ 
+            try{ 
+                localStorage.removeItem(storageKey); 
+                localStorage.removeItem(SUBMIT_META_KEY); 
+            }catch(_){} 
+            Array.from(dom.allInputs).forEach(el=>{ 
+                if(el.tagName==='INPUT' || el.tagName==='TEXTAREA'){ 
+                    el.value=''; 
+                } 
+            }); 
+            if (typeof lastZipBlob!=='undefined') lastZipBlob=null; 
+            if (typeof lastMeta!=='undefined') lastMeta=null; 
+            setStatus(''); 
+            updatePreview(); 
+        }
+        
+        function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;');}
+
+        function getReportFilename(){ 
+            const grade=(document.getElementById('student_grade').value||'1').trim(); 
+            const studentClass=(document.getElementById('student_class').value||'0').trim().padStart(2,'0'); 
+            const studentNumber=(document.getElementById('student_number').value||'0').trim().padStart(2,'0'); 
+            const studentId=`${grade}${studentClass}${studentNumber}`; 
+            const studentName=document.getElementById('student_name').value.trim()||'이름없음'; 
+            return `${studentId}_${studentName}_물리학연관기사탐구`; 
+        }
+        
+        function printReport(){ 
+            const originalTitle=document.title; 
+            document.title=getReportFilename(); 
+            window.print(); 
+            setTimeout(()=>{ document.title=originalTitle; }, 500); 
+        }
+        
+        function openPreviewInNewTab(){ 
+            try{ 
+                const reportContent=document.getElementById('report-content').innerHTML; 
+                const now=new Date(); 
+                const ts=`${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`; 
+                const title=`미리보기-물리학연관기사탐구-${ts}`; 
+                const docHtml=generateDocHtml(title, reportContent); 
+                const blob=new Blob([docHtml],{type:'text/html'}); 
+                const url=URL.createObjectURL(blob); 
+                window.open(url,'_blank'); 
+                setTimeout(()=>URL.revokeObjectURL(url),10000);
+            }catch(_){}
+        }
+
+        function setStatus(text){ if (dom.submitStatus) dom.submitStatus.textContent=text||''; }
+        function showProgress(show){ const c=document.getElementById('progress_container'); if(!c) return; c.classList.toggle('hidden', !show); c.setAttribute('aria-hidden', show?'false':'true'); }
+        function setProgress(percent,label=''){ const bar=document.getElementById('progress_bar'); const txt=document.getElementById('progress_text'); if(bar) bar.style.width=`${Math.max(0,Math.min(100,percent))}%`; if(txt) txt.textContent=label||''; }
+
+        const ENDPOINT='/.netlify/functions/submit';
+        const SUBMIT_KEY='S-2025-github2025subject';
+        const SUBJECT=document.querySelector('meta[name="submission-subject"]')?.content||'물리학II';
+        const ACTIVITY_INPUT_DEFAULT=document.querySelector('meta[name="submission-activity"]')?.content||'물리학연관기사탐구';
+        const SUBMIT_META_KEY='submit_meta_physicsII';
+
+        ['student_grade','student_class','student_number','student_name'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('input', saveSubmitMeta); });
+        loadSubmitMeta();
+        
+        function saveSubmitMeta(){ 
+            const meta={ 
+                grade:document.getElementById('student_grade')?.value||'', 
+                class:document.getElementById('student_class')?.value||'', 
+                number:document.getElementById('student_number')?.value||'', 
+                name:document.getElementById('student_name')?.value||'' 
+            }; 
+            try{ localStorage.setItem(SUBMIT_META_KEY, JSON.stringify(meta)); }catch(_){} 
+        }
+        
+        function loadSubmitMeta(){ 
+            try{ 
+                const raw=localStorage.getItem(SUBMIT_META_KEY); 
+                if(!raw) return; 
+                const meta=JSON.parse(raw); 
+                if(meta.grade!=null) document.getElementById('student_grade').value=meta.grade; 
+                if(meta.class!=null) document.getElementById('student_class').value=meta.class; 
+                if(meta.number!=null) document.getElementById('student_number').value=meta.number; 
+                if(meta.name!=null) document.getElementById('student_name').value=meta.name; 
+            }catch(_){} 
+        }
+
+        function generateDocHtml(dynamicTitle, reportInnerHtml){ 
+            return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${dynamicTitle}</title><script src="https://cdn.tailwindcss.com"><\/script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet"><style>body{font-family:'Noto Sans KR','Inter',sans-serif;background-color:#f3f4f6;margin:0}*{color:inherit !important}.report-page{background-color:#fff;padding:2.5cm 2cm;box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);color:#1f2937}.printable-area{width:100%}.report-main-title{font-family:'Noto Sans KR',sans-serif;font-size:1.875rem;font-weight:700;text-align:center;margin-bottom:1rem;border-bottom:2px solid #111827;padding-bottom:1rem}.report-section-title{font-family:'Noto Sans KR',sans-serif;font-size:1.5rem;font-weight:700;color:#111827;margin-top:2.5rem;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid #d1d5db}.preview-text{white-space:pre-wrap;word-break:break-word;min-height:2.5em;line-height:1.8;color:#374151;font-family:'Nanum Myeongjo',serif}.preview-text a{color:#2563eb !important;text-decoration:underline}.preview-placeholder{color:#9ca3af !important;font-style:italic}@page{size:A4 portrait;margin:2cm}@media print{body *{visibility:hidden}.printable-area,.printable-area *{visibility:visible}.printable-area{position:absolute;left:0;top:0;width:100%;padding:0;margin:0;box-shadow:none;border:none}.no-print{display:none}}</style></head><body><div class="report-page"><div class="printable-area">${reportInnerHtml}</div></div></body></html>`; 
+        }
+
+        function calcSectionCode(grade,klass){ const g=String(grade||'').trim(); const k=String(klass||'').trim().padStart(2,'0'); return `${g}${k}`; }
+        function calcStudentId(grade,klass,number){ const g=String(grade||'').trim(); const k=String(klass||'').trim().padStart(2,'0'); const n=String(number||'').trim().padStart(2,'0'); return `${g}${k}${n}`; }
+
+        function validateForm(){ 
+            const gradeEl=document.getElementById('student_grade'); 
+            const classEl=document.getElementById('student_class'); 
+            const numberEl=document.getElementById('student_number'); 
+            const nameEl=document.getElementById('student_name'); 
+            const grade=parseInt((gradeEl.value||'').trim(),10); 
+            const klass=parseInt((classEl.value||'').trim(),10); 
+            const number=parseInt((numberEl.value||'').trim(),10); 
+            const name=(nameEl.value||'').trim(); 
+            if(Number.isNaN(grade)||grade<1||grade>3){ showToast('학년은 1~3 사이의 숫자여야 합니다.'); gradeEl.focus(); return null; } 
+            if(Number.isNaN(klass)||klass<1||klass>20){ showToast('반은 1~20 사이의 숫자여야 합니다.'); classEl.focus(); return null; } 
+            if(Number.isNaN(number)||number<1||number>40){ showToast('번호는 1~40 사이의 숫자여야 합니다.'); numberEl.focus(); return null; } 
+            if(!name){ showToast('이름을 입력하세요.'); nameEl.focus(); return null; } 
+            return { grade, klass, number, name }; 
+        }
+
+        async function blobToBase64(blob){ 
+            return await new Promise((resolve,reject)=>{ 
+                const reader=new FileReader(); 
+                reader.onload=()=>{ 
+                    const result=reader.result||''; 
+                    const commaIdx=String(result).indexOf(','); 
+                    const b64=commaIdx>=0?String(result).slice(commaIdx+1):String(result); 
+                    resolve(b64); 
+                }; 
+                reader.onerror=()=>reject(reader.error); 
+                reader.readAsDataURL(blob); 
+            }); 
+        }
+        
+        function bytesFromBase64(b64){ const len=b64.length; const pad=(b64.endsWith('==')?2:(b64.endsWith('=')?1:0)); return Math.floor((len*3)/4)-pad; }
+
+        function triggerBlobDownload(blob, filename){ 
+            try{ 
+                const a=document.createElement('a'); 
+                a.href=URL.createObjectURL(blob); 
+                a.download=filename; 
+                document.body.appendChild(a); 
+                a.click(); 
+                document.body.removeChild(a); 
+                URL.revokeObjectURL(a.href); 
+                showToast('ZIP 파일이 다운로드되었습니다.'); 
+                return true; 
+            }catch(_){ return false; } 
+        }
+        
+        async function saveWithPicker(blob, filename){ 
+            try{ 
+                const opts={ suggestedName: filename, types:[{ description:'ZIP file', accept:{'application/zip':['.zip']} }] }; 
+                const handle=await window.showSaveFilePicker(opts); 
+                const writable=await handle.createWritable(); 
+                await writable.write(blob); 
+                await writable.close(); 
+                return true; 
+            }catch(_){ return false; } 
+        }
+        
+        function detectInApp(){ 
+            const uaRaw=navigator.userAgent||navigator.vendor||''; 
+            const ua=uaRaw.toLowerCase(); 
+            const isIOS=/iphone|ipad|ipod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1); 
+            const isAndroid=/android/.test(ua); 
+            const isSamsung=/samsungbrowser/i.test(uaRaw); 
+            const isKakao=/kakaotalk/.test(ua); 
+            const isNaver=/naver/.test(ua); 
+            const isFB=/fban|fbav|fb_iab/.test(ua); 
+            const isIG=/instagram/.test(ua); 
+            const isLine=/ line\//.test(ua); 
+            const isIOSWebView=isIOS && !!window.webkit && !!window.webkit.messageHandlers && !/safari/i.test(uaRaw); 
+            const isInApp=isKakao||isNaver||isFB||isIG||isLine||isIOSWebView; 
+            return { isInApp, isIOS, isAndroid, isSamsung }; 
+        }
+
+        async function attemptLocalDownloadAndVerify(zipFilename){ 
+            const env=detectInApp(); 
+            if (env.isInApp){ 
+                setStatus('로컬 다운로드가 제한되어 서버 다운로드로 전환합니다.'); 
+                serverDownloadLastZip(); 
+                return; 
+            } 
+            if (env.isIOS){ 
+                setStatus('iOS 저장 안내를 표시합니다.'); 
+                if (lastZipBlob) triggerBlobDownload(lastZipBlob, zipFilename); 
+                return; 
+            }
+            let localSaved=false; 
+            let usedPicker=false; 
+            if (window.showSaveFilePicker && lastZipBlob){ 
+                usedPicker=true; 
+                localSaved=await saveWithPicker(lastZipBlob, zipFilename); 
+            }
+            if (!localSaved && lastZipBlob){ 
+                try{ 
+                    localSaved=triggerBlobDownload(lastZipBlob, zipFilename)===true; 
+                }catch(_){ localSaved=false; } 
+            }
+            if (env.isAndroid || env.isSamsung){ 
+                if (!usedPicker) localSaved=false; 
+            }
+            if (localSaved){ 
+                setStatus('✅ 로컬 다운로드가 완료되었습니다.'); 
+                showToast('로컬 다운로드 완료'); 
+            } else { 
+                setStatus('로컬 다운로드 실패 또는 제한됨, 서버에서 다운로드합니다.'); 
+                serverDownloadLastZip(); 
+            }
+        }
+
+        function trackServerDownload(token, timeoutMs=5000){ 
+            const deadline=Date.now()+timeoutMs; 
+            const key=`download_ok_${encodeURIComponent(token)}=`; 
+            const timer=setInterval(()=>{ 
+                const found=document.cookie.includes(key); 
+                if (found){ 
+                    clearInterval(timer); 
+                    setStatus('✅ 로컬 저장(서버 첨부) 확인되었습니다.'); 
+                    showToast('다운로드 완료 확인'); 
+                } else if (Date.now()>deadline){ 
+                    clearInterval(timer); 
+                } 
+            }, 300); 
+        }
+
+        function serverDownloadLastZip(){ 
+            try{ 
+                if (!lastZipBlob || !lastMeta?.zipFilename){ 
+                    showToast('다운로드할 파일이 없습니다.'); 
+                    return; 
+                } 
+                blobToBase64(lastZipBlob).then((b64)=>{ 
+                    const token=`${Date.now()}_${Math.random().toString(36).slice(2,8)}`; 
+                    trackServerDownload(token, 3500); 
+                    const form=document.createElement('form'); 
+                    form.method='POST'; 
+                    form.action='/.netlify/functions/download'; 
+                    form.target='_blank'; 
+                    const add=(n,v)=>{ const i=document.createElement('input'); i.type='hidden'; i.name=n; i.value=v; form.appendChild(i); }; 
+                    add('filename', lastMeta.zipFilename); 
+                    add('mime', 'application/zip'); 
+                    add('contentBase64', b64); 
+                    add('token', token); 
+                    document.body.appendChild(form); 
+                    form.submit(); 
+                    document.body.removeChild(form); 
+                    showToast('서버에서 다운로드를 시작합니다.'); 
+                }).catch(()=>{ throw new Error('base64 변환 실패'); }); 
+            }catch(_){ showToast('서버 다운로드에 실패했습니다.'); }
+        }
+
+        let lastZipBlob=null; 
+        let lastMeta=null;
+
+        async function handleZipDownloadAndSubmit(){ 
+            try{
+                setStatus('학생 정보 검증 중…'); 
+                dom.retryUploadBtn.dataset.show=''; 
+                dom.retryUploadBtn.classList.add('hidden'); 
+                const form=validateForm(); 
+                if(!form) return; 
+                showProgress(true); 
+                setProgress(10,'문서 생성 준비...');
+                const section=calcSectionCode(form.grade, form.klass); 
+                const studentId=calcStudentId(form.grade, form.klass, form.number); 
+                const docTitle='물리학II 2학기 수행평가 - 물리학연관기사탐구';
+                const fmt=new Intl.DateTimeFormat('ko-KR',{ timeZone:'Asia/Seoul', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
+                const parts=Object.fromEntries(fmt.formatToParts(new Date()).map(p=>[p.type,p.value])); 
+                const timestamp=`${parts.year}${parts.month}${parts.day}_${parts.hour}${parts.minute}${parts.second}`;
+                const baseName=`${studentId}_${form.name}_${docTitle}_${timestamp}`; 
+                const htmlFilename=`${baseName}.html`; 
+                const zipFilename=`${baseName}.zip`;
+                setStatus('ZIP 파일 생성 중…'); 
+                setProgress(25,'ZIP 생성 중...'); 
+                const reportContent=document.getElementById('report-content').innerHTML; 
+                const docHtml=generateDocHtml(baseName, reportContent);
+                const zip=new JSZip(); 
+                zip.file(htmlFilename, docHtml); 
+                const zipBlob=await zip.generateAsync({type:'blob', compression:'DEFLATE', compressionOptions:{level:6}}); 
+                lastZipBlob=zipBlob; 
+                lastMeta={ studentId, name:form.name, zipFilename, section };
+                const sizeBytes=zipBlob.size; 
+                if (sizeBytes>8*1024*1024){ 
+                    setStatus('업로드 실패: ZIP 용량 초과 (8MB)'); 
+                    showToast('ZIP 용량이 8MB를 초과합니다.'); 
+                    dom.retryUploadBtn.dataset.show='1'; 
+                    dom.retryUploadBtn.classList.remove('hidden'); 
+                    return; 
+                }
+                setStatus('저장준비중입니다. 잠시 기다려 주세요'); 
+                setProgress(45,'업로드 준비...'); 
+                const b64=await blobToBase64(zipBlob);
+                if (!zipFilename.toLowerCase().endsWith('.zip')){ 
+                    setStatus('업로드 실패: 지원하지 않는 파일 형식'); 
+                    showToast('ZIP 파일만 업로드할 수 있습니다.'); 
+                    return; 
+                }
+                const activity=(ACTIVITY_INPUT_DEFAULT||'').trim();
+                if(!activity){ 
+                    setStatus('활동 폴더명이 비어 있습니다. 메타 또는 입력값을 지정하세요.'); 
+                    showToast('활동 폴더명을 입력하거나 메타를 설정하세요.'); 
+                    return; 
+                }
+                const payload={ studentId:studentId, subject:SUBJECT, activity:activity, section:section, files:[{ filename:zipFilename, contentBase64:b64, mime:'application/zip' }] };
+                setProgress(60,'업로드 중...'); 
+                const res=await fetch(ENDPOINT,{ method:'POST', headers:{ 'Content-Type':'application/json', 'X-Submission-Key':SUBMIT_KEY }, body:JSON.stringify(payload) });
+                const text=await res.text(); 
+                let data={}; 
+                try{ data=JSON.parse(text); }catch(_){ data={ raw:text }; }
+                if (!res.ok){ 
+                    const errorMsg=data.error||data.detail||data.message||res.statusText||`HTTP ${res.status}`; 
+                    throw new Error(`업로드 실패: ${errorMsg}`); 
+                }
+                const uploadedFile=data.files?.[0]; 
+                const filePath=uploadedFile?.name||zipFilename; 
+                const fullPath=`/과제제출/${SUBJECT}/${activity}/${section}/${studentId}/${filePath}`;
+                setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 다운로드 확인 중…`); 
+                setProgress(85,'다운로드 준비...');
+                attemptLocalDownloadAndVerify(zipFilename); 
+                setProgress(100,'완료'); 
+                setTimeout(()=>showProgress(false),1500);
+            }catch(err){ 
+                const errorMessage=err?.message||err||'알 수 없는 오류'; 
+                setStatus(`❌ 제출 실패: ${errorMessage}`); 
+                showToast(`제출 실패: ${errorMessage}`); 
+                setProgress(0,''); 
+                showProgress(false); 
+            }
+        }
+
+        async function retryLastUpload(){
+            try{
+                if(!lastZipBlob||!lastMeta){ showToast('재시도할 항목이 없습니다.'); return; }
+                setStatus('저장준비중입니다. 잠시 기다려 주세요');
+                showProgress(true);
+                setProgress(45,'업로드 준비...');
+                const b64=await blobToBase64(lastZipBlob);
+                const sizeBytes=bytesFromBase64(b64);
+                if(sizeBytes>8*1024*1024){ setStatus('업로드 실패: ZIP 용량 초과 (8MB)'); showToast('ZIP 파일 용량이 8MB를 초과합니다.'); return; }
+                const activity=(ACTIVITY_INPUT_DEFAULT||'').trim();
+                if(!activity){ setStatus('활동 폴더명이 비어 있습니다. 메타 또는 입력값을 지정하세요.'); showToast('활동 폴더명을 입력하거나 메타를 설정하세요.'); return; }
+                const payload={ studentId:lastMeta.studentId, subject:SUBJECT, activity:activity, section:lastMeta.section, files:[{ filename:lastMeta.zipFilename, contentBase64:b64, mime:'application/zip' }] };
+                setProgress(60,'업로드 중...');
+                const res=await fetch(ENDPOINT,{ method:'POST', headers:{ 'Content-Type':'application/json', 'X-Submission-Key':SUBMIT_KEY }, body:JSON.stringify(payload) });
+                const text=await res.text();
+                let data={};
+                try{ data=JSON.parse(text); }catch(_){ data={ raw:text }; }
+                if(!res.ok){ const reason=data.error||data.detail||data.message||res.statusText||'업로드 실패'; setStatus(`제출 실패: ${reason}`); showToast(`제출 실패: ${reason}`); return; }
+                const uploadedFile=data.files?.[0];
+                const filePath=uploadedFile?.name||lastMeta.zipFilename;
+                const fullPath=`/과제제출/${SUBJECT}/${activity}/${lastMeta.section}/${lastMeta.studentId}/${filePath}`;
+                setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 다운로드 확인 중…`);
+                setProgress(85,'다운로드 준비...');
+                attemptLocalDownloadAndVerify(lastMeta.zipFilename);
+                setProgress(100,'완료');
+                setTimeout(()=>showProgress(false),1500);
+            }catch(err){
+                const errorMessage=err?.message||err||'알 수 없는 오류';
+                setStatus(`❌ 제출 실패: ${errorMessage}`);
+                showToast(`제출 실패: ${errorMessage}`);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
