@@ -697,7 +697,13 @@
                 }
             } catch (error) {
                 console.error('iOS 파일 공유 실패:', error);
-                // 모든 방법이 실패한 경우에만 서버 다운로드로 전환
+                // 모든 방법이 실패한 경우에만 iOS Help Modal 표시
+                if (dom.iosHelpModal) {
+                    showModal(dom.iosHelpModal, dom.downloadZipBtn);
+                    return false;
+                }
+                
+                // 최종 대체 방법으로 서버 다운로드
                 console.log('모든 로컬 저장 방법 실패, 서버 다운로드로 전환');
                 setStatus('로컬 저장 실패, 서버에서 다운로드합니다.');
                 serverDownloadLastZip();
@@ -714,7 +720,11 @@
             } 
             if (env.isIOS){ 
                 setStatus('iOS에서 파일 앱으로 공유합니다.'); 
-                if (lastZipBlob) await shareToFilesApp(lastZipBlob, zipFilename); 
+                if (lastZipBlob && lastMeta?.zipFilename) {
+                    await shareToFilesApp(lastZipBlob, lastMeta.zipFilename);
+                } else {
+                    setStatus('다운로드할 파일이 없습니다.');
+                }
                 return; 
             }
             let localSaved=false; 

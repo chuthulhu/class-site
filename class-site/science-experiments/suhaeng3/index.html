@@ -645,7 +645,7 @@
                 
                 const nowUTC = typeof data?.now === 'number' ? data.now : Date.parse(data?.iso || '');
                 if (!Number.isFinite(nowUTC)) throw new Error('bad time payload');
-                
+
                 console.log('Server time:', new Date(nowUTC).toISOString());
                 console.log('Local time:', new Date().toISOString());
                 
@@ -1307,16 +1307,16 @@
                 return;
             }
 
-        // iOS Safari: guide to Files via share sheet
-        if (isIOS()) {
+            // iOS Safari: guide to Files via share sheet
+            if (isIOS()) {
             setStatus('iOS에서 파일 앱으로 공유합니다.');
             if (lastZipBlob && lastMeta?.zipFilename) {
                 await shareToFilesApp(lastZipBlob, lastMeta.zipFilename);
             } else {
                 setStatus('다운로드할 파일이 없습니다.');
             }
-            return;
-        }
+                return;
+            }
 
             let localSaved = false;
             let usedPicker = false;
