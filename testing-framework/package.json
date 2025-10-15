@@ -1,0 +1,39 @@
+{
+  "name": "class-site-testing-framework",
+  "version": "1.0.0",
+  "description": "독립적인 웹앱 호환성 테스트 프레임워크",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report",
+    "test:mobile": "playwright test --project=mobile",
+    "test:desktop": "playwright test --project=desktop",
+    "test:all": "playwright test --project=all",
+    "lighthouse": "lhci autorun",
+    "serve": "python -m http.server 8080",
+    "start": "npm run serve"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@lhci/cli": "^0.12.0",
+    "lighthouse": "^11.0.0",
+    "webpagetest": "^0.4.0",
+    "puppeteer": "^21.0.0",
+    "express": "^4.18.0",
+    "cors": "^2.8.5",
+    "nodemailer": "^6.9.0"
+  },
+  "keywords": [
+    "testing",
+    "playwright",
+    "cross-browser",
+    "compatibility",
+    "automation"
+  ],
+  "author": "Class Site Team",
+  "license": "MIT"
+}
+

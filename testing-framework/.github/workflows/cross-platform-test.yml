@@ -1,0 +1,190 @@
+name: Cross-Platform Compatibility Testing
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'class-site/**'
+      - 'testing-framework/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'class-site/**'
+      - 'testing-framework/**'
+  schedule:
+    # 매일 오전 6시에 자동 테스트 실행
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: '테스트 유형 선택'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - desktop
+        - mobile
+        - performance
+
+jobs:
+  # 환경별 호환성 테스트
+  compatibility-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: [
+          'chrome-desktop',
+          'firefox-desktop', 
+          'safari-desktop',
+          'android-chrome',
+          'android-samsung',
+          'ios-safari',
+          'ios-chrome',
+          'ipad-safari'
+        ]
+    
+    steps:
+    - name: Checkout 코드
+      uses: actions/checkout@v4
+      
+    - name: Node.js 설정
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: 'testing-framework/package-lock.json'
+        
+    - name: 테스트 프레임워크 의존성 설치
+      working-directory: ./testing-framework
+      run: |
+        npm ci
+        npx playwright install --with-deps
+        
+    - name: 웹 서버 시작
+      working-directory: ./class-site
+      run: |
+        python -m http.server 8080 &
+        sleep 5
+        
+    - name: 호환성 테스트 실행
+      working-directory: ./testing-framework
+      run: |
+        npx playwright test --project=${{ matrix.project }} --reporter=html,json
+        
+    - name: 테스트 결과 업로드
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-${{ matrix.project }}
+        path: |
+          testing-framework/reports/
+          testing-framework/test-results/
+        retention-days: 30
+
+  # 성능 테스트
+  performance-test:
+    runs-on: ubuntu-latest
+    needs: compatibility-test
+    
+    steps:
+    - name: Checkout 코드
+      uses: actions/checkout@v4
+      
+    - name: Node.js 설정
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Lighthouse CI 설치
+      run: npm install -g @lhci/cli
+      
+    - name: 웹 서버 시작
+      working-directory: ./class-site
+      run: |
+        python -m http.server 8080 &
+        sleep 5
+        
+    - name: Lighthouse 성능 테스트
+      run: |
+        lhci autorun --config=testing-framework/config/lighthouserc.js
+        
+    - name: 성능 결과 업로드
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: lighthouse-results
+        path: testing-framework/reports/lighthouse/
+        retention-days: 30
+
+  # 접근성 테스트
+  accessibility-test:
+    runs-on: ubuntu-latest
+    needs: compatibility-test
+    
+    steps:
+    - name: Checkout 코드
+      uses: actions/checkout@v4
+      
+    - name: Node.js 설정
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: axe-core 설치
+      run: npm install -g @axe-core/cli
+      
+    - name: 웹 서버 시작
+      working-directory: ./class-site
+      run: |
+        python -m http.server 8080 &
+        sleep 5
+        
+    - name: 접근성 테스트 실행
+      run: |
+        axe http://localhost:8080 --exit --save testing-framework/reports/accessibility.json
+        
+    - name: 접근성 결과 업로드
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: accessibility-results
+        path: testing-framework/reports/accessibility.json
+        retention-days: 30
+
+  # 테스트 결과 통합 및 리포트 생성
+  generate-report:
+    runs-on: ubuntu-latest
+    needs: [compatibility-test, performance-test, accessibility-test]
+    if: always()
+    
+    steps:
+    - name: Checkout 코드
+      uses: actions/checkout@v4
+      
+    - name: 모든 테스트 결과 다운로드
+      uses: actions/download-artifact@v4
+      
+    - name: 통합 리포트 생성
+      run: |
+        node testing-framework/scripts/generate-report.js
+        
+    - name: 리포트 업로드
+      uses: actions/upload-artifact@v4
+      with:
+        name: comprehensive-test-report
+        path: testing-framework/reports/comprehensive/
+        retention-days: 90
+
+  # 실패 시 알림
+  notify-on-failure:
+    runs-on: ubuntu-latest
+    needs: [compatibility-test, performance-test, accessibility-test]
+    if: failure()
+    
+    steps:
+    - name: 실패 알림
+      run: |
+        echo "테스트 실패가 발생했습니다. 자세한 내용은 GitHub Actions 로그를 확인하세요."
+        # 여기에 Slack, Discord, 이메일 알림 추가 가능
+

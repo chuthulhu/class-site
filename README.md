@@ -91,10 +91,12 @@ class-site/
 
 ## 🔄 최근 업데이트
 
-### v1.3.0 (2025-10-02)
-- ✅ 교사키 기능 개선: 시간 함수와 독립적으로 작동
-- ✅ Netlify 배포 오류 해결: 잘못된 리다이렉트 규칙 제거
-- ✅ 프로젝트 구조 개선: 안전한 마이그레이션 완료
+### v1.3.0 (2025-10-15)
+- ✅ **Playwright 테스트 프레임워크**: 환경별 자동화 테스트 시스템 구축
+- ✅ **물리학II 웹앱**: 물리학연관기사탐구 수행평가 웹앱 추가
+- ✅ **문서 통합**: 중복 문서 정리 및 완전 가이드 생성
+- ✅ **환경별 호환성**: 모든 주요 브라우저/디바이스에서 검증 완료
+- ✅ **교사키 시스템**: 시간 함수와 독립적으로 작동하도록 개선
 
 ### v1.2.0 (2025-08-30)
 - ✅ 업로드 우선 흐름으로 변경
@@ -104,17 +106,22 @@ class-site/
 
 ## 📚 문서
 
-### 사용자 가이드
-- [교사키 사용법](docs/teacher-key-guide.md)
-- [suhaeng3 사용자 가이드](docs/suhaeng3-user-guide.md)
-- [테스트 가이드](docs/suhaeng3-test-guide.md)
+### 📖 통합 가이드 (권장)
+- [과학탐구실험 완전 가이드](docs/suhaeng3-complete-guide.md) - 사용자용 종합 가이드
+- [테스트 완전 가이드](docs/testing-complete-guide.md) - 환경별 테스트 방법
+- [교사키 완전 가이드](docs/teacher-key-complete-guide.md) - 교사키 시스템 상세
 
-### 개발자 문서
+### 🔧 개발자 문서
 - [프로젝트 상세](project/README.md)
 - [API 문서](project/api.md)
 - [배포 가이드](project/deployment.md)
 - [변경 이력](CHANGELOG.md)
 - [향후 계획](ROADMAP.md)
+
+### 🧪 테스트 관련
+- [Playwright 문제 해결](docs/PLAYWRIGHT_TROUBLESHOOTING.md)
+- [물리학II 테스트 결과](docs/PHYSICS2_TEST_RESULTS.md)
+- [테스트 프레임워크](testing-framework/README.md)
 
 ## 🛠️ 개발 환경 설정
 
@@ -141,17 +148,21 @@ MICROSOFT_TENANT_ID=your_tenant_id
 
 ## 🧪 테스트
 
-### 자동화 테스트
+### 자동화 테스트 (권장)
 ```bash
-# 전체 테스트 실행
-./scripts/test.sh
+# Playwright 테스트 프레임워크 사용
+cd testing-framework
+npm install
+npx playwright install --with-deps
+npm run test:all
 
-# 특정 환경 테스트
-./scripts/test.sh testing
+# 결과 확인
+npm run test:report
 ```
 
 ### 수동 테스트
-- [테스트 가이드](docs/suhaeng3-test-guide.md) 참조
+- [테스트 완전 가이드](docs/testing-complete-guide.md) 참조
+- 브라우저 개발자 도구 활용 (Chrome DevTools Device Toolbar)
 
 ## 🚀 배포
 
@@ -193,6 +204,6 @@ MICROSOFT_TENANT_ID=your_tenant_id
 
 ---
 
-**마지막 업데이트**: 2025-10-02  
+**마지막 업데이트**: 2025-10-15  
 **버전**: 1.3.0  
 **상태**: 운영 중

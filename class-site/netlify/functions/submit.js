@@ -7,8 +7,10 @@
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "Content-Type, X-Submission-Key",
-  "Access-Control-Allow-Methods": "OPTIONS, POST",
+  "Access-Control-Allow-Headers": "Content-Type, X-Submission-Key, Authorization, X-Requested-With",
+  "Access-Control-Allow-Methods": "OPTIONS, POST, GET, PUT, DELETE",
+  "Access-Control-Max-Age": "86400", // 24시간 캐시
+  "Access-Control-Allow-Credentials": "true"
 };
 
 // 정책(형식별 최대 용량 MB)
