@@ -384,3 +384,4 @@ await page.click('[data-testid="submit-button"]')
 **버전**: 1.3.0  
 **상태**: 운영 중
 
+

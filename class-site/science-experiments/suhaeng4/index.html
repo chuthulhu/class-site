@@ -545,8 +545,8 @@
                                 <input type="date" id="survey_date" class="w-full p-3 border border-gray-300 rounded-md">
                             </div>
                             <div>
-                                <label for="survey_period" class="font-semibold text-gray-700 block mb-2">조사 기간</label>
-                                <input type="text" id="survey_period" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 2024년 3월 15일 ~ 3월 20일">
+                                <label for="survey_period" class="font-semibold text-gray-700 block mb-2">조사 시간</label>
+                                <input type="text" id="survey_period" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 오전 9시 ~ 오후 3시">
                             </div>
                         </div>
                         <div class="mt-4">
@@ -1753,7 +1753,7 @@
             
             const surveyInfoParts = [];
             if (surveyDate) surveyInfoParts.push(`조사 날짜: ${surveyDate}`);
-            if (surveyPeriod) surveyInfoParts.push(`조사 기간: ${surveyPeriod}`);
+            if (surveyPeriod) surveyInfoParts.push(`조사 시간: ${surveyPeriod}`);
             if (weather) surveyInfoParts.push(`날씨: ${weather}`);
             
             const surveyInfoEl = document.getElementById('preview_survey_info');
@@ -1761,7 +1761,7 @@
                 if (surveyInfoParts.length > 0) {
                     surveyInfoEl.textContent = surveyInfoParts.join(', ');
                 } else {
-                    surveyInfoEl.innerHTML = `<span class="preview-placeholder">조사 날짜, 조사 기간, 날씨를 입력하세요</span>`;
+                    surveyInfoEl.innerHTML = `<span class="preview-placeholder">조사 날짜, 조사 시간, 날씨를 입력하세요</span>`;
                 }
             }
             
