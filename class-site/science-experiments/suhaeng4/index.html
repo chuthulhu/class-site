@@ -1,0 +1,2241 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>과학탐구실험2 수행평가4 - 스마트 기기를 이용하여 주변의 생물 조사하기</title>
+    <meta name="submission-subject" content="과학탐구실험2">
+    <meta name="submission-activity" content="스마트 기기를 이용하여 주변의 생물 조사하기">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans KR','Inter',sans-serif; background-color:#f3f4f6; }
+        .tab-button-group { display:flex; flex-wrap:wrap; gap:0.5rem; background-color:#e5e7eb; padding:0.5rem; border-radius:0.75rem; }
+        .tab-button { flex-grow:1; text-align:center; padding:0.75rem 0.5rem; border-radius:0.625rem; font-weight:600; color:#374151; cursor:pointer; transition:all .2s ease; border:1px solid #d1d5db; background-color:#ffffff; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+        .tab-button:hover { background-color:#f9fafb; color:#111827; border-color:#c7d2fe; }
+        .tab-button.active { background-color:#ffffff; color:#4f46e5; border-color:#4f46e5; box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06); }
+        .tab-content { display:none; }
+        .tab-content.active { display:block; }
+        .report-page { background-color:#fff; padding:2.5cm 2cm; box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05); color:#1f2937; }
+        .report-main-title { font-family:'Noto Sans KR',sans-serif; font-size:1.875rem; font-weight:700; text-align:center; margin-bottom:1rem; border-bottom:2px solid #111827; padding-bottom:1rem; }
+        .report-section-title { font-family:'Noto Sans KR',sans-serif; font-size:1.5rem; font-weight:700; color:#111827; margin-top:2.5rem; margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:1px solid #d1d5db; }
+        .preview-text { white-space:pre-wrap; word-break:break-word; min-height:2.5em; line-height:1.8; color:#374151; font-family:'Nanum Myeongjo',serif; }
+        .preview-text a { color:#2563eb; text-decoration:underline; }
+        .preview-text a:hover { color:#1d4ed8; text-decoration:underline; }
+        .preview-placeholder { color:#9ca3af; font-style:italic; }
+        /* 이미지 관련 스타일 */
+        .image-preview img { max-width: 100%; height: auto; }
+        .image-upload-area { border: 2px dashed #d1d5db; border-radius: 0.5rem; padding: 1rem; text-align: center; transition: border-color 0.2s; }
+        .image-upload-area:hover { border-color: #3b82f6; }
+        .image-upload-area.dragover { border-color: #3b82f6; background-color: #eff6ff; }
+        /* guidance styles */
+        .infographic-card { background-color:#f9fafb; border:1px solid #e5e7eb; border-radius:0.75rem; padding:1.5rem; text-align:center; }
+        .tip-card { background: linear-gradient(135deg,#f5f3ff,#eef2ff); border-left:4px solid #6366f1; padding:1rem; border-radius:0.5rem; }
+        /* accordion */
+        .accordion-header button.open { background-color:#eef2ff; color:#4338ca; }
+        .accordion-content { transition:max-height .3s ease-out, padding .3s ease-out; max-height:0; overflow:hidden; }
+        .accordion-content.open { max-height:1500px; }
+
+        /* Responsive typography & controls */
+        html { font-size:16px; }
+        @media (min-width: 640px) { html { font-size:16.5px; } }
+        @media (min-width: 768px) { html { font-size:17px; } }
+        @media (min-width: 1024px) { html { font-size:17.5px; } }
+        @media (min-width: 1280px) { html { font-size:18px; } }
+
+        .tab-button { font-size:.95rem; padding:.85rem .5rem; }
+        @media (min-width: 640px) { .tab-button { font-size:1rem; } }
+        @media (min-width: 1024px) { .tab-button { font-size:1.05rem; } }
+
+        #download_zip_btn,
+        #print_btn,
+        #preview_newtab_btn,
+        #retry_upload_btn,
+        #add_source_btn,
+        #clear_inputs_btn {
+            font-size:.95rem; padding:.6rem 1rem;
+        }
+        @media (min-width: 640px) {
+            #download_zip_btn,
+            #print_btn,
+            #preview_newtab_btn,
+            #retry_upload_btn,
+            #add_source_btn,
+            #clear_inputs_btn { font-size:1rem; padding:.7rem 1.1rem; }
+        }
+        @media (min-width: 1024px) {
+            #download_zip_btn,
+            #print_btn,
+            #preview_newtab_btn,
+            #retry_upload_btn,
+            #add_source_btn,
+            #clear_inputs_btn { font-size:1.0625rem; padding:.8rem 1.2rem; }
+        }
+
+        label { font-size:.95rem; }
+        textarea, input[type="text"], input[type="number"], select { font-size:1rem; }
+        @media (min-width: 1024px) {
+            textarea, input[type="text"], input[type="number"], select { font-size:1.0625rem; }
+        }
+        @page { 
+            size: A4 portrait; 
+            margin: 2cm 2cm 2cm 2cm;
+        }
+        
+        /* 인쇄용 머리말 스타일 */
+        .print-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: white;
+            border-bottom: 1px solid #E5E7EB;
+            display: none;
+            z-index: 1000;
+        }
+        
+        .print-header .header-title {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 18px;
+            font-weight: bold;
+            color: #1F2937;
+        }
+        
+        .print-header .header-student {
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 12px;
+            color: #6B7280;
+        }
+        /* 미리보기 탭에서 제목섹션 숨김 */
+        .header-section {
+            display: none;
+        }
+        
+        @media print { 
+            body { 
+                background-color: white; 
+                padding-top: 0; /* 머리말 공간 제거 */
+            }
+            .no-print { display:none; }
+            .bg-gray-200 { background-color: white !important; }
+            
+            /* 인쇄용 머리말 숨김 */
+            .print-header {
+                display: none !important;
+            }
+            
+            /* 제목/학생정보 섹션도 숨김 (각 섹션에 개별 제목 포함) */
+            .header-section {
+                display: none;
+            }
+            
+            .printable-area { 
+                width:100%; 
+                padding:0; 
+                margin:0; 
+                box-shadow:none; 
+                border:none;
+            }
+            
+            /* 각 섹션마다 새 페이지에서 시작 */
+            .content-section {
+                page-break-before: always;
+                margin-top: 0;
+            }
+            .content-section:first-child {
+                page-break-before: auto; /* 첫 번째 섹션은 페이지 브레이크 없음 */
+            }
+            
+            .page-break-before { 
+                page-break-before: always; 
+            }
+        }
+        
+        .page-break-before {
+            page-break-before: always;
+        }
+        
+        .section-container {
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+            background-color: #FAFAFA;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-container:last-child {
+            margin-bottom: 0;
+        }
+        
+        .section-header {
+            border-bottom: 2px solid #3B82F6;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            color: #1F2937;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .section-subtitle {
+            color: #6B7280;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        @media print {
+            .page-break-before {
+                page-break-before: always;
+            }
+            
+            .section-container {
+                border: 1px solid #000;
+                box-shadow: none;
+                background-color: white;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+    <link rel="icon" href="data:,">
+</head>
+<body class="p-4 sm:p-8">
+    <!-- 인쇄용 머리말 -->
+    <div class="print-header">
+        <div class="header-title">과학탐구실험2 수행평가4</div>
+        <div class="header-student" id="print-student-info">1학년 0반 00번 이름: ㅇㅇㅇ</div>
+    </div>
+    <div class="max-w-5xl mx-auto">
+        <header class="text-center bg-white p-8 rounded-xl shadow-lg mb-6 no-print">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">과학탐구실험2 수행평가4</h1>
+            <p class="text-lg text-gray-600 mt-2">스마트 기기를 이용하여 주변의 생물 조사하기</p>
+        </header>
+
+        <div class="bg-white p-6 sm:p-8 rounded-lg shadow-md mb-6 no-print">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-6">
+                <div class="flex items-center space-x-2 flex-wrap justify-center">
+                    <input type="number" id="student_grade" min="1" max="3" step="1" inputmode="numeric" class="w-20 p-2 border border-gray-300 rounded-md text-center" placeholder="학년">
+                    <label for="student_grade" class="font-semibold">학년</label>
+                    <input type="number" id="student_class" min="1" max="20" step="1" inputmode="numeric" class="w-20 p-2 border border-gray-300 rounded-md text-center" placeholder="반">
+                    <label for="student_class" class="font-semibold">반</label>
+                    <input type="number" id="student_number" min="1" max="40" step="1" inputmode="numeric" class="w-20 p-2 border border-gray-300 rounded-md text-center" placeholder="번호">
+                    <label for="student_number" class="font-semibold">번</label>
+                    <input type="text" id="student_name" class="w-32 p-2 border border-gray-300 rounded-md" placeholder="이름">
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-8 no-print">
+            <div class="tab-button-group" aria-label="탭 메뉴">
+                <button class="tab-button active" data-tab="guide1">활동 안내</button>
+                <button class="tab-button" data-tab="tab1">생태 조사 계획서</button>
+                <button class="tab-button" data-tab="tab2">생태 조사 보고서</button>
+                <button class="tab-button" data-tab="tab3">생물 카드 제작</button>
+                <button class="tab-button" data-tab="tab4">미리보기 및 제출</button>
+            </div>
+        </div>
+        
+        <div id="guide1" class="tab-content active">
+            <div class="bg-white p-6 sm:p-8 rounded-lg shadow-md space-y-10">
+                <section>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">스마트 기기를 이용하여 주변의 생물 조사하기</h2>
+                    <p class="text-gray-600 mb-6">스마트폰의 카메라와 생물 식별 앱을 활용하여 주변 생물을 조사하고, 생태 조사 계획서와 보고서를 작성하며, 생물 카드를 제작합니다.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="infographic-card"><span class="text-5xl mb-3">📋</span><h3 class="font-bold">생태 조사 계획서</h3><p class="text-gray-600 mt-2">조사 목적, 날짜, 준비물 등 계획 수립</p></div>
+                        <div class="infographic-card"><span class="text-5xl mb-3">📊</span><h3 class="font-bold">생태 조사 보고서</h3><p class="text-gray-600 mt-2">조사 결과 정리 및 분석</p></div>
+                        <div class="infographic-card"><span class="text-5xl mb-3">🃏</span><h3 class="font-bold">생물 카드 제작</h3><p class="text-gray-600 mt-2">5개 생물의 상세 정보 카드</p></div>
+                    </div>
+                </section>
+                
+                <section>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">활동 목표</h2>
+                    <div class="tip-card">
+                        <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+                            <li>스마트 기기를 활용한 생물 조사 방법 습득</li>
+                            <li>생태 조사 계획서 작성 및 체계적 조사 수행</li>
+                            <li>조사 결과를 정리한 보고서 작성</li>
+                            <li>발견한 생물 5종에 대한 생물 카드 제작</li>
+                        </ul>
+                    </div>
+                </section>
+                
+                <section>
+                    <div class="accordion-item border-t pt-4">
+                        <div class="accordion-header"><button class="w-full text-left p-4 rounded-lg font-semibold text-lg text-gray-800 hover:bg-gray-100 flex justify-between items-center"><span>📱 스마트 기기 활용 방법</span><svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button></div>
+                        <div class="accordion-content"><div class="p-4 text-gray-600 space-y-3">
+                            <p>스마트폰을 활용한 생물 조사 방법을 알아보세요.</p>
+                            <div class="tip-card p-4 rounded-lg">
+                                <h4 class="font-bold text-indigo-800">스마트 기기 활용</h4>
+                                <ul class="list-disc list-inside mt-2 text-sm">
+                                    <li><strong>카메라:</strong> 생물의 특징이 잘 보이도록 촬영</li>
+                                    <li><strong>생물 식별 앱:</strong> 네이버, 구글 렌즈, 식물도감 앱 등 활용</li>
+                                    <li><strong>GPS 기능:</strong> 조사 위치 기록</li>
+                                    <li><strong>메모 앱:</strong> 관찰 내용 즉시 기록</li>
+                                </ul>
+                                <div class="mt-4 p-3 rounded-lg bg-indigo-50 border border-indigo-200">
+                                    <h5 class="font-bold text-indigo-800 text-sm">💡 촬영 팁</h5>
+                                    <ul class="text-sm text-indigo-900 mt-1 space-y-1">
+                                        <li>• 생물의 전체 모습과 특징 부위를 모두 촬영</li>
+                                        <li>• 잎, 꽃, 열매 등 식별에 중요한 부분 촬영</li>
+                                        <li>• 서식지 환경도 함께 촬영</li>
+                                        <li>• 여러 각도에서 촬영하여 정확한 식별</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div></div>
+                    </div>
+                    
+                    <div class="accordion-item border-t pt-4">
+                        <div class="accordion-header"><button class="w-full text-left p-4 rounded-lg font-semibold text-lg text-gray-800 hover:bg-gray-100 flex justify-between items-center"><span>🔬 생물 분류 및 학명</span><svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button></div>
+                        <div class="accordion-content"><div class="p-4 text-gray-600 space-y-3">
+                            <p>생물의 분류 체계와 학명 작성 방법을 알아보세요.</p>
+                            <div class="tip-card p-4 rounded-lg">
+                                <h4 class="font-bold text-indigo-800">생물 분류 체계</h4>
+                                <ul class="list-disc list-inside mt-2 text-sm">
+                                    <li><strong>계(Kingdom):</strong> 동물계, 식물계, 균계 등</li>
+                                    <li><strong>문(Phylum):</strong> 척삭동물문, 속씨식물문 등</li>
+                                    <li><strong>강(Class):</strong> 포유강, 쌍자엽식물강 등</li>
+                                    <li><strong>목(Order):</strong> 식육목, 장미목 등</li>
+                                    <li><strong>과(Family):</strong> 개과, 장미과 등</li>
+                                    <li><strong>속(Genus):</strong> 개속, 장미속 등</li>
+                                    <li><strong>종(Species):</strong> 개, 장미 등</li>
+                                </ul>
+                                <div class="mt-4 p-3 rounded-lg bg-indigo-50 border border-indigo-200">
+                                    <h5 class="font-bold text-indigo-800 text-sm">✍️ 학명 작성 예시</h5>
+                                    <p class="text-sm text-indigo-900 mt-1">
+                                        <strong>소나무:</strong> <em>Pinus densiflora</em><br>
+                                        <strong>개:</strong> <em>Canis lupus familiaris</em><br>
+                                        <strong>장미:</strong> <em>Rosa hybrida</em>
+                                    </p>
+                                </div>
+                            </div>
+                        </div></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <main>
+            <!-- 생태 조사 계획서 탭 -->
+            <div id="tab1" class="tab-content">
+                <div class="bg-white p-6 sm:p-10 rounded-lg shadow-md space-y-8">
+                    <header class="text-center mb-4">
+                        <h2 class="text-2xl font-bold text-gray-800">생태 조사 계획서</h2>
+                        <p class="text-gray-600">생물 조사를 위한 계획을 체계적으로 수립하세요.</p>
+                    </header>
+                    
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">조사 기본 정보</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="survey_date" class="font-semibold text-gray-700 block mb-2">조사 날짜</label>
+                                <input type="date" id="survey_date" class="w-full p-3 border border-gray-300 rounded-md">
+                            </div>
+                            <div>
+                                <label for="survey_period" class="font-semibold text-gray-700 block mb-2">조사 기간</label>
+                                <input type="text" id="survey_period" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 2024년 3월 15일 ~ 3월 20일">
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <label for="weather" class="font-semibold text-gray-700 block mb-2">날씨</label>
+                            <select id="weather" class="w-full p-3 border border-gray-300 rounded-md">
+                                <option value="">날씨를 선택하세요</option>
+                                <option value="맑음">맑음</option>
+                                <option value="구름많음">구름많음</option>
+                                <option value="흐림">흐림</option>
+                                <option value="비">비</option>
+                                <option value="눈">눈</option>
+                            </select>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">생태조사목적</h3>
+                        <div>
+                            <label for="survey_purpose" class="font-semibold text-gray-700 block mb-2">생태조사목적</label>
+                            <div class="text-sm bg-blue-50 border border-blue-200 text-blue-900 rounded-md p-3 mb-2">
+                                <div class="font-semibold mb-1">작성 가이드</div>
+                                <ul class="list-disc list-inside space-y-0.5">
+                                    <li>왜 이 지역의 생물을 조사하는지 명확히 기술</li>
+                                    <li>예: 학교 주변 생물 다양성 파악, 계절별 생물 변화 관찰 등</li>
+                                </ul>
+                            </div>
+                            <textarea id="survey_purpose" rows="3" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생태조사목적을 구체적으로 작성하세요"></textarea>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">생태조사 준비물</h3>
+                        <div>
+                            <label for="equipment" class="font-semibold text-gray-700 block mb-2">생태조사 준비물</label>
+                            <div class="text-sm bg-blue-50 border border-blue-200 text-blue-900 rounded-md p-3 mb-2">
+                                <div class="font-semibold mb-1">필수 준비물</div>
+                                <ul class="list-disc list-inside space-y-0.5">
+                                    <li>스마트폰 (카메라, 생물 식별 앱)</li>
+                                    <li>메모장, 펜</li>
+                                    <li>손소독제, 마스크</li>
+                                    <li>간단한 간식, 물</li>
+                                </ul>
+                            </div>
+                            <textarea id="equipment" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생태조사에 필요한 준비물을 나열하세요"></textarea>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">조사 구역 내 장소 이동 순서</h3>
+                        <div>
+                            <label for="survey_route" class="font-semibold text-gray-700 block mb-2">조사 구역 내 장소 이동 순서</label>
+                            <div class="text-sm bg-blue-50 border border-blue-200 text-blue-900 rounded-md p-3 mb-2">
+                                <div class="font-semibold mb-1">작성 가이드</div>
+                                <ul class="list-disc list-inside space-y-0.5">
+                                    <li>조사할 구체적인 장소와 이동 순서를 명시</li>
+                                    <li>예: 1) 학교 운동장 → 2) 화단 → 3) 주변 공원</li>
+                                    <li>각 장소별 예상 소요 시간도 함께 기술</li>
+                                </ul>
+                            </div>
+                            <textarea id="survey_route" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="조사 구역 내 장소 이동 순서를 구체적으로 작성하세요"></textarea>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">조사 결과 이용 계획</h3>
+                        <div>
+                            <label for="survey_usage" class="font-semibold text-gray-700 block mb-2">조사 결과 이용 계획</label>
+                            <div class="text-sm bg-blue-50 border border-blue-200 text-blue-900 rounded-md p-3 mb-2">
+                                <div class="font-semibold mb-1">작성 가이드</div>
+                                <ul class="list-disc list-inside space-y-0.5">
+                                    <li>조사 결과를 어떻게 활용할지 계획</li>
+                                    <li>예: 생물 카드 제작, 보고서 작성, 발표 자료 준비</li>
+                                    <li>생태계 보전을 위한 활용 방안도 포함</li>
+                                </ul>
+                            </div>
+                            <textarea id="survey_usage" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="조사 결과 이용 계획을 구체적으로 작성하세요"></textarea>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- 생태 조사 보고서 탭 -->
+            <div id="tab2" class="tab-content">
+                <div class="bg-white p-6 sm:p-10 rounded-lg shadow-md space-y-8">
+                    <header class="text-center mb-4">
+                        <h2 class="text-2xl font-bold text-gray-800">생태 조사 보고서</h2>
+                        <p class="text-gray-600">조사 결과를 체계적으로 정리하고 분석하세요.</p>
+                    </header>
+                    
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">조사 장소의 환경적 특징</h3>
+                        <div>
+                            <label for="environmental_features" class="font-semibold text-gray-700 block mb-2">조사 장소의 환경적 특징</label>
+                            <div class="text-sm bg-blue-50 border border-blue-200 text-blue-900 rounded-md p-3 mb-2">
+                                <div class="font-semibold mb-1">작성 가이드</div>
+                                <ul class="list-disc list-inside space-y-0.5">
+                                    <li>조사 장소의 지형, 기후, 토양, 수질 등 환경 조건</li>
+                                    <li>식생의 밀도, 높이, 종류 등 식생 환경</li>
+                                    <li>인간 활동의 영향 정도</li>
+                                </ul>
+                            </div>
+                            <textarea id="environmental_features" rows="6" class="w-full p-3 border border-gray-300 rounded-md" placeholder="조사 장소의 환경적 특징을 상세히 작성하세요"></textarea>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">발견한 생물의 종 수</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="animal_species_count" class="font-semibold text-gray-700 block mb-2">동물 종 수</label>
+                                <div class="text-sm bg-blue-50 border border-blue-200 text-blue-900 rounded-md p-3 mb-2">
+                                    <div class="font-semibold mb-1">작성 가이드</div>
+                                    <p>발견한 동물의 종류 수를 숫자로 입력하세요.</p>
+                                </div>
+                                <input type="number" id="animal_species_count" min="0" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 5">
+                            </div>
+                            <div>
+                                <label for="plant_species_count" class="font-semibold text-gray-700 block mb-2">식물 종 수</label>
+                                <div class="text-sm bg-blue-50 border border-blue-200 text-blue-900 rounded-md p-3 mb-2">
+                                    <div class="font-semibold mb-1">작성 가이드</div>
+                                    <p>발견한 식물의 종류 수를 숫자로 입력하세요.</p>
+                                </div>
+                                <input type="number" id="plant_species_count" min="0" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 8">
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">발견한 생물의 특징 (8개)</h3>
+                        <div class="space-y-4">
+                            <div class="text-sm bg-blue-50 border border-blue-200 text-blue-900 rounded-md p-3">
+                                <div class="font-semibold mb-1">작성 가이드</div>
+                                <p>발견한 생물 8종에 대해 이름, 학명, 발견장소, 특징을 기록하세요.</p>
+                            </div>
+                            
+                            <!-- 생물 1 -->
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <h4 class="font-semibold text-gray-800 mb-3">생물 1</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="species1_name" class="font-semibold text-gray-700 block mb-2">이름</label>
+                                        <input type="text" id="species1_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 참새">
+                                    </div>
+                                    <div>
+                                        <label for="species1_scientific_name" class="font-semibold text-gray-700 block mb-2">학명</label>
+                                        <input type="text" id="species1_scientific_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: Passer montanus">
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <label for="species1_location" class="font-semibold text-gray-700 block mb-2">발견장소</label>
+                                    <input type="text" id="species1_location" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 학교 운동장 나무 위">
+                                </div>
+                                <div class="mt-4">
+                                    <label for="species1_characteristics" class="font-semibold text-gray-700 block mb-2">특징</label>
+                                    <textarea id="species1_characteristics" rows="2" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 특징을 상세히 작성하세요"></textarea>
+                                </div>
+                            </div>
+                            
+                            <!-- 생물 2 -->
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <h4 class="font-semibold text-gray-800 mb-3">생물 2</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="species2_name" class="font-semibold text-gray-700 block mb-2">이름</label>
+                                        <input type="text" id="species2_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 개미">
+                                    </div>
+                                    <div>
+                                        <label for="species2_scientific_name" class="font-semibold text-gray-700 block mb-2">학명</label>
+                                        <input type="text" id="species2_scientific_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: Formica japonica">
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <label for="species2_location" class="font-semibold text-gray-700 block mb-2">발견장소</label>
+                                    <input type="text" id="species2_location" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 화단 흙 속">
+                                </div>
+                                <div class="mt-4">
+                                    <label for="species2_characteristics" class="font-semibold text-gray-700 block mb-2">특징</label>
+                                    <textarea id="species2_characteristics" rows="2" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 특징을 상세히 작성하세요"></textarea>
+                                </div>
+                            </div>
+                            
+                            <!-- 생물 3 -->
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <h4 class="font-semibold text-gray-800 mb-3">생물 3</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="species3_name" class="font-semibold text-gray-700 block mb-2">이름</label>
+                                        <input type="text" id="species3_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 장미">
+                                    </div>
+                                    <div>
+                                        <label for="species3_scientific_name" class="font-semibold text-gray-700 block mb-2">학명</label>
+                                        <input type="text" id="species3_scientific_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: Rosa hybrida">
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <label for="species3_location" class="font-semibold text-gray-700 block mb-2">발견장소</label>
+                                    <input type="text" id="species3_location" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 학교 화단">
+                                </div>
+                                <div class="mt-4">
+                                    <label for="species3_characteristics" class="font-semibold text-gray-700 block mb-2">특징</label>
+                                    <textarea id="species3_characteristics" rows="2" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 특징을 상세히 작성하세요"></textarea>
+                                </div>
+                            </div>
+                            
+                            <!-- 생물 4 -->
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <h4 class="font-semibold text-gray-800 mb-3">생물 4</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="species4_name" class="font-semibold text-gray-700 block mb-2">이름</label>
+                                        <input type="text" id="species4_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 나비">
+                                    </div>
+                                    <div>
+                                        <label for="species4_scientific_name" class="font-semibold text-gray-700 block mb-2">학명</label>
+                                        <input type="text" id="species4_scientific_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: Pieris rapae">
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <label for="species4_location" class="font-semibold text-gray-700 block mb-2">발견장소</label>
+                                    <input type="text" id="species4_location" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 화단 꽃 위">
+                                </div>
+                                <div class="mt-4">
+                                    <label for="species4_characteristics" class="font-semibold text-gray-700 block mb-2">특징</label>
+                                    <textarea id="species4_characteristics" rows="2" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 특징을 상세히 작성하세요"></textarea>
+                                </div>
+                            </div>
+                            
+                            <!-- 생물 5 -->
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <h4 class="font-semibold text-gray-800 mb-3">생물 5</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="species5_name" class="font-semibold text-gray-700 block mb-2">이름</label>
+                                        <input type="text" id="species5_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 개">
+                                    </div>
+                                    <div>
+                                        <label for="species5_scientific_name" class="font-semibold text-gray-700 block mb-2">학명</label>
+                                        <input type="text" id="species5_scientific_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: Canis lupus familiaris">
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <label for="species5_location" class="font-semibold text-gray-700 block mb-2">발견장소</label>
+                                    <input type="text" id="species5_location" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 학교 주변 길">
+                                </div>
+                                <div class="mt-4">
+                                    <label for="species5_characteristics" class="font-semibold text-gray-700 block mb-2">특징</label>
+                                    <textarea id="species5_characteristics" rows="2" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 특징을 상세히 작성하세요"></textarea>
+                                </div>
+                            </div>
+                            
+                            <!-- 생물 6 -->
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <h4 class="font-semibold text-gray-800 mb-3">생물 6</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="species6_name" class="font-semibold text-gray-700 block mb-2">이름</label>
+                                        <input type="text" id="species6_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 소나무">
+                                    </div>
+                                    <div>
+                                        <label for="species6_scientific_name" class="font-semibold text-gray-700 block mb-2">학명</label>
+                                        <input type="text" id="species6_scientific_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: Pinus densiflora">
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <label for="species6_location" class="font-semibold text-gray-700 block mb-2">발견장소</label>
+                                    <input type="text" id="species6_location" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 학교 정원">
+                                </div>
+                                <div class="mt-4">
+                                    <label for="species6_characteristics" class="font-semibold text-gray-700 block mb-2">특징</label>
+                                    <textarea id="species6_characteristics" rows="2" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 특징을 상세히 작성하세요"></textarea>
+                                </div>
+                            </div>
+                            
+                            <!-- 생물 7 -->
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <h4 class="font-semibold text-gray-800 mb-3">생물 7</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="species7_name" class="font-semibold text-gray-700 block mb-2">이름</label>
+                                        <input type="text" id="species7_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 메뚜기">
+                                    </div>
+                                    <div>
+                                        <label for="species7_scientific_name" class="font-semibold text-gray-700 block mb-2">학명</label>
+                                        <input type="text" id="species7_scientific_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: Oxya chinensis">
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <label for="species7_location" class="font-semibold text-gray-700 block mb-2">발견장소</label>
+                                    <input type="text" id="species7_location" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 운동장 잔디">
+                                </div>
+                                <div class="mt-4">
+                                    <label for="species7_characteristics" class="font-semibold text-gray-700 block mb-2">특징</label>
+                                    <textarea id="species7_characteristics" rows="2" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 특징을 상세히 작성하세요"></textarea>
+                                </div>
+                            </div>
+                            
+                            <!-- 생물 8 -->
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <h4 class="font-semibold text-gray-800 mb-3">생물 8</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="species8_name" class="font-semibold text-gray-700 block mb-2">이름</label>
+                                        <input type="text" id="species8_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 민들레">
+                                    </div>
+                                    <div>
+                                        <label for="species8_scientific_name" class="font-semibold text-gray-700 block mb-2">학명</label>
+                                        <input type="text" id="species8_scientific_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: Taraxacum officinale">
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <label for="species8_location" class="font-semibold text-gray-700 block mb-2">발견장소</label>
+                                    <input type="text" id="species8_location" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 운동장 가장자리">
+                                </div>
+                                <div class="mt-4">
+                                    <label for="species8_characteristics" class="font-semibold text-gray-700 block mb-2">특징</label>
+                                    <textarea id="species8_characteristics" rows="2" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 특징을 상세히 작성하세요"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- 생물 카드 제작 탭 -->
+            <div id="tab3" class="tab-content">
+                <div class="bg-white p-6 sm:p-10 rounded-lg shadow-md space-y-8">
+                    <header class="text-center mb-4">
+                        <h2 class="text-2xl font-bold text-gray-800">생물 카드 제작</h2>
+                        <p class="text-gray-600">발견한 생물 5종에 대한 상세한 생물 카드를 제작하세요.</p>
+                    </header>
+                    <div class="flex justify-end -mt-2">
+                        <button id="clear_inputs_btn" class="bg-red-50 text-red-700 font-semibold py-2 px-4 rounded-lg border border-red-200 hover:bg-red-100 transition text-sm">🗑️ 입력 내용 삭제</button>
+                    </div>
+                    
+                    <!-- 생물 카드 1 -->
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">생물 카드 1</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="card1_image" class="font-semibold text-gray-700 block mb-2">생물 사진</label>
+                                <div class="text-sm bg-blue-50 border border-blue-200 text-blue-900 rounded-md p-3 mb-2">
+                                    <div class="font-semibold mb-1">사진 촬영 가이드</div>
+                                    <ul class="list-disc list-inside space-y-0.5">
+                                        <li>생물의 전체 모습과 특징 부위를 모두 촬영</li>
+                                        <li>잎, 꽃, 열매 등 식별에 중요한 부분 촬영</li>
+                                        <li>서식지 환경도 함께 촬영</li>
+                                    </ul>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <input type="file" id="card1_image" accept="image/*" class="hidden" onchange="handleImageUpload(this, 'card1_image_preview')">
+                                    <button type="button" onclick="document.getElementById('card1_image').click()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+                                        📷 사진 선택
+                                    </button>
+                                    <div id="card1_image_preview" class="flex-1"></div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="card1_name" class="font-semibold text-gray-700 block mb-2">생물 이름</label>
+                                    <input type="text" id="card1_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 소나무">
+                                </div>
+                                <div>
+                                    <label for="card1_scientific_name" class="font-semibold text-gray-700 block mb-2">학명</label>
+                                    <input type="text" id="card1_scientific_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: Pinus densiflora">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="card1_classification" class="font-semibold text-gray-700 block mb-2">분류</label>
+                                <div class="text-sm bg-blue-50 border border-blue-200 text-blue-900 rounded-md p-3 mb-2">
+                                    <div class="font-semibold mb-1">작성 가이드</div>
+                                    <ul class="list-disc list-inside space-y-0.5">
+                                        <li>계, 문, 강, 목, 과, 속, 종 순서로 작성</li>
+                                        <li>예: 식물계 > 속씨식물문 > 쌍자엽식물강 > 소나무목 > 소나무과 > 소나무속</li>
+                                    </ul>
+                                </div>
+                                <textarea id="card1_classification" rows="3" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 분류를 작성하세요"></textarea>
+                            </div>
+                            <div>
+                                <label for="card1_characteristics" class="font-semibold text-gray-700 block mb-2">특징</label>
+                                <div class="text-sm bg-blue-50 border border-blue-200 text-blue-900 rounded-md p-3 mb-2">
+                                    <div class="font-semibold mb-1">작성 가이드</div>
+                                    <ul class="list-disc list-inside space-y-0.5">
+                                        <li>생물의 외형적 특징과 생태적 특징</li>
+                                        <li>서식지, 생활사, 특별한 습성 등</li>
+                                    </ul>
+                                </div>
+                                <textarea id="card1_characteristics" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 특징을 상세히 작성하세요"></textarea>
+                            </div>
+                            <div>
+                                <label for="card1_habitat" class="font-semibold text-gray-700 block mb-2">서식지</label>
+                                <textarea id="card1_habitat" rows="2" class="w-full p-3 border border-gray-300 rounded-md" placeholder="서식지 환경을 작성하세요"></textarea>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 생물 카드 2 -->
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">생물 카드 2</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="card2_image" class="font-semibold text-gray-700 block mb-2">생물 사진</label>
+                                <div class="flex items-center space-x-4">
+                                    <input type="file" id="card2_image" accept="image/*" class="hidden" onchange="handleImageUpload(this, 'card2_image_preview')">
+                                    <button type="button" onclick="document.getElementById('card2_image').click()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+                                        📷 사진 선택
+                                    </button>
+                                    <div id="card2_image_preview" class="flex-1"></div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="card2_name" class="font-semibold text-gray-700 block mb-2">생물 이름</label>
+                                    <input type="text" id="card2_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 개">
+                                </div>
+                                <div>
+                                    <label for="card2_scientific_name" class="font-semibold text-gray-700 block mb-2">학명</label>
+                                    <input type="text" id="card2_scientific_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: Canis lupus familiaris">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="card2_classification" class="font-semibold text-gray-700 block mb-2">분류</label>
+                                <textarea id="card2_classification" rows="3" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 분류를 작성하세요"></textarea>
+                            </div>
+                            <div>
+                                <label for="card2_characteristics" class="font-semibold text-gray-700 block mb-2">특징</label>
+                                <textarea id="card2_characteristics" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 특징을 상세히 작성하세요"></textarea>
+                            </div>
+                            <div>
+                                <label for="card2_habitat" class="font-semibold text-gray-700 block mb-2">서식지</label>
+                                <textarea id="card2_habitat" rows="2" class="w-full p-3 border border-gray-300 rounded-md" placeholder="서식지 환경을 작성하세요"></textarea>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 생물 카드 3 -->
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">생물 카드 3</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="card3_image" class="font-semibold text-gray-700 block mb-2">생물 사진</label>
+                                <div class="flex items-center space-x-4">
+                                    <input type="file" id="card3_image" accept="image/*" class="hidden" onchange="handleImageUpload(this, 'card3_image_preview')">
+                                    <button type="button" onclick="document.getElementById('card3_image').click()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+                                        📷 사진 선택
+                                    </button>
+                                    <div id="card3_image_preview" class="flex-1"></div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="card3_name" class="font-semibold text-gray-700 block mb-2">생물 이름</label>
+                                    <input type="text" id="card3_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 장미">
+                                </div>
+                                <div>
+                                    <label for="card3_scientific_name" class="font-semibold text-gray-700 block mb-2">학명</label>
+                                    <input type="text" id="card3_scientific_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: Rosa hybrida">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="card3_classification" class="font-semibold text-gray-700 block mb-2">분류</label>
+                                <textarea id="card3_classification" rows="3" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 분류를 작성하세요"></textarea>
+                            </div>
+                            <div>
+                                <label for="card3_characteristics" class="font-semibold text-gray-700 block mb-2">특징</label>
+                                <textarea id="card3_characteristics" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 특징을 상세히 작성하세요"></textarea>
+                            </div>
+                            <div>
+                                <label for="card3_habitat" class="font-semibold text-gray-700 block mb-2">서식지</label>
+                                <textarea id="card3_habitat" rows="2" class="w-full p-3 border border-gray-300 rounded-md" placeholder="서식지 환경을 작성하세요"></textarea>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 생물 카드 4 -->
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">생물 카드 4</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="card4_image" class="font-semibold text-gray-700 block mb-2">생물 사진</label>
+                                <div class="flex items-center space-x-4">
+                                    <input type="file" id="card4_image" accept="image/*" class="hidden" onchange="handleImageUpload(this, 'card4_image_preview')">
+                                    <button type="button" onclick="document.getElementById('card4_image').click()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+                                        📷 사진 선택
+                                    </button>
+                                    <div id="card4_image_preview" class="flex-1"></div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="card4_name" class="font-semibold text-gray-700 block mb-2">생물 이름</label>
+                                    <input type="text" id="card4_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 참새">
+                                </div>
+                                <div>
+                                    <label for="card4_scientific_name" class="font-semibold text-gray-700 block mb-2">학명</label>
+                                    <input type="text" id="card4_scientific_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: Passer montanus">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="card4_classification" class="font-semibold text-gray-700 block mb-2">분류</label>
+                                <textarea id="card4_classification" rows="3" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 분류를 작성하세요"></textarea>
+                            </div>
+                            <div>
+                                <label for="card4_characteristics" class="font-semibold text-gray-700 block mb-2">특징</label>
+                                <textarea id="card4_characteristics" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 특징을 상세히 작성하세요"></textarea>
+                            </div>
+                            <div>
+                                <label for="card4_habitat" class="font-semibold text-gray-700 block mb-2">서식지</label>
+                                <textarea id="card4_habitat" rows="2" class="w-full p-3 border border-gray-300 rounded-md" placeholder="서식지 환경을 작성하세요"></textarea>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 생물 카드 5 -->
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">생물 카드 5</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="card5_image" class="font-semibold text-gray-700 block mb-2">생물 사진</label>
+                                <div class="flex items-center space-x-4">
+                                    <input type="file" id="card5_image" accept="image/*" class="hidden" onchange="handleImageUpload(this, 'card5_image_preview')">
+                                    <button type="button" onclick="document.getElementById('card5_image').click()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+                                        📷 사진 선택
+                                    </button>
+                                    <div id="card5_image_preview" class="flex-1"></div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="card5_name" class="font-semibold text-gray-700 block mb-2">생물 이름</label>
+                                    <input type="text" id="card5_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: 개미">
+                                </div>
+                                <div>
+                                    <label for="card5_scientific_name" class="font-semibold text-gray-700 block mb-2">학명</label>
+                                    <input type="text" id="card5_scientific_name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="예: Formica japonica">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="card5_classification" class="font-semibold text-gray-700 block mb-2">분류</label>
+                                <textarea id="card5_classification" rows="3" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 분류를 작성하세요"></textarea>
+                            </div>
+                            <div>
+                                <label for="card5_characteristics" class="font-semibold text-gray-700 block mb-2">특징</label>
+                                <textarea id="card5_characteristics" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 특징을 상세히 작성하세요"></textarea>
+                            </div>
+                            <div>
+                                <label for="card5_habitat" class="font-semibold text-gray-700 block mb-2">서식지</label>
+                                <textarea id="card5_habitat" rows="2" class="w-full p-3 border border-gray-300 rounded-md" placeholder="서식지 환경을 작성하세요"></textarea>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- 미리보기 및 제출 탭 -->
+            <div id="tab4" class="tab-content">
+                <div class="bg-white p-6 sm:p-8 rounded-lg shadow-md mb-6 no-print">
+                    <div class="flex justify-center items-center gap-4 flex-wrap">
+                        <button id="download_zip_btn" class="bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition text-base">📦 ZIP으로 다운로드</button>
+                        <button id="print_btn" class="bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition text-base">🖨️ PDF로 저장</button>
+                        <button id="preview_newtab_btn" class="bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition text-base">👁️ 미리보기(새 탭)</button>
+                        <button id="retry_upload_btn" class="hidden bg-yellow-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-yellow-600 transition text-base">🔄 업로드 재시도</button>
+                    </div>
+                    <p class="text-center text-sm text-gray-600 mt-4" aria-live="polite" role="status"><span id="submit_status"></span></p>
+                    <div id="progress_container" class="w-full max-w-xl mx-auto mt-3 hidden" aria-hidden="true">
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div id="progress_bar" class="bg-indigo-600 h-3 rounded-full" style="width:0%"></div>
+                        </div>
+                        <p id="progress_text" class="text-center text-xs text-gray-600 mt-1"></p>
+                    </div>
+                </div>
+                <div class="bg-gray-200 p-4 sm:p-8 rounded-lg space-y-8">
+                    <!-- 제목/학생정보 섹션 (머리말용) -->
+                    <div class="printable-area report-page header-section" data-student-info="">
+                        <div class="section-header">
+                            <h1 class="section-title">과학탐구실험2 수행평가4</h1>
+                            <p class="section-subtitle">스마트 기기를 이용하여 주변의 생물 조사하기</p>
+                        </div>
+                        <p class="text-right text-gray-600 mb-10" style="font-family: 'Noto Sans KR', sans-serif;">
+                            <span id="preview_student_grade">1</span>학년 <span id="preview_student_class">0</span>반 <span id="preview_student_number">00</span>번 이름: <span id="preview_student_name">ㅇㅇㅇ</span>
+                        </p>
+                    </div>
+                    
+                    <!-- 생태 조사 계획서 섹션 -->
+                    <div class="printable-area report-page content-section">
+                        <div class="section-header">
+                            <h1 class="section-title">과학탐구실험2 수행평가4</h1>
+                            <p class="section-subtitle">스마트 기기를 이용하여 주변의 생물 조사하기</p>
+                        </div>
+                        <p class="text-right text-gray-600 mb-10" style="font-family: 'Noto Sans KR', sans-serif;">
+                            <span id="preview_student_grade_plan">1</span>학년 <span id="preview_student_class_plan">0</span>반 <span id="preview_student_number_plan">00</span>번 이름: <span id="preview_student_name_plan">ㅇㅇㅇ</span>
+                        </p>
+                        <h2 class="report-section-title">생태 조사 계획서</h2>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">조사 기본 정보</h3>
+                        <p class="preview-text" id="preview_survey_info"><span class="preview-placeholder">조사 날짜, 조사 기간, 날씨를 입력하세요</span></p>
+                        
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">생태조사목적</h3>
+                        <p class="preview-text" id="preview_survey_purpose"><span class="preview-placeholder">생태조사목적을 입력하세요</span></p>
+                        
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">생태조사 준비물</h3>
+                        <p class="preview-text" id="preview_equipment"><span class="preview-placeholder">생태조사 준비물을 입력하세요</span></p>
+                        
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">조사 구역 내 장소 이동 순서</h3>
+                        <p class="preview-text" id="preview_survey_route"><span class="preview-placeholder">조사 구역 내 장소 이동 순서를 입력하세요</span></p>
+                        
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">조사 결과 이용 계획</h3>
+                        <p class="preview-text" id="preview_survey_usage"><span class="preview-placeholder">조사 결과 이용 계획을 입력하세요</span></p>
+
+                    </div>
+                    
+                    <!-- 생태 조사 보고서 섹션 -->
+                    <div class="printable-area report-page content-section">
+                        <div class="section-header">
+                            <h1 class="section-title">과학탐구실험2 수행평가4</h1>
+                            <p class="section-subtitle">스마트 기기를 이용하여 주변의 생물 조사하기</p>
+                        </div>
+                        <p class="text-right text-gray-600 mb-10" style="font-family: 'Noto Sans KR', sans-serif;">
+                            <span id="preview_student_grade_report">1</span>학년 <span id="preview_student_class_report">0</span>반 <span id="preview_student_number_report">00</span>번 이름: <span id="preview_student_name_report">ㅇㅇㅇ</span>
+                        </p>
+                        <h2 class="report-section-title">생태 조사 보고서</h2>
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">조사 장소의 환경적 특징</h3>
+                        <p class="preview-text" id="preview_environmental_features"><span class="preview-placeholder">조사 장소의 환경적 특징을 입력하세요</span></p>
+                        
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">발견한 생물의 종 수</h3>
+                        <p class="preview-text" id="preview_species_count"><span class="preview-placeholder">동물과 식물 종 수를 입력하세요</span></p>
+                        
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">발견한 생물의 특징 (8개)</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full border-collapse border border-gray-300 text-sm" style="font-family: 'Noto Sans KR', sans-serif;">
+                                <thead>
+                                    <tr class="bg-gray-100">
+                                        <th class="border border-gray-300 px-4 py-3 text-left font-semibold">이름</th>
+                                        <th class="border border-gray-300 px-4 py-3 text-left font-semibold">학명</th>
+                                        <th class="border border-gray-300 px-4 py-3 text-left font-semibold">발견장소</th>
+                                        <th class="border border-gray-300 px-4 py-3 text-left font-semibold">특징</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species1_name"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species1_scientific_name"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species1_location"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species1_characteristics"><span class="preview-placeholder">-</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species2_name"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species2_scientific_name"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species2_location"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species2_characteristics"><span class="preview-placeholder">-</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species3_name"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species3_scientific_name"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species3_location"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species3_characteristics"><span class="preview-placeholder">-</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species4_name"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species4_scientific_name"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species4_location"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species4_characteristics"><span class="preview-placeholder">-</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species5_name"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species5_scientific_name"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species5_location"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species5_characteristics"><span class="preview-placeholder">-</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species6_name"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species6_scientific_name"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species6_location"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species6_characteristics"><span class="preview-placeholder">-</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species7_name"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species7_scientific_name"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species7_location"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species7_characteristics"><span class="preview-placeholder">-</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species8_name"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species8_scientific_name"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species8_location"><span class="preview-placeholder">-</span></td>
+                                        <td class="border border-gray-300 px-4 py-3" id="preview_species8_characteristics"><span class="preview-placeholder">-</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                    </div>
+                    </div>
+                    <!-- 생물 카드 섹션 -->
+                    <div class="printable-area report-page content-section">
+                        <div class="section-header">
+                            <h1 class="section-title">과학탐구실험2 수행평가4</h1>
+                            <p class="section-subtitle">스마트 기기를 이용하여 주변의 생물 조사하기</p>
+                        </div>
+                        <p class="text-right text-gray-600 mb-10" style="font-family: 'Noto Sans KR', sans-serif;">
+                            <span id="preview_student_grade_card">1</span>학년 <span id="preview_student_class_card">0</span>반 <span id="preview_student_number_card">00</span>번 이름: <span id="preview_student_name_card">ㅇㅇㅇ</span>
+                        </p>
+                        <h2 class="report-section-title">생물 카드</h2>
+                        
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">생물 카드 1</h3>
+                        <div id="preview_card1_image" class="mb-4"></div>
+                        <p class="preview-text" id="preview_card1"><span class="preview-placeholder">생물 카드 1 정보를 입력하세요</span></p>
+                        
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">생물 카드 2</h3>
+                        <div id="preview_card2_image" class="mb-4"></div>
+                        <p class="preview-text" id="preview_card2"><span class="preview-placeholder">생물 카드 2 정보를 입력하세요</span></p>
+                        
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">생물 카드 3</h3>
+                        <div id="preview_card3_image" class="mb-4"></div>
+                        <p class="preview-text" id="preview_card3"><span class="preview-placeholder">생물 카드 3 정보를 입력하세요</span></p>
+                        
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">생물 카드 4</h3>
+                        <div id="preview_card4_image" class="mb-4"></div>
+                        <p class="preview-text" id="preview_card4"><span class="preview-placeholder">생물 카드 4 정보를 입력하세요</span></p>
+                        
+                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">생물 카드 5</h3>
+                        <div id="preview_card5_image" class="mb-4"></div>
+                        <p class="preview-text" id="preview_card5"><span class="preview-placeholder">생물 카드 5 정보를 입력하세요</span></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast-notification" class="fixed bottom-5 right-5 bg-gray-800 text-white py-3 px-5 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 no-print">저장되었습니다!</div>
+
+    <!-- iOS Save Help Modal -->
+    <div id="ios-help-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 no-print" role="dialog" aria-modal="true" aria-labelledby="ios-help-title">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
+            <h3 id="ios-help-title" class="text-lg font-bold text-gray-800">iOS에서 ZIP 파일 저장하기</h3>
+            <ol class="text-gray-700 mt-3 list-decimal list-inside space-y-2">
+                <li>아래 "파일에 저장(공유 시트)" 버튼을 눌러 공유 시트를 여세요.</li>
+                <li>공유 시트에서 "파일에 저장"을 선택하세요.</li>
+                <li>원하는 저장 위치(예: iCloud Drive 또는 내 iPhone)와 폴더를 선택하고 저장하세요.</li>
+            </ol>
+            <p class="text-gray-500 text-sm mt-3">팁: 저장 후 "파일" 앱에서 방금 저장한 위치로 이동해 확인할 수 있어요.</p>
+            <div class="mt-6 flex flex-col sm:flex-row justify-end gap-3">
+                <button id="ios-help-download-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">대신 바로 다운로드</button>
+                <div class="flex-1"></div>
+                <button id="ios-help-close-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">닫기</button>
+                <button id="ios-help-confirm-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">파일에 저장(공유 시트)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Download Center Modal -->
+    <div id="inapp-download-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 no-print" role="dialog" aria-modal="true" aria-labelledby="inapp-title">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
+            <h3 id="inapp-title" class="text-lg font-bold text-gray-800">모바일 브라우저에서 저장하기</h3>
+            <p class="text-gray-600 mt-2">현재 사용 중인 브라우저에서는 파일 저장이 제한될 수 있어요. 아래 버튼으로 서버에서 직접 내려받아 주세요.</p>
+            <div class="mt-4 grid grid-cols-1 gap-3">
+                <button id="inapp-server-download-btn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">서버에서 다운로드(권장)</button>
+                <button id="inapp-retry-btn" class="hidden px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">재시도</button>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button id="inapp-close-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // 로컬 개발 환경 감지
+    const isLocalDev = window.location.hostname === 'localhost' || 
+                      window.location.hostname === '127.0.0.1' ||
+                      window.location.hostname.includes('192.168') ||
+                      window.location.protocol === 'file:';
+
+    // 교사키 검증 함수 (배포 환경에서만 적용)
+    async function checkTeacherKey() {
+        // 로컬 개발 환경에서는 교사키 검증 우회
+        if (isLocalDev) {
+            console.log('로컬 개발 환경: 교사키 검증 우회');
+            return true;
+        }
+        
+        try {
+            const url = new URL(window.location.href);
+            const providedKey = url.searchParams.get('key') || '';
+            
+            // 교사키가 없으면 접근 차단
+            if (!providedKey || providedKey.trim().length === 0) {
+                showAccessDenied();
+                return false;
+            }
+            
+            // Netlify 환경변수에서 교사키 검증
+            try {
+                const response = await fetch('/.netlify/functions/verify-teacher-key', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ key: providedKey })
+                });
+                
+                if (!response.ok) {
+                    showAccessDenied();
+                    return false;
+                }
+                
+                const result = await response.json();
+                if (!result.valid) {
+                    showAccessDenied();
+                    return false;
+                }
+                
+                // 교사키를 sessionStorage에 저장 (기존 시스템과 동일)
+                sessionStorage.setItem('teacher_key', providedKey);
+                console.log('Teacher key validated:', providedKey.slice(0, 8) + '...');
+                return true;
+                
+            } catch (fetchError) {
+                console.error('교사키 검증 API 오류:', fetchError);
+                // API 오류 시에도 교사키가 있으면 허용 (fallback)
+                sessionStorage.setItem('teacher_key', providedKey);
+                return true;
+            }
+            
+        } catch (error) {
+            console.error('URL parsing error:', error);
+            showAccessDenied();
+            return false;
+        }
+    }
+    
+    // 접근 거부 페이지 표시
+    function showAccessDenied() {
+        document.body.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: 'Noto Sans KR', sans-serif; background-color: #f3f4f6;">
+                <div style="text-align: center; background: white; padding: 3rem; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,.1);">
+                    <h1 style="font-size: 4rem; font-weight: bold; color: #ef4444; margin-bottom: 1rem;">403</h1>
+                    <h2 style="font-size: 1.5rem; font-weight: 600; color: #374151; margin-bottom: 1rem;">접근 권한이 없습니다</h2>
+                    <p style="color: #6b7280; margin-bottom: 2rem;">이 페이지는 교사키가 필요한 페이지입니다.</p>
+                    <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 0.5rem; padding: 1rem; margin-top: 1rem;">
+                        <p style="color: #dc2626; font-size: 0.875rem; margin: 0;">
+                            💡 교사 포털에서 제공되는 링크를 사용해주세요.
+                        </p>
+                    </div>
+                    <div style="margin-top: 2rem;">
+                        <a href="/" style="display: inline-block; background-color: #3b82f6; color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; text-decoration: none; font-weight: 500;">
+                            교사 포털로 이동
+                        </a>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // 페이지 로드 시 교사키 검증 (비동기)
+    checkTeacherKey().then(isValid => {
+        if (!isValid) {
+            // 교사키가 유효하지 않으면 스크립트 실행 중단
+            throw new Error('Unauthorized access');
+        }
+    }).catch(error => {
+        console.error('교사키 검증 실패:', error);
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const dom = {
+            tabs: document.querySelectorAll('.tab-button'),
+            tabContents: document.querySelectorAll('.tab-content'),
+            accordions: document.querySelectorAll('.accordion-header button'),
+            downloadZipBtn: document.getElementById('download_zip_btn'),
+            printBtn: document.getElementById('print_btn'),
+            previewNewTabBtn: document.getElementById('preview_newtab_btn'),
+            retryUploadBtn: document.getElementById('retry_upload_btn'),
+            clearBtn: document.getElementById('clear_inputs_btn'),
+            toast: document.getElementById('toast-notification'),
+            allInputs: document.querySelectorAll('#tab1 input, #tab1 textarea, #tab1 select, #tab2 input, #tab2 textarea, #tab3 input, #tab3 textarea, input#student_grade, input#student_class, input#student_number, input#student_name'),
+            submitStatus: document.getElementById('submit_status'),
+            // iOS Help Modal
+            iosHelpModal: document.getElementById('ios-help-modal'),
+            iosHelpConfirmBtn: document.getElementById('ios-help-confirm-btn'),
+            iosHelpCloseBtn: document.getElementById('ios-help-close-btn'),
+            iosHelpDownloadBtn: document.getElementById('ios-help-download-btn'),
+            // In-App Download Center
+            inappModal: document.getElementById('inapp-download-modal'),
+            inappCloseBtn: document.getElementById('inapp-close-btn'),
+            inappServerDownloadBtn: document.getElementById('inapp-server-download-btn'),
+            inappRetryBtn: document.getElementById('inapp-retry-btn'),
+        };
+
+        const fields = {
+            'survey_date': 'preview_survey_date',
+            'survey_period': 'preview_survey_period',
+            'weather': 'preview_weather',
+            'survey_purpose': 'preview_survey_purpose',
+            'equipment': 'preview_equipment',
+            'survey_route': 'preview_survey_route',
+            'survey_usage': 'preview_survey_usage',
+            'environmental_features': 'preview_environmental_features',
+            'animal_species_count': 'preview_animal_species_count',
+            'plant_species_count': 'preview_plant_species_count',
+            'species1_name': 'preview_species1_name',
+            'species1_scientific_name': 'preview_species1_scientific_name',
+            'species1_location': 'preview_species1_location',
+            'species1_characteristics': 'preview_species1_characteristics',
+            'species2_name': 'preview_species2_name',
+            'species2_scientific_name': 'preview_species2_scientific_name',
+            'species2_location': 'preview_species2_location',
+            'species2_characteristics': 'preview_species2_characteristics',
+            'species3_name': 'preview_species3_name',
+            'species3_scientific_name': 'preview_species3_scientific_name',
+            'species3_location': 'preview_species3_location',
+            'species3_characteristics': 'preview_species3_characteristics',
+            'species4_name': 'preview_species4_name',
+            'species4_scientific_name': 'preview_species4_scientific_name',
+            'species4_location': 'preview_species4_location',
+            'species4_characteristics': 'preview_species4_characteristics',
+            'species5_name': 'preview_species5_name',
+            'species5_scientific_name': 'preview_species5_scientific_name',
+            'species5_location': 'preview_species5_location',
+            'species5_characteristics': 'preview_species5_characteristics',
+            'species6_name': 'preview_species6_name',
+            'species6_scientific_name': 'preview_species6_scientific_name',
+            'species6_location': 'preview_species6_location',
+            'species6_characteristics': 'preview_species6_characteristics',
+            'species7_name': 'preview_species7_name',
+            'species7_scientific_name': 'preview_species7_scientific_name',
+            'species7_location': 'preview_species7_location',
+            'species7_characteristics': 'preview_species7_characteristics',
+            'species8_name': 'preview_species8_name',
+            'species8_scientific_name': 'preview_species8_scientific_name',
+            'species8_location': 'preview_species8_location',
+            'species8_characteristics': 'preview_species8_characteristics',
+            'card1_name': 'preview_card1_name',
+            'card1_scientific_name': 'preview_card1_scientific_name',
+            'card1_classification': 'preview_card1_classification',
+            'card1_characteristics': 'preview_card1_characteristics',
+            'card1_habitat': 'preview_card1_habitat',
+            'card2_name': 'preview_card2_name',
+            'card2_scientific_name': 'preview_card2_scientific_name',
+            'card2_classification': 'preview_card2_classification',
+            'card2_characteristics': 'preview_card2_characteristics',
+            'card2_habitat': 'preview_card2_habitat',
+            'card3_name': 'preview_card3_name',
+            'card3_scientific_name': 'preview_card3_scientific_name',
+            'card3_classification': 'preview_card3_classification',
+            'card3_characteristics': 'preview_card3_characteristics',
+            'card3_habitat': 'preview_card3_habitat',
+            'card4_name': 'preview_card4_name',
+            'card4_scientific_name': 'preview_card4_scientific_name',
+            'card4_classification': 'preview_card4_classification',
+            'card4_characteristics': 'preview_card4_characteristics',
+            'card4_habitat': 'preview_card4_habitat',
+            'card5_name': 'preview_card5_name',
+            'card5_scientific_name': 'preview_card5_scientific_name',
+            'card5_classification': 'preview_card5_classification',
+            'card5_characteristics': 'preview_card5_characteristics',
+            'card5_habitat': 'preview_card5_habitat',
+        };
+
+        const storageKey = 'scienceExperiment2ReportData';
+
+        // 이미지 압축 및 리사이징 함수
+        function compressImage(file, maxWidth = 800, quality = 0.8) {
+            return new Promise((resolve, reject) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                
+                img.onload = function() {
+                    try {
+                        // 비율 유지하면서 리사이징
+                        let { width, height } = img;
+                        if (width > maxWidth) {
+                            height = (height * maxWidth) / width;
+                            width = maxWidth;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        // 이미지 그리기
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // 압축된 이미지를 Blob으로 변환
+                        canvas.toBlob((blob) => {
+                            if (blob) {
+                                // 원본 파일명 유지하면서 새로운 File 객체 생성
+                                const compressedFile = new File([blob], file.name, {
+                                    type: 'image/jpeg',
+                                    lastModified: Date.now()
+                                });
+                                resolve(compressedFile);
+                            } else {
+                                reject(new Error('이미지 압축 실패'));
+                            }
+                        }, 'image/jpeg', quality);
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                
+                img.onerror = () => reject(new Error('이미지 로드 실패'));
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        // 이미지 업로드 처리 함수 (개선된 버전)
+        window.handleImageUpload = async function(input, previewId) {
+            const file = input.files[0];
+            if (file) {
+                try {
+                    // 파일 크기 체크 (10MB 제한)
+                    if (file.size > 10 * 1024 * 1024) {
+                        alert('이미지 파일 크기가 10MB를 초과합니다. 더 작은 이미지를 선택해주세요.');
+                        input.value = '';
+                        return;
+                    }
+                    
+                    // 파일 타입 체크
+                    if (!file.type.startsWith('image/')) {
+                        alert('이미지 파일만 업로드할 수 있습니다.');
+                        input.value = '';
+                        return;
+                    }
+                    
+                    // 로딩 표시
+                    const preview = document.getElementById(previewId);
+                    preview.innerHTML = `
+                        <div class="flex items-center space-x-2 text-blue-600">
+                            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                            <span class="text-sm">이미지 압축 중...</span>
+                        </div>
+                    `;
+                    
+                    // 이미지 압축
+                    const compressedFile = await compressImage(file);
+                    
+                    // Blob URL 생성 (메모리 효율적)
+                    const blobUrl = URL.createObjectURL(compressedFile);
+                    
+                    preview.innerHTML = `
+                        <div class="flex items-center space-x-2">
+                            <img src="${blobUrl}" alt="생물 사진" class="w-20 h-20 object-cover rounded-lg border border-gray-300">
+                            <div class="text-sm text-gray-600">
+                                <div class="font-semibold">${compressedFile.name}</div>
+                                <div>${(compressedFile.size / 1024).toFixed(1)} KB (압축됨)</div>
+                            </div>
+                            <button type="button" onclick="removeImage('${input.id}', '${previewId}')" class="text-red-500 hover:text-red-700 text-sm">삭제</button>
+                        </div>
+                    `;
+                    
+                    // 원본 파일을 압축된 파일로 교체 (호환성 개선)
+                    try {
+                        if (window.DataTransfer && DataTransfer.prototype.items) {
+                            const dataTransfer = new DataTransfer();
+                            dataTransfer.items.add(compressedFile);
+                            input.files = dataTransfer.files;
+                            console.log('DataTransfer로 파일 교체 성공:', compressedFile.name);
+                        } else {
+                            // 구형 브라우저 대응: input을 재생성
+                            const newInput = input.cloneNode();
+                            newInput.files = [compressedFile];
+                            input.parentNode.replaceChild(newInput, input);
+                            newInput.addEventListener('change', () => handleImageUpload(newInput, previewId));
+                            console.log('Input 재생성으로 파일 교체 성공:', compressedFile.name);
+                        }
+                    } catch (transferError) {
+                        console.warn('DataTransfer API 사용 실패, 원본 파일 유지:', transferError);
+                        // DataTransfer 실패 시 원본 파일 유지하되 압축된 파일 정보를 저장
+                        input._compressedFile = compressedFile;
+                    }
+                    
+                    updatePreview();
+                } catch (error) {
+                    console.error('이미지 처리 중 오류:', error);
+                    const errorMessage = error.message || '알 수 없는 오류';
+                    alert(`이미지 처리 중 오류가 발생했습니다: ${errorMessage}`);
+                    input.value = '';
+                    document.getElementById(previewId).innerHTML = '';
+                }
+            }
+        };
+
+        // 이미지 삭제 함수
+        window.removeImage = function(inputId, previewId) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+            
+            if (input) {
+                input.value = '';
+                // 압축된 파일 정보도 삭제
+                delete input._compressedFile;
+            }
+            
+            if (preview) {
+                preview.innerHTML = '';
+            }
+            
+            updatePreview();
+        };
+
+        dom.tabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+        if (dom.accordions) dom.accordions.forEach(button => button.addEventListener('click', toggleAccordion));
+        dom.allInputs.forEach(input => input.addEventListener('input', updatePreviewAndSave));
+
+        if (dom.downloadZipBtn) dom.downloadZipBtn.addEventListener('click', handleZipDownloadAndSubmit);
+        if (dom.printBtn) dom.printBtn.addEventListener('click', printReport);
+        if (dom.previewNewTabBtn) dom.previewNewTabBtn.addEventListener('click', openPreviewInNewTab);
+        if (dom.retryUploadBtn) dom.retryUploadBtn.addEventListener('click', retryLastUpload);
+        if (dom.clearBtn) dom.clearBtn.addEventListener('click', handleClearAll);
+
+        // iOS Help Modal events
+        if (dom.iosHelpCloseBtn) dom.iosHelpCloseBtn.addEventListener('click', () => hideModal(dom.iosHelpModal));
+        if (dom.iosHelpDownloadBtn) dom.iosHelpDownloadBtn.addEventListener('click', () => {
+            if (lastZipBlob && lastMeta?.zipFilename) triggerBlobDownload(lastZipBlob, lastMeta.zipFilename);
+            dom.iosHelpModal.classList.add('hidden');
+        });
+        if (dom.iosHelpConfirmBtn) dom.iosHelpConfirmBtn.addEventListener('click', openIOSShare);
+
+        // In-App Download Center events
+        if (dom.inappCloseBtn) dom.inappCloseBtn.addEventListener('click', () => hideModal(dom.inappModal));
+        if (dom.inappServerDownloadBtn) dom.inappServerDownloadBtn.addEventListener('click', () => {
+            serverDownloadLastZip();
+        });
+        if (dom.inappRetryBtn) dom.inappRetryBtn.addEventListener('click', () => {
+            serverDownloadLastZip(true);
+        });
+
+        // Close modals on ESC for accessibility
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (dom.iosHelpModal && !dom.iosHelpModal.classList.contains('hidden')) hideModal(dom.iosHelpModal);
+                if (dom.inappModal && !dom.inappModal.classList.contains('hidden')) hideModal(dom.inappModal);
+            }
+        });
+
+        loadFromBrowser();
+        switchTab('guide1');
+        updatePreview();
+
+        // 아코디언 메뉴를 기본적으로 모두 펼칩니다.
+        if (dom.accordions) dom.accordions.forEach(button => setAccordionState(button, true));
+
+        // Hide PDF print button only on iOS and in-app browsers (Android에서는 노출)
+        const __env = detectInApp();
+        if ((isIOS() || __env.isInApp) && dom.printBtn) {
+            dom.printBtn.classList.add('hidden');
+        }
+
+        // --- Modal focus trap helpers ---
+        let __lastTriggerEl = null;
+        function getFocusable(el) {
+            return el.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        }
+        function showModal(el, triggerEl = null) {
+            __lastTriggerEl = triggerEl || document.activeElement;
+            el.classList.remove('hidden');
+            const f = getFocusable(el);
+            if (f.length) f[0].focus();
+            function onKey(e) {
+                if (e.key !== 'Tab') return;
+                const focusables = Array.from(getFocusable(el));
+                if (!focusables.length) return;
+                const first = focusables[0];
+                const last = focusables[focusables.length - 1];
+                if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+            }
+            el.__trapHandler = onKey;
+            el.addEventListener('keydown', onKey);
+        }
+        function hideModal(el) {
+            el.classList.add('hidden');
+            if (el.__trapHandler) el.removeEventListener('keydown', el.__trapHandler);
+            if (__lastTriggerEl && typeof __lastTriggerEl.focus === 'function') {
+                __lastTriggerEl.focus();
+            }
+        }
+
+        function switchTab(targetTabId) { 
+            dom.tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === targetTabId)); 
+            dom.tabContents.forEach(content => content.classList.toggle('active', content.id === targetTabId)); 
+            window.scrollTo(0,0); 
+        }
+        
+        function setAccordionState(button, open = true) {
+            const content = button.parentElement.nextElementSibling;
+            const icon = button.querySelector('svg');
+            button.classList.toggle('open', open);
+            content.classList.toggle('open', open);
+            if (open) {
+                setTimeout(() => {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                    content.style.paddingTop = '1rem';
+                    content.style.paddingBottom = '1rem';
+                }, 10);
+                if(icon) icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.style.maxHeight = '0';
+                content.style.paddingTop = '0';
+                content.style.paddingBottom = '0';
+                if(icon) icon.style.transform = 'rotate(0deg)';
+            }
+        }
+        
+        function toggleAccordion(event) { 
+            const button = event.currentTarget;
+            const isOpen = !button.classList.contains('open');
+            setAccordionState(button, isOpen);
+        }
+
+        function updatePreviewAndSave() { updatePreview(); saveToBrowser(); }
+        
+        function updatePreview() { 
+            // 학생 정보 업데이트
+            const studentGrade = document.getElementById('student_grade')?.value || '';
+            const studentClass = document.getElementById('student_class')?.value || '';
+            const studentNumber = document.getElementById('student_number')?.value || '';
+            const studentName = document.getElementById('student_name')?.value || '';
+            
+            // 각 섹션별 학생 정보 업데이트
+            const sections = [
+                { prefix: 'plan', elements: ['preview_student_grade_plan', 'preview_student_class_plan', 'preview_student_number_plan', 'preview_student_name_plan'] },
+                { prefix: 'report', elements: ['preview_student_grade_report', 'preview_student_class_report', 'preview_student_number_report', 'preview_student_name_report'] },
+                { prefix: 'card', elements: ['preview_student_grade_card', 'preview_student_class_card', 'preview_student_number_card', 'preview_student_name_card'] }
+            ];
+            
+            sections.forEach(section => {
+                const gradeEl = document.getElementById(section.elements[0]);
+                const classEl = document.getElementById(section.elements[1]);
+                const numberEl = document.getElementById(section.elements[2]);
+                const nameEl = document.getElementById(section.elements[3]);
+                
+                if (gradeEl) gradeEl.textContent = studentGrade || '1';
+                if (classEl) classEl.textContent = studentClass || '0';
+                if (numberEl) numberEl.textContent = studentNumber || '00';
+                if (nameEl) nameEl.textContent = studentName || 'ㅇㅇㅇ';
+            });
+            
+            // 기존 제목/학생정보 섹션의 학생 정보도 업데이트 (미리보기용)
+            const gradeEl = document.getElementById('preview_student_grade');
+            const classEl = document.getElementById('preview_student_class');
+            const numberEl = document.getElementById('preview_student_number');
+            const nameEl = document.getElementById('preview_student_name');
+            
+            if (gradeEl) gradeEl.textContent = studentGrade || '1';
+            if (classEl) classEl.textContent = studentClass || '0';
+            if (numberEl) numberEl.textContent = studentNumber || '00';
+            if (nameEl) nameEl.textContent = studentName || 'ㅇㅇㅇ';
+            
+            // 머리말용 data-student-info 속성 업데이트
+            const headerSection = document.querySelector('.header-section');
+            if (headerSection) {
+                const studentInfo = `${studentGrade || '1'}학년 ${studentClass || '0'}반 ${studentNumber || '00'}번 ${studentName || 'ㅇㅇㅇ'}`;
+                headerSection.setAttribute('data-student-info', studentInfo);
+            }
+            
+            // 인쇄용 머리말 학생 정보 업데이트
+            const printStudentInfo = document.getElementById('print-student-info');
+            if (printStudentInfo) {
+                const studentInfo = `${studentGrade || '1'}학년 ${studentClass || '0'}반 ${studentNumber || '00'}번 이름: ${studentName || 'ㅇㅇㅇ'}`;
+                printStudentInfo.textContent = studentInfo;
+            }
+            
+            // 일반 필드들 처리
+            Object.entries(fields).forEach(([fieldId, previewId]) => { 
+                const inputEl = document.getElementById(fieldId); 
+                const previewEl = document.getElementById(previewId); 
+                if (!inputEl || !previewEl) return; 
+                
+                const value = inputEl.value.trim(); 
+                const placeholderSpan = previewEl.querySelector('.preview-placeholder'); 
+                const placeholderText = placeholderSpan ? placeholderSpan.textContent : `[${fieldId}]`; 
+                if (value) { 
+                    previewEl.textContent = value; 
+                } else { 
+                    previewEl.innerHTML = `<span class="preview-placeholder">${placeholderText}</span>`; 
+                } 
+            });
+            
+            // 조사 기본 정보 조합
+            const surveyDate = document.getElementById('survey_date')?.value || '';
+            const surveyPeriod = document.getElementById('survey_period')?.value || '';
+            const weather = document.getElementById('weather')?.value || '';
+            
+            const surveyInfoParts = [];
+            if (surveyDate) surveyInfoParts.push(`조사 날짜: ${surveyDate}`);
+            if (surveyPeriod) surveyInfoParts.push(`조사 기간: ${surveyPeriod}`);
+            if (weather) surveyInfoParts.push(`날씨: ${weather}`);
+            
+            const surveyInfoEl = document.getElementById('preview_survey_info');
+            if (surveyInfoEl) {
+                if (surveyInfoParts.length > 0) {
+                    surveyInfoEl.textContent = surveyInfoParts.join(', ');
+                } else {
+                    surveyInfoEl.innerHTML = `<span class="preview-placeholder">조사 날짜, 조사 기간, 날씨를 입력하세요</span>`;
+                }
+            }
+            
+            // 발견한 생물의 종 수 조합
+            const animalCount = document.getElementById('animal_species_count')?.value || '';
+            const plantCount = document.getElementById('plant_species_count')?.value || '';
+            
+            const speciesCountEl = document.getElementById('preview_species_count');
+            if (speciesCountEl) {
+                if (animalCount || plantCount) {
+                    const animalText = animalCount ? `동물 ${animalCount}종` : '';
+                    const plantText = plantCount ? `식물 ${plantCount}종` : '';
+                    const separator = animalCount && plantCount ? ', ' : '';
+                    speciesCountEl.textContent = `${animalText}${separator}${plantText}`;
+                } else {
+                    speciesCountEl.innerHTML = `<span class="preview-placeholder">동물과 식물 종 수를 입력하세요</span>`;
+                }
+            }
+            
+            // 발견한 생물의 특징 조합 (8개) - 표 형식으로 업데이트
+            for (let i = 1; i <= 8; i++) {
+                const name = document.getElementById(`species${i}_name`)?.value.trim() || '';
+                const scientificName = document.getElementById(`species${i}_scientific_name`)?.value.trim() || '';
+                const location = document.getElementById(`species${i}_location`)?.value.trim() || '';
+                const characteristics = document.getElementById(`species${i}_characteristics`)?.value.trim() || '';
+                
+                // 각 셀을 개별적으로 업데이트
+                const nameEl = document.getElementById(`preview_species${i}_name`);
+                const scientificNameEl = document.getElementById(`preview_species${i}_scientific_name`);
+                const locationEl = document.getElementById(`preview_species${i}_location`);
+                const characteristicsEl = document.getElementById(`preview_species${i}_characteristics`);
+                
+                if (nameEl) nameEl.textContent = name || '-';
+                if (scientificNameEl) scientificNameEl.textContent = scientificName || '-';
+                if (locationEl) locationEl.textContent = location || '-';
+                if (characteristicsEl) characteristicsEl.textContent = characteristics || '-';
+            }
+            
+            // 생물 카드 정보 조합
+            for (let i = 1; i <= 5; i++) {
+                const name = document.getElementById(`card${i}_name`)?.value.trim() || '';
+                const scientificName = document.getElementById(`card${i}_scientific_name`)?.value.trim() || '';
+                const classification = document.getElementById(`card${i}_classification`)?.value.trim() || '';
+                const characteristics = document.getElementById(`card${i}_characteristics`)?.value.trim() || '';
+                const habitat = document.getElementById(`card${i}_habitat`)?.value.trim() || '';
+                
+                const cardParts = [];
+                if (name) cardParts.push(`이름: ${name}`);
+                if (scientificName) cardParts.push(`학명: ${scientificName}`);
+                if (classification) cardParts.push(`분류: ${classification}`);
+                if (characteristics) cardParts.push(`특징: ${characteristics}`);
+                if (habitat) cardParts.push(`서식지: ${habitat}`);
+                
+                const cardEl = document.getElementById(`preview_card${i}`);
+                if (cardEl) {
+                    if (cardParts.length > 0) {
+                        cardEl.textContent = cardParts.join('\n');
+                    } else {
+                        cardEl.innerHTML = `<span class="preview-placeholder">생물 카드 ${i} 정보를 입력하세요</span>`;
+                    }
+                }
+                
+                // 이미지 미리보기 업데이트 (Blob URL 사용)
+                const imageInput = document.getElementById(`card${i}_image`);
+                const imagePreviewEl = document.getElementById(`preview_card${i}_image`);
+                if (imageInput && imagePreviewEl) {
+                    if (imageInput.files && imageInput.files[0]) {
+                        const blobUrl = URL.createObjectURL(imageInput.files[0]);
+                        imagePreviewEl.innerHTML = `
+                            <div class="text-center">
+                                <img src="${blobUrl}" alt="생물 사진" class="max-w-xs mx-auto rounded-lg border border-gray-300 shadow-sm">
+                            </div>
+                        `;
+                    } else {
+                        imagePreviewEl.innerHTML = '';
+                    }
+                }
+            }
+        }
+
+        function getFormData() { 
+            const data = {}; 
+            dom.allInputs.forEach(input => data[input.id] = input.value); 
+            return data; 
+        }
+        
+        function saveToBrowser() { 
+            localStorage.setItem(storageKey, JSON.stringify(getFormData())); 
+            showToast('자동 저장되었습니다.'); 
+        }
+        
+        function loadFromBrowser() { 
+            const saved = localStorage.getItem(storageKey); 
+            if (!saved) return; 
+            const data = JSON.parse(saved); 
+            Object.entries(data).forEach(([k,v]) => { 
+                const el = document.getElementById(k); 
+                if (el) el.value = v; 
+            }); 
+            updatePreview(); 
+        }
+        
+        function showToast(message) { 
+            const toast = dom.toast; 
+            if (!toast) return; 
+            toast.textContent = message; 
+            toast.style.opacity = 1; 
+            setTimeout(()=>{ toast.style.opacity = 0; }, 1200); 
+        }
+        
+        function handleClearAll(){ 
+            try{ 
+                const ok=window.confirm('입력한 내용을 모두 삭제하시겠어요?\n이 작업은 되돌릴 수 없습니다.'); 
+                if(!ok) return; 
+                clearFormAndStorage(); 
+                showToast('입력 내용이 삭제되었습니다.'); 
+            }catch(_){} 
+        }
+        
+        function clearFormAndStorage(){ 
+            try{ 
+                localStorage.removeItem(storageKey); 
+                localStorage.removeItem(SUBMIT_META_KEY); 
+            }catch(_){} 
+            Array.from(dom.allInputs).forEach(el=>{ 
+                if(el.tagName==='INPUT' || el.tagName==='TEXTAREA' || el.tagName==='SELECT'){ 
+                    el.value=''; 
+                } 
+            }); 
+            if (typeof lastZipBlob!=='undefined') lastZipBlob=null; 
+            if (typeof lastMeta!=='undefined') lastMeta=null; 
+            setStatus(''); 
+            updatePreview(); 
+        }
+        
+        function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;');}
+
+        function getReportFilename(){ 
+            const grade=(document.getElementById('student_grade').value||'1').trim(); 
+            const studentClass=(document.getElementById('student_class').value||'0').trim().padStart(2,'0'); 
+            const studentNumber=(document.getElementById('student_number').value||'0').trim().padStart(2,'0'); 
+            const studentId=`${grade}${studentClass}${studentNumber}`; 
+            const studentName=document.getElementById('student_name').value.trim()||'이름없음'; 
+            return `${studentId}_${studentName}_스마트기기생물조사`; 
+        }
+        
+        function printReport(){ 
+            const originalTitle=document.title; 
+            document.title=getReportFilename(); 
+            window.print(); 
+            setTimeout(()=>{ document.title=originalTitle; }, 500); 
+        }
+        
+        function openPreviewInNewTab(){ 
+            try{ 
+                // 모든 섹션의 내용을 수집하여 하나의 문서로 구성
+                const sections = document.querySelectorAll('.printable-area.report-page');
+                let reportContent = '<div class="printable-area report-page">';
+                sections.forEach((section, index) => {
+                    // 각 섹션의 내용만 추출 (div 태그 제거)
+                    const sectionContent = section.innerHTML;
+                    reportContent += sectionContent;
+                    
+                    // 마지막 섹션이 아니면 페이지 브레이크 추가
+                    if (index < sections.length - 1) {
+                        reportContent += '<div class="page-break-before"></div>';
+                    }
+                });
+                reportContent += '</div>';
+                
+                const now=new Date(); 
+                const ts=`${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`; 
+                const title=`미리보기-스마트기기생물조사-${ts}`; 
+                const docHtml=generateDocHtml(title, reportContent); 
+                const blob=new Blob([docHtml],{type:'text/html'}); 
+                const url=URL.createObjectURL(blob); 
+                window.open(url,'_blank'); 
+                setTimeout(()=>URL.revokeObjectURL(url),10000);
+            }catch(_){}
+        }
+
+        function setStatus(text){ if (dom.submitStatus) dom.submitStatus.textContent=text||''; }
+        function showProgress(show){ const c=document.getElementById('progress_container'); if(!c) return; c.classList.toggle('hidden', !show); c.setAttribute('aria-hidden', show?'false':'true'); }
+        function setProgress(percent,label=''){ const bar=document.getElementById('progress_bar'); const txt=document.getElementById('progress_text'); if(bar) bar.style.width=`${Math.max(0,Math.min(100,percent))}%`; if(txt) txt.textContent=label||''; }
+
+        const ENDPOINT='/.netlify/functions/submit';
+        const SUBMIT_KEY='S-2025-github2025subject';
+        const SUBJECT=document.querySelector('meta[name="submission-subject"]')?.content||'과학탐구실험2';
+        const ACTIVITY_INPUT_DEFAULT=document.querySelector('meta[name="submission-activity"]')?.content||'스마트기기생물조사';
+        const SUBMIT_META_KEY='submit_meta_scienceExperiment2';
+
+        ['student_grade','student_class','student_number','student_name'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('input', saveSubmitMeta); });
+        loadSubmitMeta();
+        
+        function saveSubmitMeta(){ 
+            const meta={ 
+                grade:document.getElementById('student_grade')?.value||'', 
+                class:document.getElementById('student_class')?.value||'', 
+                number:document.getElementById('student_number')?.value||'', 
+                name:document.getElementById('student_name')?.value||'' 
+            }; 
+            try{ localStorage.setItem(SUBMIT_META_KEY, JSON.stringify(meta)); }catch(_){} 
+        }
+        
+        function loadSubmitMeta(){ 
+            try{ 
+                const raw=localStorage.getItem(SUBMIT_META_KEY); 
+                if(!raw) return; 
+                const meta=JSON.parse(raw); 
+                if(meta.grade!=null) document.getElementById('student_grade').value=meta.grade; 
+                if(meta.class!=null) document.getElementById('student_class').value=meta.class; 
+                if(meta.number!=null) document.getElementById('student_number').value=meta.number; 
+                if(meta.name!=null) document.getElementById('student_name').value=meta.name; 
+            }catch(_){} 
+        }
+
+        function generateDocHtml(dynamicTitle, reportInnerHtml){ 
+            return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${dynamicTitle}</title><script src="https://cdn.tailwindcss.com"><\/script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet"><style>body{font-family:'Noto Sans KR','Inter',sans-serif;background-color:#f3f4f6;margin:0}*{color:inherit !important}.report-page{background-color:#fff;padding:2.5cm 2cm;box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);color:#1f2937}.printable-area{width:100%}.report-main-title{font-family:'Noto Sans KR',sans-serif;font-size:1.875rem;font-weight:700;text-align:center;margin-bottom:1rem;border-bottom:2px solid #111827;padding-bottom:1rem}.report-section-title{font-family:'Noto Sans KR',sans-serif;font-size:1.5rem;font-weight:700;color:#111827;margin-top:2.5rem;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid #d1d5db}.preview-text{white-space:pre-wrap;word-break:break-word;min-height:2.5em;line-height:1.8;color:#374151;font-family:'Nanum Myeongjo',serif}.preview-text a{color:#2563eb !important;text-decoration:underline}.preview-placeholder{color:#9ca3af !important;font-style:italic}.page-break-before{page-break-before:always}.section-header{border-bottom:2px solid #3B82F6;padding-bottom:12px;margin-bottom:20px}.section-title{color:#1F2937;font-size:1.5rem;font-weight:bold;margin-bottom:8px}.section-subtitle{color:#6B7280;font-size:0.9rem;font-weight:500}@page{size:A4 portrait;margin:2cm}@media print{body *{visibility:hidden}.printable-area,.printable-area *{visibility:visible}.printable-area{position:absolute;left:0;top:0;width:100%;padding:0;margin:0;box-shadow:none;border:none}.no-print{display:none}.page-break-before{page-break-before:always}}</style></head><body><div class="report-page">${reportInnerHtml}</div></body></html>`; 
+        }
+
+        function calcSectionCode(grade,klass){ const g=String(grade||'').trim(); const k=String(klass||'').trim().padStart(2,'0'); return `${g}${k}`; }
+        function calcStudentId(grade,klass,number){ const g=String(grade||'').trim(); const k=String(klass||'').trim().padStart(2,'0'); const n=String(number||'').trim().padStart(2,'0'); return `${g}${k}${n}`; }
+
+        function validateForm(){ 
+            const gradeEl=document.getElementById('student_grade'); 
+            const classEl=document.getElementById('student_class'); 
+            const numberEl=document.getElementById('student_number'); 
+            const nameEl=document.getElementById('student_name'); 
+            const grade=parseInt((gradeEl.value||'').trim(),10); 
+            const klass=parseInt((classEl.value||'').trim(),10); 
+            const number=parseInt((numberEl.value||'').trim(),10); 
+            const name=(nameEl.value||'').trim(); 
+            if(Number.isNaN(grade)||grade<1||grade>3){ showToast('학년은 1~3 사이의 숫자여야 합니다.'); gradeEl.focus(); return null; } 
+            if(Number.isNaN(klass)||klass<1||klass>20){ showToast('반은 1~20 사이의 숫자여야 합니다.'); classEl.focus(); return null; } 
+            if(Number.isNaN(number)||number<1||number>40){ showToast('번호는 1~40 사이의 숫자여야 합니다.'); numberEl.focus(); return null; } 
+            if(!name){ showToast('이름을 입력하세요.'); nameEl.focus(); return null; } 
+            return { grade, klass, number, name }; 
+        }
+
+        async function blobToBase64(blob){ 
+            return await new Promise((resolve,reject)=>{ 
+                const reader=new FileReader(); 
+                reader.onload=()=>{ 
+                    const result=reader.result||''; 
+                    const commaIdx=String(result).indexOf(','); 
+                    const b64=commaIdx>=0?String(result).slice(commaIdx+1):String(result); 
+                    resolve(b64); 
+                }; 
+                reader.onerror=()=>reject(reader.error); 
+                reader.readAsDataURL(blob); 
+            }); 
+        }
+        
+        function bytesFromBase64(b64){ const len=b64.length; const pad=(b64.endsWith('==')?2:(b64.endsWith('=')?1:0)); return Math.floor((len*3)/4)-pad; }
+
+        function triggerBlobDownload(blob, filename){ 
+            try{ 
+                const a=document.createElement('a'); 
+                a.href=URL.createObjectURL(blob); 
+                a.download=filename; 
+                document.body.appendChild(a); 
+                a.click(); 
+                document.body.removeChild(a); 
+                URL.revokeObjectURL(a.href); 
+                showToast('ZIP 파일이 다운로드되었습니다.'); 
+                return true; 
+            }catch(_){ return false; } 
+        }
+        
+        async function saveWithPicker(blob, filename){ 
+            try{ 
+                const opts={ suggestedName: filename, types:[{ description:'ZIP file', accept:{'application/zip':['.zip']} }] }; 
+                const handle=await window.showSaveFilePicker(opts); 
+                const writable=await handle.createWritable(); 
+                await writable.write(blob); 
+                await writable.close(); 
+                return true; 
+            }catch(_){ return false; } 
+        }
+        
+        // --- Helpers for iOS detection & download/share ---
+        function isIOS() {
+            const ua = navigator.userAgent || navigator.vendor || '';
+            const iOSDevice = /iPad|iPhone|iPod/.test(ua);
+            const iPadOSDesktopUA = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+            return iOSDevice || iPadOSDesktopUA;
+        }
+
+        function detectInApp(){ 
+            const uaRaw=navigator.userAgent||navigator.vendor||''; 
+            const ua=uaRaw.toLowerCase(); 
+            const isIOS=/iphone|ipad|ipod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1); 
+            const isAndroid=/android/.test(ua); 
+            const isSamsung=/samsungbrowser/i.test(uaRaw); 
+            const isKakao=/kakaotalk/.test(ua); 
+            const isNaver=/naver/.test(ua); 
+            const isFB=/fban|fbav|fb_iab/.test(ua); 
+            const isIG=/instagram/.test(ua); 
+            const isLine=/ line\//.test(ua); 
+            const isIOSWebView=isIOS && !!window.webkit && !!window.webkit.messageHandlers && !/safari/i.test(uaRaw); 
+            const isInApp=isKakao||isNaver||isFB||isIG||isLine||isIOSWebView; 
+            let app = null;
+            if (isKakao) app = 'kakao'; else if (isNaver) app = 'naver'; else if (isIG) app = 'instagram'; else if (isFB) app = 'facebook'; else if (isLine) app = 'line'; else if (isIOSWebView) app = 'ios-webview';
+            return { isInApp, app, isIOS, isAndroid, isSamsung }; 
+        }
+
+        async function openIOSShare() {
+            try {
+                if (!lastZipBlob || !lastMeta?.zipFilename) {
+                    showToast('공유할 파일이 없습니다.');
+                    return;
+                }
+                const zipFile = new File([lastZipBlob], lastMeta.zipFilename, { type: 'application/zip' });
+                if (navigator.canShare && navigator.canShare({ files: [zipFile] }) && typeof navigator.share === 'function') {
+                    await navigator.share({ files: [zipFile], title: lastMeta.zipFilename, text: '파일 앱에서 저장 위치를 선택하세요.' });
+                    showToast('공유 시트가 열렸습니다. "파일에 저장"을 선택하세요.');
+                } else {
+                    triggerBlobDownload(lastZipBlob, lastMeta.zipFilename);
+                }
+            } catch (e) {
+                triggerBlobDownload(lastZipBlob, lastMeta.zipFilename);
+            } finally {
+                if (dom.iosHelpModal) dom.iosHelpModal.classList.add('hidden');
+            }
+        }
+
+        async function attemptLocalDownloadAndVerify(zipFilename){ 
+            const env=detectInApp(); 
+            if (env.isInApp){ 
+                setStatus('로컬 다운로드가 제한되어 서버 다운로드로 전환합니다.'); 
+                if (dom.inappModal) showModal(dom.inappModal, dom.downloadZipBtn);
+                try { serverDownloadLastZip(); } catch(_) {}
+                return; 
+            } 
+            if (isIOS()){ 
+                setStatus('iOS 저장 안내를 표시합니다.'); 
+                if (dom.iosHelpModal) showModal(dom.iosHelpModal, dom.downloadZipBtn);
+                return; 
+            }
+            let localSaved=false; 
+            let usedPicker=false; 
+            if (window.showSaveFilePicker && lastZipBlob){ 
+                usedPicker=true; 
+                localSaved=await saveWithPicker(lastZipBlob, zipFilename); 
+            }
+            if (!localSaved && lastZipBlob){ 
+                try{ 
+                    localSaved=triggerBlobDownload(lastZipBlob, zipFilename)===true; 
+                }catch(_){ localSaved=false; } 
+            }
+            if (env.isAndroid || env.isSamsung){ 
+                if (!usedPicker) localSaved=false; 
+            }
+            if (localSaved){ 
+                setStatus('✅ 로컬 다운로드가 완료되었습니다.'); 
+                showToast('로컬 다운로드 완료'); 
+            } else { 
+                setStatus('로컬 다운로드 실패 또는 제한됨, 서버에서 다운로드합니다.'); 
+                if (dom.inappModal) showModal(dom.inappModal, dom.downloadZipBtn);
+                try { serverDownloadLastZip(); } catch(_) {}
+            }
+        }
+
+        function trackServerDownload(token, timeoutMs=5000){ 
+            const deadline=Date.now()+timeoutMs; 
+            const key=`download_ok_${encodeURIComponent(token)}=`; 
+            const timer=setInterval(()=>{ 
+                const found=document.cookie.includes(key); 
+                if (found){ 
+                    clearInterval(timer); 
+                    setStatus('✅ 로컬 저장(서버 첨부) 확인되었습니다.'); 
+                    showToast('다운로드 완료 확인'); 
+                } else if (Date.now()>deadline){ 
+                    clearInterval(timer); 
+                } 
+            }, 300); 
+        }
+
+        let __inappRetryCount = 0;
+        const __inappRetryMax = 2;
+        function setInappRetryVisibility(show) {
+            if (!dom.inappRetryBtn) return;
+            dom.inappRetryBtn.classList.toggle('hidden', !show);
+        }
+        function serverDownloadLastZip(isManualRetry = false) {
+            try {
+                if (!lastZipBlob || !lastMeta?.zipFilename) {
+                    showToast('다운로드할 파일이 없습니다.');
+                    return;
+                }
+                blobToBase64(lastZipBlob).then((b64) => {
+                    try {
+                        const token = `${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+                        trackServerDownload(token, 3500);
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '/.netlify/functions/download';
+                        form.target = '_blank';
+                        const add = (n, v) => { const i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = v; form.appendChild(i); };
+                        add('filename', lastMeta.zipFilename);
+                        add('mime', 'application/zip');
+                        add('contentBase64', b64);
+                        add('token', token);
+                        document.body.appendChild(form);
+                        form.submit();
+                        document.body.removeChild(form);
+                        showToast('서버에서 다운로드를 시작합니다.');
+                        __inappRetryCount = 0;
+                        setInappRetryVisibility(false);
+                        if (dom.inappModal) hideModal(dom.inappModal);
+                    } catch (e) {
+                        throw e;
+                    }
+                }).catch(() => {
+                    throw new Error('base64 변환 실패');
+                });
+            } catch (_) {
+                __inappRetryCount += 1;
+                if (__inappRetryCount <= __inappRetryMax) {
+                    setInappRetryVisibility(true);
+                    showToast(`서버 다운로드에 실패했습니다. 재시도 가능 (${__inappRetryCount}/${__inappRetryMax})`);
+                } else {
+                    setInappRetryVisibility(false);
+                    showToast('서버 다운로드에 반복 실패했습니다. 잠시 후 다시 시도하세요.');
+                }
+            }
+        }
+
+        let lastZipBlob=null; 
+        let lastMeta=null;
+
+        async function handleZipDownloadAndSubmit(){ 
+            try{
+                setStatus('학생 정보 검증 중…'); 
+                dom.retryUploadBtn.dataset.show=''; 
+                dom.retryUploadBtn.classList.add('hidden'); 
+                const form=validateForm(); 
+                if(!form) return; 
+                showProgress(true); 
+                setProgress(10,'문서 생성 준비...');
+                const section=calcSectionCode(form.grade, form.klass); 
+                const studentId=calcStudentId(form.grade, form.klass, form.number); 
+                const docTitle='과학탐구실험2 수행평가4 - 스마트 기기를 이용하여 주변의 생물 조사하기';
+                const fmt=new Intl.DateTimeFormat('ko-KR',{ timeZone:'Asia/Seoul', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
+                const parts=Object.fromEntries(fmt.formatToParts(new Date()).map(p=>[p.type,p.value])); 
+                const timestamp=`${parts.year}${parts.month}${parts.day}_${parts.hour}${parts.minute}${parts.second}`;
+                const baseName=`${studentId}_${form.name}_${docTitle}_${timestamp}`; 
+                const htmlFilename=`${baseName}.html`; 
+                const zipFilename=`${baseName}.zip`;
+                setStatus('ZIP 파일 생성 중…'); 
+                setProgress(25,'ZIP 생성 중...'); 
+                // 모든 섹션의 내용을 수집하여 하나의 문서로 구성
+                const sections = document.querySelectorAll('.printable-area.report-page');
+                let reportContent = '<div class="printable-area report-page">';
+                sections.forEach((section, index) => {
+                    // 각 섹션의 내용만 추출 (div 태그 제거)
+                    const sectionContent = section.innerHTML;
+                    reportContent += sectionContent;
+                    
+                    // 마지막 섹션이 아니면 페이지 브레이크 추가
+                    if (index < sections.length - 1) {
+                        reportContent += '<div class="page-break-before"></div>';
+                    }
+                });
+                reportContent += '</div>';
+                const docHtml=generateDocHtml(baseName, reportContent);
+                const zip=new JSZip(); 
+                zip.file(htmlFilename, docHtml);
+                console.log('HTML 파일 추가 완료:', htmlFilename); 
+                
+                // 이미지 파일들을 ZIP에 추가
+                let imageCount = 0;
+                for (let i = 1; i <= 5; i++) {
+                    const imageInput = document.getElementById(`card${i}_image`);
+                    if (imageInput && imageInput.files && imageInput.files[0]) {
+                        try {
+                            imageCount++;
+                            // 압축된 파일이 있으면 우선 사용, 없으면 원본 파일 사용
+                            const imageFile = imageInput._compressedFile || imageInput.files[0];
+                            
+                            // 파일명 안전성 검사
+                            const safeFileName = imageFile.name.replace(/[^a-zA-Z0-9가-힣._-]/g, '_');
+                            const fileName = `생물카드${i}_${safeFileName}`;
+                            
+                            // 파일 크기 확인 (5MB 제한)
+                            if (imageFile.size > 5 * 1024 * 1024) {
+                                console.warn(`이미지 파일 ${i}이 너무 큽니다: ${imageFile.size} bytes`);
+                                continue;
+                            }
+                            
+                            zip.file(fileName, imageFile);
+                            console.log(`이미지 파일 추가: ${fileName} (${imageFile.size} bytes, 압축됨: ${!!imageInput._compressedFile})`);
+                        } catch (imageError) {
+                            console.error(`이미지 파일 ${i} 처리 중 오류:`, imageError);
+                        }
+                    }
+                }
+                
+                if (imageCount > 0) {
+                    setProgress(35, `이미지 ${imageCount}개 추가 중...`);
+                }
+                
+                const zipBlob=await zip.generateAsync({type:'blob', compression:'DEFLATE', compressionOptions:{level:6}}); 
+                lastZipBlob=zipBlob; 
+                lastMeta={ studentId, name:form.name, zipFilename, section };
+                const sizeBytes=zipBlob.size;
+                console.log('ZIP 생성 완료:', { sizeBytes, imageCount, zipFilename }); 
+                if (sizeBytes>8*1024*1024){ 
+                    setStatus('업로드 실패: ZIP 용량 초과 (8MB)'); 
+                    showToast('ZIP 용량이 8MB를 초과합니다.'); 
+                    dom.retryUploadBtn.dataset.show='1'; 
+                    dom.retryUploadBtn.classList.remove('hidden'); 
+                    return; 
+                }
+                setStatus('저장준비중입니다. 잠시 기다려 주세요'); 
+                setProgress(45,'업로드 준비...'); 
+                const b64=await blobToBase64(zipBlob);
+                if (!zipFilename.toLowerCase().endsWith('.zip')){ 
+                    setStatus('업로드 실패: 지원하지 않는 파일 형식'); 
+                    showToast('ZIP 파일만 업로드할 수 있습니다.'); 
+                    return; 
+                }
+                const activity=(ACTIVITY_INPUT_DEFAULT||'').trim();
+                if(!activity){ 
+                    setStatus('활동 폴더명이 비어 있습니다. 메타 또는 입력값을 지정하세요.'); 
+                    showToast('활동 폴더명을 입력하거나 메타를 설정하세요.'); 
+                    return; 
+                }
+                const payload={ studentId:studentId, subject:SUBJECT, activity:activity, section:section, files:[{ filename:zipFilename, contentBase64:b64, mime:'application/zip' }] };
+                console.log('서버 제출 시작:', { studentId, subject: SUBJECT, activity, section, zipFilename, payloadSize: JSON.stringify(payload).length });
+                setProgress(60,'업로드 중...'); 
+                const res=await fetch(ENDPOINT,{ method:'POST', headers:{ 'Content-Type':'application/json', 'X-Submission-Key':SUBMIT_KEY }, body:JSON.stringify(payload) });
+                const text=await res.text(); 
+                let data={}; 
+                try{ data=JSON.parse(text); }catch(_){ data={ raw:text }; }
+                if (!res.ok){ 
+                    console.error('Submit failed:', { status: res.status, statusText: res.statusText, data, payload });
+                    const errorMsg=data.error||data.detail||data.message||res.statusText||`HTTP ${res.status}`; 
+                    throw new Error(`업로드 실패: ${errorMsg}`); 
+                }
+                const uploadedFile=data.files?.[0]; 
+                const filePath=uploadedFile?.name||zipFilename; 
+                const fullPath=`/과제제출/${SUBJECT}/${activity}/${section}/${studentId}/${filePath}`;
+                setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 다운로드 확인 중…`); 
+                setProgress(85,'다운로드 준비...');
+                attemptLocalDownloadAndVerify(zipFilename); 
+                setProgress(100,'완료'); 
+                setTimeout(()=>showProgress(false),1500);
+            }catch(err){ 
+                const errorMessage=err?.message||err||'알 수 없는 오류'; 
+                setStatus(`❌ 제출 실패: ${errorMessage}`); 
+                showToast(`제출 실패: ${errorMessage}`); 
+                setProgress(0,''); 
+                showProgress(false); 
+            }
+        }
+
+        async function retryLastUpload(){
+            try{
+                if(!lastZipBlob||!lastMeta){ showToast('재시도할 항목이 없습니다.'); return; }
+                setStatus('저장준비중입니다. 잠시 기다려 주세요');
+                showProgress(true);
+                setProgress(45,'업로드 준비...');
+                const b64=await blobToBase64(lastZipBlob);
+                const sizeBytes=bytesFromBase64(b64);
+                if(sizeBytes>8*1024*1024){ setStatus('업로드 실패: ZIP 용량 초과 (8MB)'); showToast('ZIP 파일 용량이 8MB를 초과합니다.'); return; }
+                const activity=(ACTIVITY_INPUT_DEFAULT||'').trim();
+                if(!activity){ setStatus('활동 폴더명이 비어 있습니다. 메타 또는 입력값을 지정하세요.'); showToast('활동 폴더명을 입력하거나 메타를 설정하세요.'); return; }
+                const payload={ studentId:lastMeta.studentId, subject:SUBJECT, activity:activity, section:lastMeta.section, files:[{ filename:lastMeta.zipFilename, contentBase64:b64, mime:'application/zip' }] };
+                setProgress(60,'업로드 중...');
+                const res=await fetch(ENDPOINT,{ method:'POST', headers:{ 'Content-Type':'application/json', 'X-Submission-Key':SUBMIT_KEY }, body:JSON.stringify(payload) });
+                const text=await res.text();
+                let data={};
+                try{ data=JSON.parse(text); }catch(_){ data={ raw:text }; }
+                if(!res.ok){ 
+                    console.error('Retry submit failed:', { status: res.status, statusText: res.statusText, data, payload });
+                    const reason=data.error||data.detail||data.message||res.statusText||'업로드 실패'; 
+                    setStatus(`제출 실패: ${reason}`); 
+                    showToast(`제출 실패: ${reason}`); 
+                    return; 
+                }
+                const uploadedFile=data.files?.[0];
+                const filePath=uploadedFile?.name||lastMeta.zipFilename;
+                const fullPath=`/과제제출/${SUBJECT}/${activity}/${lastMeta.section}/${lastMeta.studentId}/${filePath}`;
+                setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 다운로드 확인 중…`);
+                setProgress(85,'다운로드 준비...');
+                attemptLocalDownloadAndVerify(lastMeta.zipFilename);
+                setProgress(100,'완료');
+                setTimeout(()=>showProgress(false),1500);
+            }catch(err){
+                const errorMessage=err?.message||err||'알 수 없는 오류';
+                setStatus(`❌ 제출 실패: ${errorMessage}`);
+                showToast(`제출 실패: ${errorMessage}`);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
