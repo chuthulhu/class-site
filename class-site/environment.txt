@@ -1,0 +1,15 @@
+# 교사 관리 포털 환경변수 설정 파일
+# 이 파일을 참고하여 .env 파일을 생성하세요
+
+ADMIN_PASSWORD=teacher2024
+NODE_ENV=development
+
+# 로컬 개발 환경 설정 방법:
+# 1. 프로젝트 루트 디렉토리(class-site/)에 .env 파일 생성
+# 2. 위의 환경변수들을 복사하여 붙여넣기
+# 3. 필요시 ADMIN_PASSWORD 값을 원하는 암호로 변경
+# 4. 파일 저장 후 Netlify CLI로 로컬 서버 실행
+
+# 주의사항:
+# - .env 파일은 .gitignore에 포함되어 있어 Git에 커밋되지 않습니다
+# - 실제 운영 환경에서는 Netlify 대시보드에서 환경변수를 설정하세요

@@ -1,7 +1,26 @@
 [build]
   base    = "class-site"
   publish = "."
-  ignore  = "BACKUPS/"
+  ignore  = [
+    "BACKUPS/",
+    "testing-framework/",
+    "docs/",
+    "scripts/",
+    "config/",
+    "class-site/docs/",
+    "class-site/local-dev-config.js",
+    "class-site/env.example",
+    "class-site/environment.txt",
+    "class-site/local-dev-config.example.js",
+    "class-site/node_modules/",
+    "class-site/package.json",
+    "class-site/package-lock.json",
+    "class-site/ROLLBACK_GUIDE.md"
+  ]
+
+# 환경변수 설정
+[build.environment]
+  ADMIN_PASSWORD = "2025sapa"
 
 [functions]
   directory = "netlify/functions"
