@@ -1175,22 +1175,22 @@
         }
     }
     
-    // 접근 거부 페이지 표시
+    // 404 페이지 표시 (교사키 없는 접속)
     function showAccessDenied() {
         document.body.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: 'Noto Sans KR', sans-serif; background-color: #f3f4f6;">
                 <div style="text-align: center; background: white; padding: 3rem; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,.1);">
-                    <h1 style="font-size: 4rem; font-weight: bold; color: #ef4444; margin-bottom: 1rem;">403</h1>
-                    <h2 style="font-size: 1.5rem; font-weight: 600; color: #374151; margin-bottom: 1rem;">접근 권한이 없습니다</h2>
-                    <p style="color: #6b7280; margin-bottom: 2rem;">이 페이지는 교사키가 필요한 페이지입니다.</p>
-                    <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 0.5rem; padding: 1rem; margin-top: 1rem;">
-                        <p style="color: #dc2626; font-size: 0.875rem; margin: 0;">
-                            💡 교사 포털에서 제공되는 링크를 사용해주세요.
+                    <h1 style="font-size: 4rem; font-weight: bold; color: #ef4444; margin-bottom: 1rem;">404</h1>
+                    <h2 style="font-size: 1.5rem; font-weight: 600; color: #374151; margin-bottom: 1rem;">페이지를 찾을 수 없습니다</h2>
+                    <p style="color: #6b7280; margin-bottom: 2rem;">요청하신 페이지가 존재하지 않거나 잘못된 접근입니다.</p>
+                    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem; margin-top: 1rem;">
+                        <p style="color: #6b7280; font-size: 0.875rem; margin: 0;">
+                            💡 올바른 링크로 접근해주세요.
                         </p>
                     </div>
                     <div style="margin-top: 2rem;">
-                        <a href="/" style="display: inline-block; background-color: #3b82f6; color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; text-decoration: none; font-weight: 500;">
-                            교사 포털로 이동
+                        <a href="/" style="display: inline-block; background-color: #6b7280; color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; text-decoration: none; font-weight: 500;">
+                            홈으로 이동
                         </a>
                     </div>
                 </div>
