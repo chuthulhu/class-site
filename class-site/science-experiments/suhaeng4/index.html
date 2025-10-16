@@ -199,6 +199,152 @@
             font-weight: 500;
         }
         
+        /* 생물 카드 스타일 - 플레잉 카드 비율 */
+        .biological-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 3px solid #3b82f6;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            /* 플레잉 카드 비율: 2.5:3.5 (약 0.714) */
+            aspect-ratio: 2.5 / 3.5;
+            min-height: 320px;
+            max-height: 450px;
+        }
+        
+        .biological-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(59, 130, 246, 0.25);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            color: white;
+            padding: clamp(6px, 1.5vw, 10px) clamp(10px, 2.5vw, 14px);
+            text-align: center;
+            border-bottom: 2px solid #2563eb;
+            flex-shrink: 0;
+            /* 헤더 높이를 줄임 */
+            min-height: 0;
+            max-height: 15%;
+        }
+        
+        .card-title {
+            font-size: clamp(1rem, 2.8vw, 1.2rem);
+            font-weight: bold;
+            margin: 0;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            line-height: 1.2;
+        }
+        
+        .card-subtitle {
+            font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+            font-style: italic;
+            margin: clamp(2px, 0.5vw, 4px) 0 0 0;
+            opacity: 0.9;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            line-height: 1.1;
+        }
+        
+        .card-image {
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #e2e8f0;
+            overflow: hidden;
+            /* 이미지 영역을 카드 세로의 50%로 설정 */
+            flex: 0 0 50%;
+            min-height: 0;
+        }
+        
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .no-image-placeholder {
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            color: #94a3b8;
+            opacity: 0.6;
+        }
+        
+        .card-content {
+            padding: clamp(8px, 2vw, 16px);
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            /* 특징 영역을 늘림 */
+            flex: 1;
+            min-height: 0;
+        }
+        
+        .card-info {
+            flex: 1;
+        }
+        
+        .info-item {
+            margin-bottom: clamp(6px, 1.2vw, 10px);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #374151;
+            font-size: clamp(0.8rem, 2.2vw, 0.95rem);
+            margin-bottom: clamp(2px, 0.4vw, 4px);
+        }
+        
+        .info-value {
+            color: #6b7280;
+            font-size: clamp(0.75rem, 2vw, 0.85rem);
+            line-height: 1.5;
+            word-break: break-word;
+            white-space: pre-wrap; /* 줄바꿈 반영 */
+        }
+        
+        .info-value.preview-placeholder {
+            color: #9ca3af;
+            font-style: italic;
+        }
+        
+        /* 카드 그리드 레이아웃 - 반응형 */
+        .cards-grid {
+            display: grid;
+            gap: clamp(12px, 3vw, 24px);
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            max-width: 100%;
+        }
+        
+        /* 데스크톱에서 최대 3열, 태블릿에서 2열, 모바일에서 1열 */
+        @media (min-width: 1200px) {
+            .cards-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (min-width: 768px) and (max-width: 1199px) {
+            .cards-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
         @media print {
             .page-break-before {
                 page-break-before: always;
@@ -209,6 +355,58 @@
                 box-shadow: none;
                 background-color: white;
                 page-break-inside: avoid;
+            }
+            
+            .biological-card {
+                background: white;
+                border: 2px solid #000;
+                box-shadow: none;
+                break-inside: avoid;
+                aspect-ratio: 2.5 / 3.5;
+                min-height: 220px;
+                max-height: 320px;
+            }
+            
+            .card-header {
+                background: #e0f2fe;
+                color: #000;
+                border-bottom: 1px solid #000;
+                padding: 6px 10px;
+                max-height: 15%;
+            }
+            
+            .card-title {
+                font-size: 0.85rem;
+                text-shadow: none;
+            }
+            
+            .card-subtitle {
+                font-size: 0.65rem;
+                text-shadow: none;
+            }
+            
+            .card-image {
+                flex: 0 0 50%;
+            }
+            
+            .card-content {
+                padding: 6px 10px;
+                flex: 1;
+            }
+            
+            .info-label {
+                font-size: 0.65rem;
+            }
+            
+            .info-value {
+                font-size: 0.6rem;
+                line-height: 1.4;
+                white-space: pre-wrap;
+            }
+            
+            .cards-grid {
+                gap: 12px;
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
@@ -716,17 +914,6 @@
                                 </div>
                             </div>
                             <div>
-                                <label for="card1_classification" class="font-semibold text-gray-700 block mb-2">분류</label>
-                                <div class="text-sm bg-blue-50 border border-blue-200 text-blue-900 rounded-md p-3 mb-2">
-                                    <div class="font-semibold mb-1">작성 가이드</div>
-                                    <ul class="list-disc list-inside space-y-0.5">
-                                        <li>계, 문, 강, 목, 과, 속, 종 순서로 작성</li>
-                                        <li>예: 식물계 > 속씨식물문 > 쌍자엽식물강 > 소나무목 > 소나무과 > 소나무속</li>
-                                    </ul>
-                                </div>
-                                <textarea id="card1_classification" rows="3" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 분류를 작성하세요"></textarea>
-                            </div>
-                            <div>
                                 <label for="card1_characteristics" class="font-semibold text-gray-700 block mb-2">특징</label>
                                 <div class="text-sm bg-blue-50 border border-blue-200 text-blue-900 rounded-md p-3 mb-2">
                                     <div class="font-semibold mb-1">작성 가이드</div>
@@ -736,10 +923,6 @@
                                     </ul>
                                 </div>
                                 <textarea id="card1_characteristics" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 특징을 상세히 작성하세요"></textarea>
-                            </div>
-                            <div>
-                                <label for="card1_habitat" class="font-semibold text-gray-700 block mb-2">서식지</label>
-                                <textarea id="card1_habitat" rows="2" class="w-full p-3 border border-gray-300 rounded-md" placeholder="서식지 환경을 작성하세요"></textarea>
                             </div>
                         </div>
                     </section>
@@ -769,16 +952,8 @@
                                 </div>
                             </div>
                             <div>
-                                <label for="card2_classification" class="font-semibold text-gray-700 block mb-2">분류</label>
-                                <textarea id="card2_classification" rows="3" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 분류를 작성하세요"></textarea>
-                            </div>
-                            <div>
                                 <label for="card2_characteristics" class="font-semibold text-gray-700 block mb-2">특징</label>
                                 <textarea id="card2_characteristics" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 특징을 상세히 작성하세요"></textarea>
-                            </div>
-                            <div>
-                                <label for="card2_habitat" class="font-semibold text-gray-700 block mb-2">서식지</label>
-                                <textarea id="card2_habitat" rows="2" class="w-full p-3 border border-gray-300 rounded-md" placeholder="서식지 환경을 작성하세요"></textarea>
                             </div>
                         </div>
                     </section>
@@ -808,16 +983,8 @@
                                 </div>
                             </div>
                             <div>
-                                <label for="card3_classification" class="font-semibold text-gray-700 block mb-2">분류</label>
-                                <textarea id="card3_classification" rows="3" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 분류를 작성하세요"></textarea>
-                            </div>
-                            <div>
                                 <label for="card3_characteristics" class="font-semibold text-gray-700 block mb-2">특징</label>
                                 <textarea id="card3_characteristics" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 특징을 상세히 작성하세요"></textarea>
-                            </div>
-                            <div>
-                                <label for="card3_habitat" class="font-semibold text-gray-700 block mb-2">서식지</label>
-                                <textarea id="card3_habitat" rows="2" class="w-full p-3 border border-gray-300 rounded-md" placeholder="서식지 환경을 작성하세요"></textarea>
                             </div>
                         </div>
                     </section>
@@ -847,16 +1014,8 @@
                                 </div>
                             </div>
                             <div>
-                                <label for="card4_classification" class="font-semibold text-gray-700 block mb-2">분류</label>
-                                <textarea id="card4_classification" rows="3" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 분류를 작성하세요"></textarea>
-                            </div>
-                            <div>
                                 <label for="card4_characteristics" class="font-semibold text-gray-700 block mb-2">특징</label>
                                 <textarea id="card4_characteristics" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 특징을 상세히 작성하세요"></textarea>
-                            </div>
-                            <div>
-                                <label for="card4_habitat" class="font-semibold text-gray-700 block mb-2">서식지</label>
-                                <textarea id="card4_habitat" rows="2" class="w-full p-3 border border-gray-300 rounded-md" placeholder="서식지 환경을 작성하세요"></textarea>
                             </div>
                         </div>
                     </section>
@@ -886,16 +1045,8 @@
                                 </div>
                             </div>
                             <div>
-                                <label for="card5_classification" class="font-semibold text-gray-700 block mb-2">분류</label>
-                                <textarea id="card5_classification" rows="3" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 분류를 작성하세요"></textarea>
-                            </div>
-                            <div>
                                 <label for="card5_characteristics" class="font-semibold text-gray-700 block mb-2">특징</label>
                                 <textarea id="card5_characteristics" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="생물의 특징을 상세히 작성하세요"></textarea>
-                            </div>
-                            <div>
-                                <label for="card5_habitat" class="font-semibold text-gray-700 block mb-2">서식지</label>
-                                <textarea id="card5_habitat" rows="2" class="w-full p-3 border border-gray-300 rounded-md" placeholder="서식지 환경을 작성하세요"></textarea>
                             </div>
                         </div>
                     </section>
@@ -1049,25 +1200,103 @@
                         </p>
                         <h2 class="report-section-title">생물 카드</h2>
                         
-                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">생물 카드 1</h3>
-                        <div id="preview_card1_image" class="mb-4"></div>
-                        <p class="preview-text" id="preview_card1"><span class="preview-placeholder">생물 카드 1 정보를 입력하세요</span></p>
-                        
-                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">생물 카드 2</h3>
-                        <div id="preview_card2_image" class="mb-4"></div>
-                        <p class="preview-text" id="preview_card2"><span class="preview-placeholder">생물 카드 2 정보를 입력하세요</span></p>
-                        
-                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">생물 카드 3</h3>
-                        <div id="preview_card3_image" class="mb-4"></div>
-                        <p class="preview-text" id="preview_card3"><span class="preview-placeholder">생물 카드 3 정보를 입력하세요</span></p>
-                        
-                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">생물 카드 4</h3>
-                        <div id="preview_card4_image" class="mb-4"></div>
-                        <p class="preview-text" id="preview_card4"><span class="preview-placeholder">생물 카드 4 정보를 입력하세요</span></p>
-                        
-                        <h3 class="font-semibold mt-4 mb-2" style="font-family: 'Noto Sans KR', sans-serif;">생물 카드 5</h3>
-                        <div id="preview_card5_image" class="mb-4"></div>
-                        <p class="preview-text" id="preview_card5"><span class="preview-placeholder">생물 카드 5 정보를 입력하세요</span></p>
+                        <!-- 생물 카드 그리드 -->
+                        <div class="cards-grid mt-6">
+                            <!-- 생물 카드 1 -->
+                            <div class="biological-card">
+                                <div class="card-header">
+                                    <h3 class="card-title" id="preview_card1_title">생물 카드 1</h3>
+                                    <p class="card-subtitle" id="preview_card1_subtitle">학명</p>
+                                </div>
+                                <div class="card-image" id="preview_card1_image">
+                                    <div class="no-image-placeholder">📷</div>
+                                </div>
+                                <div class="card-content">
+                                    <div class="card-info" id="preview_card1">
+                                        <div class="info-item">
+                                            <span class="info-label">특징:</span>
+                                            <span class="info-value">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 생물 카드 2 -->
+                            <div class="biological-card">
+                                <div class="card-header">
+                                    <h3 class="card-title" id="preview_card2_title">생물 카드 2</h3>
+                                    <p class="card-subtitle" id="preview_card2_subtitle">학명</p>
+                                </div>
+                                <div class="card-image" id="preview_card2_image">
+                                    <div class="no-image-placeholder">📷</div>
+                                </div>
+                                <div class="card-content">
+                                    <div class="card-info" id="preview_card2">
+                                        <div class="info-item">
+                                            <span class="info-label">특징:</span>
+                                            <span class="info-value">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 생물 카드 3 -->
+                            <div class="biological-card">
+                                <div class="card-header">
+                                    <h3 class="card-title" id="preview_card3_title">생물 카드 3</h3>
+                                    <p class="card-subtitle" id="preview_card3_subtitle">학명</p>
+                                </div>
+                                <div class="card-image" id="preview_card3_image">
+                                    <div class="no-image-placeholder">📷</div>
+                                </div>
+                                <div class="card-content">
+                                    <div class="card-info" id="preview_card3">
+                                        <div class="info-item">
+                                            <span class="info-label">특징:</span>
+                                            <span class="info-value">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 생물 카드 4 -->
+                            <div class="biological-card">
+                                <div class="card-header">
+                                    <h3 class="card-title" id="preview_card4_title">생물 카드 4</h3>
+                                    <p class="card-subtitle" id="preview_card4_subtitle">학명</p>
+                                </div>
+                                <div class="card-image" id="preview_card4_image">
+                                    <div class="no-image-placeholder">📷</div>
+                                </div>
+                                <div class="card-content">
+                                    <div class="card-info" id="preview_card4">
+                                        <div class="info-item">
+                                            <span class="info-label">특징:</span>
+                                            <span class="info-value">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 생물 카드 5 -->
+                            <div class="biological-card">
+                                <div class="card-header">
+                                    <h3 class="card-title" id="preview_card5_title">생물 카드 5</h3>
+                                    <p class="card-subtitle" id="preview_card5_subtitle">학명</p>
+                                </div>
+                                <div class="card-image" id="preview_card5_image">
+                                    <div class="no-image-placeholder">📷</div>
+                                </div>
+                                <div class="card-content">
+                                    <div class="card-info" id="preview_card5">
+                                        <div class="info-item">
+                                            <span class="info-label">특징:</span>
+                                            <span class="info-value">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1181,29 +1410,19 @@
             'species8_characteristics': 'preview_species8_characteristics',
             'card1_name': 'preview_card1_name',
             'card1_scientific_name': 'preview_card1_scientific_name',
-            'card1_classification': 'preview_card1_classification',
             'card1_characteristics': 'preview_card1_characteristics',
-            'card1_habitat': 'preview_card1_habitat',
             'card2_name': 'preview_card2_name',
             'card2_scientific_name': 'preview_card2_scientific_name',
-            'card2_classification': 'preview_card2_classification',
             'card2_characteristics': 'preview_card2_characteristics',
-            'card2_habitat': 'preview_card2_habitat',
             'card3_name': 'preview_card3_name',
             'card3_scientific_name': 'preview_card3_scientific_name',
-            'card3_classification': 'preview_card3_classification',
             'card3_characteristics': 'preview_card3_characteristics',
-            'card3_habitat': 'preview_card3_habitat',
             'card4_name': 'preview_card4_name',
             'card4_scientific_name': 'preview_card4_scientific_name',
-            'card4_classification': 'preview_card4_classification',
             'card4_characteristics': 'preview_card4_characteristics',
-            'card4_habitat': 'preview_card4_habitat',
             'card5_name': 'preview_card5_name',
             'card5_scientific_name': 'preview_card5_scientific_name',
-            'card5_classification': 'preview_card5_classification',
             'card5_characteristics': 'preview_card5_characteristics',
-            'card5_habitat': 'preview_card5_habitat',
         };
 
         const storageKey = 'scienceExperiment2ReportData';
@@ -1581,27 +1800,32 @@
                 if (characteristicsEl) characteristicsEl.textContent = characteristics || '-';
             }
             
-            // 생물 카드 정보 조합
+            // 생물 카드 정보 조합 (새로운 카드 구조)
             for (let i = 1; i <= 5; i++) {
                 const name = document.getElementById(`card${i}_name`)?.value.trim() || '';
                 const scientificName = document.getElementById(`card${i}_scientific_name`)?.value.trim() || '';
-                const classification = document.getElementById(`card${i}_classification`)?.value.trim() || '';
                 const characteristics = document.getElementById(`card${i}_characteristics`)?.value.trim() || '';
-                const habitat = document.getElementById(`card${i}_habitat`)?.value.trim() || '';
                 
-                const cardParts = [];
-                if (name) cardParts.push(`이름: ${name}`);
-                if (scientificName) cardParts.push(`학명: ${scientificName}`);
-                if (classification) cardParts.push(`분류: ${classification}`);
-                if (characteristics) cardParts.push(`특징: ${characteristics}`);
-                if (habitat) cardParts.push(`서식지: ${habitat}`);
+                // 카드 제목 업데이트 (이름)
+                const titleEl = document.getElementById(`preview_card${i}_title`);
+                if (titleEl) {
+                    titleEl.textContent = name || `생물 카드 ${i}`;
+                }
                 
+                // 카드 서브타이틀 업데이트 (학명)
+                const subtitleEl = document.getElementById(`preview_card${i}_subtitle`);
+                if (subtitleEl) {
+                    subtitleEl.textContent = scientificName || '학명';
+                    subtitleEl.style.fontStyle = scientificName ? 'italic' : 'normal';
+                }
+                
+                // 특징 업데이트
                 const cardEl = document.getElementById(`preview_card${i}`);
                 if (cardEl) {
-                    if (cardParts.length > 0) {
-                        cardEl.textContent = cardParts.join('\n');
-                    } else {
-                        cardEl.innerHTML = `<span class="preview-placeholder">생물 카드 ${i} 정보를 입력하세요</span>`;
+                    const characteristicsValue = cardEl.querySelector('.info-value');
+                    if (characteristicsValue) {
+                        characteristicsValue.textContent = characteristics || '-';
+                        characteristicsValue.className = characteristics ? 'info-value' : 'info-value preview-placeholder';
                     }
                 }
                 
@@ -1611,13 +1835,9 @@
                 if (imageInput && imagePreviewEl) {
                     if (imageInput.files && imageInput.files[0]) {
                         const blobUrl = URL.createObjectURL(imageInput.files[0]);
-                        imagePreviewEl.innerHTML = `
-                            <div class="text-center">
-                                <img src="${blobUrl}" alt="생물 사진" class="max-w-xs mx-auto rounded-lg border border-gray-300 shadow-sm">
-                            </div>
-                        `;
+                        imagePreviewEl.innerHTML = `<img src="${blobUrl}" alt="생물 사진">`;
                     } else {
-                        imagePreviewEl.innerHTML = '';
+                        imagePreviewEl.innerHTML = '<div class="no-image-placeholder">📷</div>';
                     }
                 }
             }
@@ -1762,7 +1982,7 @@
         }
 
         function generateDocHtml(dynamicTitle, reportInnerHtml){ 
-            return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${dynamicTitle}</title><script src="https://cdn.tailwindcss.com"><\/script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet"><style>body{font-family:'Noto Sans KR','Inter',sans-serif;background-color:#f3f4f6;margin:0;padding:20px}*{color:inherit !important}.report-page{background-color:#fff;padding:2.5cm 2cm;box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);color:#1f2937}.printable-area{width:100%}.report-main-title{font-family:'Noto Sans KR',sans-serif;font-size:1.875rem;font-weight:700;text-align:center;margin-bottom:1rem;border-bottom:2px solid #111827;padding-bottom:1rem}.report-section-title{font-family:'Noto Sans KR',sans-serif;font-size:1.5rem;font-weight:700;color:#111827;margin-top:2.5rem;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid #d1d5db}.preview-text{white-space:pre-wrap;word-break:break-word;min-height:2.5em;line-height:1.8;color:#374151;font-family:'Nanum Myeongjo',serif}.preview-text a{color:#2563eb !important;text-decoration:underline}.preview-placeholder{color:#9ca3af !important;font-style:italic}.page-break-before{page-break-before:always}.section-container{border:2px solid #E5E7EB;border-radius:12px;padding:24px;margin-bottom:32px;background-color:#FAFAFA;box-shadow:0 2px 4px rgba(0,0,0,0.1)}.section-container:last-child{margin-bottom:0}.section-header{border-bottom:2px solid #3B82F6;padding-bottom:12px;margin-bottom:20px}.section-title{color:#1F2937;font-size:1.5rem;font-weight:bold;margin-bottom:8px}.section-subtitle{color:#6B7280;font-size:0.9rem;font-weight:500}@page{size:A4 portrait;margin:2cm}@media print{body *{visibility:hidden}.printable-area,.printable-area *{visibility:visible}.printable-area{position:absolute;left:0;top:0;width:100%;padding:0;margin:0;box-shadow:none;border:none}.no-print{display:none}.page-break-before{page-break-before:always}.section-container{border:1px solid #000;box-shadow:none;background-color:white;page-break-inside:avoid}}</style></head><body>${reportInnerHtml}</body></html>`; 
+            return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${dynamicTitle}</title><script src="https://cdn.tailwindcss.com"><\/script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet"><style>body{font-family:'Noto Sans KR','Inter',sans-serif;background-color:#f3f4f6;margin:0;padding:20px}*{color:inherit !important}.report-page{background-color:#fff;padding:2.5cm 2cm;box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);color:#1f2937}.printable-area{width:100%}.report-main-title{font-family:'Noto Sans KR',sans-serif;font-size:1.875rem;font-weight:700;text-align:center;margin-bottom:1rem;border-bottom:2px solid #111827;padding-bottom:1rem}.report-section-title{font-family:'Noto Sans KR',sans-serif;font-size:1.5rem;font-weight:700;color:#111827;margin-top:2.5rem;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid #d1d5db}.preview-text{white-space:pre-wrap;word-break:break-word;min-height:2.5em;line-height:1.8;color:#374151;font-family:'Nanum Myeongjo',serif}.preview-text a{color:#2563eb !important;text-decoration:underline}.preview-placeholder{color:#9ca3af !important;font-style:italic}.page-break-before{page-break-before:always}.section-container{border:2px solid #E5E7EB;border-radius:12px;padding:24px;margin-bottom:32px;background-color:#FAFAFA;box-shadow:0 2px 4px rgba(0,0,0,0.1)}.section-container:last-child{margin-bottom:0}.section-header{border-bottom:2px solid #3B82F6;padding-bottom:12px;margin-bottom:20px}.section-title{color:#1F2937;font-size:1.5rem;font-weight:bold;margin-bottom:8px}.section-subtitle{color:#6B7280;font-size:0.9rem;font-weight:500}.biological-card{background:linear-gradient(135deg,#f8fafc 0%,#e2e8f0 100%);border:3px solid #3b82f6;border-radius:12px;box-shadow:0 8px 25px rgba(59,130,246,0.15);overflow:hidden;height:100%;display:flex;flex-direction:column;aspect-ratio:2.5/3.5;min-height:320px;max-height:450px}.card-header{background:linear-gradient(135deg,#60a5fa 0%,#3b82f6 100%);color:white;padding:clamp(6px,1.5vw,10px) clamp(10px,2.5vw,14px);text-align:center;border-bottom:2px solid #2563eb;flex-shrink:0;min-height:0;max-height:15%}.card-title{font-size:clamp(1rem,2.8vw,1.2rem);font-weight:bold;margin:0;text-shadow:0 1px 2px rgba(0,0,0,0.3);line-height:1.2}.card-subtitle{font-size:clamp(0.8rem,2.2vw,0.9rem);font-style:italic;margin:clamp(2px,0.5vw,4px) 0 0 0;opacity:0.9;text-shadow:0 1px 2px rgba(0,0,0,0.3);line-height:1.1}.card-image{background:#f1f5f9;display:flex;align-items:center;justify-content:center;border-bottom:1px solid #e2e8f0;overflow:hidden;flex:0 0 50%;min-height:0}.card-image img{width:100%;height:100%;object-fit:cover}.no-image-placeholder{font-size:clamp(1.8rem,5vw,3rem);color:#94a3b8;opacity:0.6}.card-content{padding:clamp(8px,2vw,16px);flex-shrink:0;display:flex;flex-direction:column;flex:1;min-height:0}.card-info{flex:1}.info-item{margin-bottom:clamp(6px,1.2vw,10px);display:flex;flex-direction:column}.info-item:last-child{margin-bottom:0}.info-label{font-weight:bold;color:#374151;font-size:clamp(0.8rem,2.2vw,0.95rem);margin-bottom:clamp(2px,0.4vw,4px)}.info-value{color:#6b7280;font-size:clamp(0.75rem,2vw,0.85rem);line-height:1.5;word-break:break-word;white-space:pre-wrap}.info-value.preview-placeholder{color:#9ca3af;font-style:italic}.cards-grid{display:grid;gap:clamp(12px,3vw,24px);grid-template-columns:repeat(auto-fit,minmax(200px,1fr));max-width:100%}@media (min-width:1200px){.cards-grid{grid-template-columns:repeat(3,1fr)}}@media (min-width:768px) and (max-width:1199px){.cards-grid{grid-template-columns:repeat(2,1fr)}}@media (max-width:767px){.cards-grid{grid-template-columns:1fr}}@page{size:A4 portrait;margin:2cm}@media print{body *{visibility:hidden}.printable-area,.printable-area *{visibility:visible}.printable-area{position:absolute;left:0;top:0;width:100%;padding:0;margin:0;box-shadow:none;border:none}.no-print{display:none}.page-break-before{page-break-before:always}.section-container{border:1px solid #000;box-shadow:none;background-color:white;page-break-inside:avoid}.biological-card{background:white;border:2px solid #000;box-shadow:none;break-inside:avoid}.card-header{background:#f0f0f0;color:#000;border-bottom:1px solid #000}}</style></head><body>${reportInnerHtml}</body></html>`; 
         }
 
         function calcSectionCode(grade,klass){ const g=String(grade||'').trim(); const k=String(klass||'').trim().padStart(2,'0'); return `${g}${k}`; }
