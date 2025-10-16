@@ -34,6 +34,19 @@ function = "gate-session2"
 path = "/science-experiments/suhaeng3/session2/*"
 function = "gate-session2"
 
+# Edge Functions routing for suhaeng4 gate
+[[edge_functions]]
+path = "/science-experiments/suhaeng4"
+function = "gate-suhaeng4"
+
+[[edge_functions]]
+path = "/science-experiments/suhaeng4/"
+function = "gate-suhaeng4"
+
+[[edge_functions]]
+path = "/science-experiments/suhaeng4/*"
+function = "gate-suhaeng4"
+
 # Test functions are automatically available at /.netlify/functions/
 # No redirect rules needed for internal Netlify function paths
 
