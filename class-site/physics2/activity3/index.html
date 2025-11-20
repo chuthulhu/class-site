@@ -6,7 +6,7 @@
     <title>물리학II 2학기 수행평가 - 최신 물리학, 공학 연관기사 탐구 발표</title>
     <meta name="submission-subject" content="물리학II">
     <meta name="submission-activity" content="최신 물리학, 공학 연관기사 탐구 발표">
-    <meta name="pdf-server-url" content="https://3.34.186.110:3000">
+    <meta name="pdf-server-url" content="http://3.34.186.110:3000">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -877,7 +877,12 @@
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ html: docHtml }),
+                        body: JSON.stringify({ 
+                            html: docHtml,
+                            options: {
+                                printBackground: false  // 배경 그래픽 제거
+                            }
+                        }),
                         signal: controller.signal,
                     });
                     clearTimeout(timeoutId);
@@ -996,7 +1001,7 @@
         }
 
         function generateDocHtml(dynamicTitle, reportInnerHtml){ 
-            return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${dynamicTitle}</title><script src="https://cdn.tailwindcss.com"><\/script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet"><style>body{font-family:'Noto Sans KR','Inter',sans-serif;background-color:#f3f4f6;margin:0}*{color:inherit !important}.report-page{background-color:#fff;padding:2.5cm 2cm;box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);color:#1f2937}.printable-area{width:100%}.report-main-title{font-family:'Noto Sans KR',sans-serif;font-size:1.875rem;font-weight:700;text-align:center;margin-bottom:1rem;border-bottom:2px solid #111827;padding-bottom:1rem}.report-section-title{font-family:'Noto Sans KR',sans-serif;font-size:1.5rem;font-weight:700;color:#111827;margin-top:2.5rem;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid #d1d5db}.preview-text{white-space:pre-wrap;word-break:break-word;min-height:2.5em;line-height:1.8;color:#374151;font-family:'Nanum Myeongjo',serif}.preview-text a{color:#2563eb !important;text-decoration:underline}.preview-placeholder{color:#9ca3af !important;font-style:italic}@page{size:A4 portrait;margin:2cm}@media print{body *{visibility:hidden}.printable-area,.printable-area *{visibility:visible}.printable-area{position:absolute;left:0;top:0;width:100%;padding:0;margin:0;box-shadow:none;border:none}.no-print{display:none}}</style></head><body><div class="report-page"><div class="printable-area">${reportInnerHtml}</div></div></body></html>`; 
+            return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${dynamicTitle}</title><script src="https://cdn.tailwindcss.com"><\/script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet"><style>body{font-family:'Noto Sans KR','Inter',sans-serif;background-color:transparent !important;margin:0}*{color:inherit !important;background-color:transparent !important;background-image:none !important;box-shadow:none !important}.report-page{background-color:transparent !important;padding:2.5cm 2cm;box-shadow:none !important;color:#1f2937}.printable-area{width:100%}.report-main-title{font-family:'Noto Sans KR',sans-serif;font-size:1.875rem;font-weight:700;text-align:center;margin-bottom:1rem;border-bottom:2px solid #111827;padding-bottom:1rem}.report-section-title{font-family:'Noto Sans KR',sans-serif;font-size:1.5rem;font-weight:700;color:#111827;margin-top:2.5rem;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid #d1d5db}.preview-text{white-space:pre-wrap;word-break:break-word;min-height:2.5em;line-height:1.8;color:#374151;font-family:'Nanum Myeongjo',serif}.preview-text a{color:#2563eb !important;text-decoration:underline}.preview-placeholder{color:#9ca3af !important;font-style:italic}@page{size:A4 portrait;margin:2cm}@media print{body *{visibility:hidden}.printable-area,.printable-area *{visibility:visible}.printable-area{position:absolute;left:0;top:0;width:100%;padding:0;margin:0;box-shadow:none;border:none}.no-print{display:none}}</style></head><body><div class="report-page"><div class="printable-area">${reportInnerHtml}</div></div></body></html>`; 
         }
 
         function calcSectionCode(grade,klass){ const g=String(grade||'').trim(); const k=String(klass||'').trim().padStart(2,'0'); return `${g}${k}`; }
