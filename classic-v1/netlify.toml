@@ -1,5 +1,5 @@
 [build]
-  base    = "class-site"
+  base    = "classic-v1"
   publish = "."
 
 
