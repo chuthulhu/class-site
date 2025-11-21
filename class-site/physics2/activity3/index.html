@@ -6,7 +6,7 @@
     <title>물리학II 2학기 수행평가 - 최신 물리학, 공학 연관기사 탐구 발표</title>
     <meta name="submission-subject" content="물리학II">
     <meta name="submission-activity" content="최신 물리학, 공학 연관기사 탐구 발표">
-    <meta name="pdf-server-url" content="http://3.34.186.110:3000">
+    <meta name="pdf-server-url" content="https://pdf.physichu.kr">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -834,7 +834,7 @@
         async function handleServerPdfDownload() {
             // 서버 주소를 meta tag에서 읽어오기 (없으면 기본값 사용)
             const pdfServerMeta = document.querySelector('meta[name="pdf-server-url"]');
-            let SERVER_BASE_URL = pdfServerMeta?.content?.trim() || 'https://3.34.186.110:3000';
+            let SERVER_BASE_URL = pdfServerMeta?.content?.trim() || 'https://pdf.physichu.kr';
             
             try {
                 // URL이 비어있거나 유효하지 않은 경우
@@ -847,6 +847,10 @@
                     throw new Error('Mixed Content 오류: HTTPS 페이지에서는 HTTPS 서버만 사용할 수 있습니다. 서버 주소를 HTTPS로 변경하거나, 서버에 SSL 인증서를 설치하세요.');
                 }
                 
+                // 학생 정보 유효성 검사 (OneDrive 저장에 필요)
+                const form = validateForm();
+                if (!form) return;
+
                 setStatus('PDF 생성 중…');
                 showProgress(true);
                 setProgress(20, 'HTML 준비 중...');
@@ -899,12 +903,74 @@
                     throw new Error(`서버 오류 (${response.status}): ${errorText}`);
                 }
                 
-                setProgress(80, 'PDF 다운로드 중...');
+                setProgress(60, 'PDF 수신 완료, OneDrive 백업 준비 중...');
                 
-                // 응답(PDF)을 blob으로 받아서 다운로드
-                const blob = await response.blob();
-                const url = URL.createObjectURL(blob);
+                // 응답(PDF)을 blob으로 받기
+                const pdfBlob = await response.blob();
                 
+                // --- OneDrive 업로드 로직 시작 ---
+                try {
+                    const section = calcSectionCode(form.grade, form.klass);
+                    const studentId = calcStudentId(form.grade, form.klass, form.number);
+                    const activity = (ACTIVITY_INPUT_DEFAULT || '').trim();
+                    
+                    if (!activity) {
+                        throw new Error('활동 폴더명이 설정되지 않았습니다.');
+                    }
+
+                    // 파일명 생성 (타임스탬프 포함)
+                    const fmt = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                    const parts = Object.fromEntries(fmt.formatToParts(new Date()).map(p => [p.type, p.value]));
+                    const timestamp = `${parts.year}${parts.month}${parts.day}_${parts.hour}${parts.minute}${parts.second}`;
+                    const baseName = `${studentId}_${form.name}_${docTitle}_${timestamp}`;
+                    
+                    const pdfFilename = `${baseName}.pdf`;
+                    const htmlFilename = `${baseName}.html`;
+
+                    // Base64 변환
+                    const pdfBase64 = await blobToBase64(pdfBlob);
+                    
+                    // HTML도 Blob으로 만들어서 Base64 변환 (일관성 유지를 위해)
+                    const htmlBlob = new Blob([docHtml], { type: 'text/html' });
+                    const htmlBase64 = await blobToBase64(htmlBlob);
+
+                    const payload = {
+                        studentId: studentId,
+                        subject: SUBJECT,
+                        activity: activity,
+                        section: section,
+                        files: [
+                            { filename: pdfFilename, contentBase64: pdfBase64, mime: 'application/pdf' },
+                            { filename: htmlFilename, contentBase64: htmlBase64, mime: 'text/html' }
+                        ]
+                    };
+
+                    setProgress(80, 'OneDrive에 백업 중...');
+                    
+                    const res = await fetch(ENDPOINT, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Submission-Key': SUBMIT_KEY },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!res.ok) {
+                        const text = await res.text();
+                        console.warn('OneDrive backup failed:', text);
+                        showToast('OneDrive 백업 실패 (다운로드는 계속됩니다)');
+                        // 백업 실패해도 다운로드는 진행
+                    } else {
+                        console.log('OneDrive backup success');
+                    }
+
+                } catch (uploadError) {
+                    console.error('OneDrive upload error:', uploadError);
+                    showToast('OneDrive 백업 중 오류 발생 (다운로드는 계속됩니다)');
+                }
+                // --- OneDrive 업로드 로직 끝 ---
+
+                setProgress(90, 'PDF 다운로드 중...');
+                
+                const url = URL.createObjectURL(pdfBlob);
                 const filename = `${getReportFilename()}.pdf`;
                 const a = document.createElement('a');
                 a.href = url;
@@ -915,7 +981,7 @@
                 URL.revokeObjectURL(url);
                 
                 setProgress(100, '완료');
-                setStatus('✅ PDF 다운로드가 완료되었습니다.');
+                setStatus('✅ PDF 다운로드 및 백업 완료');
                 showToast('PDF 다운로드 완료');
                 setTimeout(() => showProgress(false), 1500);
             } catch (err) {
