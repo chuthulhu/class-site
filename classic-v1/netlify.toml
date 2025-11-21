@@ -1,6 +1,6 @@
 [build]
   base    = "."
-  publish = "."
+  publish = "class-site"
 
 
 # 환경변수 설정
