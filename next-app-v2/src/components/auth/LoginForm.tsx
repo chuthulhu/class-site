@@ -1,11 +1,14 @@
 'use client'
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useFormStatus } from 'react-dom';
+import { useActionState } from 'react';
 import { authenticate } from '@/app/actions/auth';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-const initialState = {
+import { AuthState } from '@/app/actions/auth';
+
+const initialState: AuthState = {
   success: false,
   error: '',
   message: '',
@@ -28,7 +31,7 @@ function SubmitButton() {
 }
 
 export default function LoginForm() {
-  const [state, formAction] = useFormState(authenticate, initialState);
+  const [state, formAction] = useActionState(authenticate, initialState);
   const router = useRouter();
 
   useEffect(() => {

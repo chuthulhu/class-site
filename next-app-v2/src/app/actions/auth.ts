@@ -16,7 +16,7 @@ export type AuthState = {
   error?: string;
 };
 
-export async function authenticate(prevState: AuthState, formData: FormData) {
+export async function authenticate(prevState: AuthState, formData: FormData): Promise<AuthState> {
   const password = formData.get('password');
 
   const validatedFields = schema.safeParse({
