@@ -1830,11 +1830,14 @@
                 }
                 
                 // 이미지 미리보기 업데이트 (Blob URL 사용)
+                // 이미지 미리보기 업데이트 (Blob URL 사용)
                 const imageInput = document.getElementById(`card${i}_image`);
                 const imagePreviewEl = document.getElementById(`preview_card${i}_image`);
                 if (imageInput && imagePreviewEl) {
                     if (imageInput.files && imageInput.files[0]) {
-                        const blobUrl = URL.createObjectURL(imageInput.files[0]);
+                        // 압축된 파일이 있으면 그것을 사용 (PDF 용량 감소 효과)
+                        const imageFile = imageInput._compressedFile || imageInput.files[0];
+                        const blobUrl = URL.createObjectURL(imageFile);
                         imagePreviewEl.innerHTML = `<img src="${blobUrl}" alt="생물 사진">`;
                     } else {
                         imagePreviewEl.innerHTML = '<div class="no-image-placeholder">📷</div>';
@@ -2218,18 +2221,67 @@
                 setProgress(25,'ZIP 생성 중...'); 
                 // 모든 섹션의 내용을 수집하여 하나의 문서로 구성
                 const sections = document.querySelectorAll('.printable-area.report-page');
-                let reportContent = '<div class="printable-area report-page">';
-                sections.forEach((section, index) => {
-                    // 각 섹션의 내용만 추출 (div 태그 제거)
-                    const sectionContent = section.innerHTML;
-                    reportContent += sectionContent;
+                
+                // 임시 컨테이너 생성하여 내용 복사
+                const tempContainer = document.createElement('div');
+                
+                // 각 섹션 처리
+                for (let i = 0; i < sections.length; i++) {
+                    const section = sections[i];
+                    const clonedSection = section.cloneNode(true);
+                    
+                    // 생물 카드 이미지 처리 (Base64 임베딩)
+                    if (i > 0) { // 첫 번째 섹션(표지) 제외
+                        const cardImages = clonedSection.querySelectorAll('.card-image img');
+                        // 현재 섹션에 포함된 카드 이미지들을 찾아서 처리
+                        // 주의: 섹션과 카드의 매핑이 필요함. 
+                        // 여기서는 간단히 DOM 구조상 이미지를 찾아서 매칭되는 input의 파일로 교체
+                        
+                        // 실제 원본 DOM의 해당 섹션에서 이미지 input들을 찾음
+                        const originalImages = section.querySelectorAll('.card-image img');
+                        
+                        for (let j = 0; j < cardImages.length; j++) {
+                            const img = cardImages[j];
+                            // 원본 이미지의 src가 blob인지 확인 (이미지가 있는 경우)
+                            if (img.src && img.src.startsWith('blob:')) {
+                                // 해당 이미지가 몇 번째 카드인지 식별 필요
+                                // preview_card{N}_image ID를 가진 부모를 찾거나, 
+                                // DOM 순서대로 매칭 (카드 1~5 순서가 보장된다면)
+                                
+                                // 가장 확실한 방법: ID로 매칭
+                                const parentId = img.parentElement.id; // preview_card1_image
+                                if (parentId && parentId.startsWith('preview_card')) {
+                                    const cardIndex = parentId.replace('preview_card', '').replace('_image', '');
+                                    const imageInput = document.getElementById(`card${cardIndex}_image`);
+                                    
+                                    if (imageInput && (imageInput.files[0] || imageInput._compressedFile)) {
+                                        try {
+                                            // 압축된 파일이 있으면 우선 사용
+                                            const imageFile = imageInput._compressedFile || imageInput.files[0];
+                                            
+                                            // 이미지 파일을 Base64로 변환
+                                            const base64 = await blobToBase64(imageFile);
+                                            img.src = `data:${imageFile.type};base64,${base64}`;
+                                        } catch (e) {
+                                            console.error(`이미지 변환 실패 (카드 ${cardIndex}):`, e);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    tempContainer.appendChild(clonedSection);
                     
                     // 마지막 섹션이 아니면 페이지 브레이크 추가
-                    if (index < sections.length - 1) {
-                        reportContent += '<div class="page-break-before"></div>';
+                    if (i < sections.length - 1) {
+                        const breakEl = document.createElement('div');
+                        breakEl.className = 'page-break-before';
+                        tempContainer.appendChild(breakEl);
                     }
-                });
-                reportContent += '</div>';
+                }
+                
+                const reportContent = `<div class="printable-area report-page">${tempContainer.innerHTML}</div>`;
                 const docHtml=generateDocHtml(baseName, reportContent);
                 const zip=new JSZip(); 
                 zip.file(htmlFilename, docHtml);
