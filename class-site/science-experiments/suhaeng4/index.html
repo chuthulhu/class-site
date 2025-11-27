@@ -435,6 +435,14 @@
                     <label for="student_number" class="font-semibold">번</label>
                     <input type="text" id="student_name" class="w-32 p-2 border border-gray-300 rounded-md" placeholder="이름">
                 </div>
+                <div class="flex items-center space-x-2">
+                    <button id="manual_save_btn" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition shadow-sm">임시저장</button>
+                    <button id="manual_load_btn" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-700 transition shadow-sm">불러오기</button>
+                    <div class="h-6 w-px bg-gray-300 mx-2"></div>
+                    <button id="file_save_btn" class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition shadow-sm">파일저장</button>
+                    <button id="file_load_btn" class="bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-teal-700 transition shadow-sm">파일열기</button>
+                    <input type="file" id="file_load_input" accept=".json" class="hidden">
+                </div>
             </div>
         </div>
 
@@ -1350,6 +1358,11 @@
             previewNewTabBtn: document.getElementById('preview_newtab_btn'),
             retryUploadBtn: document.getElementById('retry_upload_btn'),
             clearBtn: document.getElementById('clear_inputs_btn'),
+            manualSaveBtn: document.getElementById('manual_save_btn'),
+            manualLoadBtn: document.getElementById('manual_load_btn'),
+            fileSaveBtn: document.getElementById('file_save_btn'),
+            fileLoadBtn: document.getElementById('file_load_btn'),
+            fileLoadInput: document.getElementById('file_load_input'),
             toast: document.getElementById('toast-notification'),
             allInputs: document.querySelectorAll('#tab1 input, #tab1 textarea, #tab1 select, #tab2 input, #tab2 textarea, #tab3 input, #tab3 textarea, input#student_grade, input#student_class, input#student_number, input#student_name'),
             submitStatus: document.getElementById('submit_status'),
@@ -1576,6 +1589,11 @@
         if (dom.previewNewTabBtn) dom.previewNewTabBtn.addEventListener('click', openPreviewInNewTab);
         if (dom.retryUploadBtn) dom.retryUploadBtn.addEventListener('click', retryLastUpload);
         if (dom.clearBtn) dom.clearBtn.addEventListener('click', handleClearAll);
+        if (dom.manualSaveBtn) dom.manualSaveBtn.addEventListener('click', () => saveToBrowser('저장되었습니다!'));
+        if (dom.manualLoadBtn) dom.manualLoadBtn.addEventListener('click', () => { loadFromBrowser(); showToast('불러왔습니다!'); });
+        if (dom.fileSaveBtn) dom.fileSaveBtn.addEventListener('click', saveToFile);
+        if (dom.fileLoadBtn) dom.fileLoadBtn.addEventListener('click', () => dom.fileLoadInput.click());
+        if (dom.fileLoadInput) dom.fileLoadInput.addEventListener('change', loadFromFile);
 
         // iOS Help Modal events
         if (dom.iosHelpCloseBtn) dom.iosHelpCloseBtn.addEventListener('click', () => hideModal(dom.iosHelpModal));
@@ -1852,20 +1870,70 @@
             return data; 
         }
         
-        function saveToBrowser() { 
+        function saveToBrowser(message = '자동 저장되었습니다.') { 
             localStorage.setItem(storageKey, JSON.stringify(getFormData())); 
-            showToast('자동 저장되었습니다.'); 
+            showToast(message); 
         }
         
         function loadFromBrowser() { 
             const saved = localStorage.getItem(storageKey); 
             if (!saved) return; 
             const data = JSON.parse(saved); 
+            applyFormData(data);
+        }
+
+        function applyFormData(data) {
             Object.entries(data).forEach(([k,v]) => { 
                 const el = document.getElementById(k); 
                 if (el) el.value = v; 
             }); 
             updatePreview(); 
+        }
+
+        function saveToFile() {
+            try {
+                const data = getFormData();
+                const json = JSON.stringify(data, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                const studentId = calcStudentId(
+                    document.getElementById('student_grade').value,
+                    document.getElementById('student_class').value,
+                    document.getElementById('student_number').value
+                );
+                const name = document.getElementById('student_name').value || '이름없음';
+                a.download = `${studentId}_${name}_생물조사_데이터.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast('파일로 저장되었습니다.');
+            } catch (e) {
+                console.error(e);
+                showToast('파일 저장 실패');
+            }
+        }
+
+        function loadFromFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    applyFormData(data);
+                    showToast('파일에서 불러왔습니다.');
+                } catch (err) {
+                    console.error(err);
+                    showToast('파일 형식이 올바르지 않습니다.');
+                }
+                event.target.value = ''; // Reset input
+            };
+            reader.readAsText(file);
         }
         
         function showToast(message) { 
