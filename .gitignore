@@ -174,3 +174,6 @@ local/
 
 # Netlify
 .netlify/
+
+get_token.js
+refresh_token.txt
