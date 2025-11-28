@@ -35,7 +35,7 @@
             document.head.appendChild(script);
         } else {
             // 프로덕션 환경에서는 로컬 설정을 사용하지 않음
-            console.log('프로덕션 환경: Netlify Functions 사용');
+            console.log('프로덕션 환경: Cloudflare Pages Functions 사용');
         }
     </script>
     <style>
@@ -322,7 +322,7 @@
                         document.getElementById('password').focus();
                     }
                 } else {
-                    // 프로덕션 환경: Netlify Functions 사용
+                    // 프로덕션 환경: Cloudflare Pages Functions 사용
                     const response = await fetch('/api/auth', {
                         method: 'POST',
                         headers: {
