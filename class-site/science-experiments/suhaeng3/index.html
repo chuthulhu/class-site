@@ -619,7 +619,7 @@
                         pageType = 'suhaeng3-session2';
                     }
                     
-                    const res = await fetch(`/.netlify/functions/time?page=${pageType}`, { cache: 'no-store' });
+                    const res = await fetch(`/api/time?page=${pageType}`, { cache: 'no-store' });
                     if (!res.ok) throw new Error(`time fetch failed: ${res.status} ${res.statusText}`);
                     data = await res.json();
                     console.log('Using server time function for page:', pageType);
@@ -1421,7 +1421,7 @@
                         trackServerDownload(token, 3500);
                         const form = document.createElement('form');
                         form.method = 'POST';
-                        form.action = '/.netlify/functions/download';
+                        form.action = '/api/download';
                         form.target = '_blank';
                         const add = (n, v) => { const i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = v; form.appendChild(i); };
                         add('filename', lastMeta.zipFilename);
@@ -1473,7 +1473,7 @@
 
         // SUBMIT MODULE START
         // Constants & Config
-        const ENDPOINT = '/.netlify/functions/submit';
+        const ENDPOINT = '/api/submit';
         const SUBMIT_KEY = 'S-2025-github2025subject'; // 서버에서 401 응답 시 UI 안내
     const SUBJECT = document.querySelector('meta[name="submission-subject"]')?.content || '과학탐구실험2';
         const ASSIGNMENT = 'suhaeng3';

@@ -70,7 +70,7 @@
             <!-- 디버깅 정보 (개발용) -->
             <div id="debug-info" class="mt-4 text-xs text-gray-400 text-center hidden">
                 <div>환경변수 상태: <span id="env-status">확인 중...</span></div>
-                <div>API 엔드포인트: /.netlify/functions/auth</div>
+                <div>API 엔드포인트: /api/auth</div>
             </div>
         </div>
     </div>
@@ -323,7 +323,7 @@
                     }
                 } else {
                     // 프로덕션 환경: Netlify Functions 사용
-                    const response = await fetch('/.netlify/functions/auth', {
+                    const response = await fetch('/api/auth', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -469,7 +469,7 @@
             }
             
             try {
-                const response = await fetch('/.netlify/functions/auth', {
+                const response = await fetch('/api/auth', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ password: 'test' })

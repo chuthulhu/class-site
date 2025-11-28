@@ -553,7 +553,7 @@
         function showProgress(show){ const c=document.getElementById('progress_container'); if(!c) return; c.classList.toggle('hidden', !show); c.setAttribute('aria-hidden', show?'false':'true'); }
         function setProgress(percent,label=''){ const bar=document.getElementById('progress_bar'); const txt=document.getElementById('progress_text'); if(bar) bar.style.width=`${Math.max(0,Math.min(100,percent))}%`; if(txt) txt.textContent=label||''; }
 
-        const ENDPOINT='/.netlify/functions/submit';
+        const ENDPOINT='/api/submit';
         const SUBMIT_KEY='S-2025-github2025subject';
         const SUBJECT=document.querySelector('meta[name="submission-subject"]')?.content||'과학탐구실험2';
         const ACTIVITY_INPUT_DEFAULT=document.querySelector('meta[name="submission-activity"]')?.content||'수행3_2차시';
@@ -754,7 +754,7 @@
 
         function trackServerDownload(token, timeoutMs=5000){ const deadline=Date.now()+timeoutMs; const key=`download_ok_${encodeURIComponent(token)}=`; const timer=setInterval(()=>{ const found=document.cookie.includes(key); if (found){ clearInterval(timer); setStatus('✅ 로컬 저장(서버 첨부) 확인되었습니다.'); showToast('다운로드 완료 확인'); } else if (Date.now()>deadline){ clearInterval(timer); } }, 300); }
 
-        function serverDownloadLastZip(){ try{ if (!lastZipBlob || !lastMeta?.zipFilename){ showToast('다운로드할 파일이 없습니다.'); return; } blobToBase64(lastZipBlob).then((b64)=>{ const token=`${Date.now()}_${Math.random().toString(36).slice(2,8)}`; trackServerDownload(token, 3500); const form=document.createElement('form'); form.method='POST'; form.action='/.netlify/functions/download'; form.target='_blank'; const add=(n,v)=>{ const i=document.createElement('input'); i.type='hidden'; i.name=n; i.value=v; form.appendChild(i); }; add('filename', lastMeta.zipFilename); add('mime', 'application/zip'); add('contentBase64', b64); add('token', token); document.body.appendChild(form); form.submit(); document.body.removeChild(form); showToast('서버에서 다운로드를 시작합니다.'); }).catch(()=>{ throw new Error('base64 변환 실패'); }); }catch(_){ showToast('서버 다운로드에 실패했습니다.'); }
+        function serverDownloadLastZip(){ try{ if (!lastZipBlob || !lastMeta?.zipFilename){ showToast('다운로드할 파일이 없습니다.'); return; } blobToBase64(lastZipBlob).then((b64)=>{ const token=`${Date.now()}_${Math.random().toString(36).slice(2,8)}`; trackServerDownload(token, 3500); const form=document.createElement('form'); form.method='POST'; form.action='/api/download'; form.target='_blank'; const add=(n,v)=>{ const i=document.createElement('input'); i.type='hidden'; i.name=n; i.value=v; form.appendChild(i); }; add('filename', lastMeta.zipFilename); add('mime', 'application/zip'); add('contentBase64', b64); add('token', token); document.body.appendChild(form); form.submit(); document.body.removeChild(form); showToast('서버에서 다운로드를 시작합니다.'); }).catch(()=>{ throw new Error('base64 변환 실패'); }); }catch(_){ showToast('서버 다운로드에 실패했습니다.'); }
         }
 
         let lastZipBlob=null; let lastMeta=null;

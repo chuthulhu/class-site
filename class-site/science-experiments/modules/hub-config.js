@@ -2,7 +2,7 @@
 export const UNLOCK_AT = '2025-10-12T15:00:00Z'; // KST 10/13 00:00
 export const STORAGE_KEY_MAIN = 'firstLastMileProjectData';
 export const SUBMIT_META_KEY = 'submit_meta';
-export const SUBMISSION_ENDPOINT = '/.netlify/functions/submit';
+export const SUBMISSION_ENDPOINT = '/api/submit';
 export const SUBMISSION_KEY_HEADER = 'X-Submission-Key';
 export const SUBMISSION_KEY_VALUE = 'S-2025-github2025subject';
 export const MAX_ZIP_BYTES = 8 * 1024 * 1024; // 8MB

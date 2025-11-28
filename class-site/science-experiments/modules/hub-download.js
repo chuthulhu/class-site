@@ -42,7 +42,7 @@ async function serverFallback(blob, filename, { onStatus, onToast }){
   const token = `${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
   trackServerDownload(token, { onStatus, onToast });
   const form = document.createElement('form');
-  form.method='POST'; form.action='/.netlify/functions/download'; form.target='_blank';
+  form.method='POST'; form.action='/api/download'; form.target='_blank';
   const add=(n,v)=>{ const i=document.createElement('input'); i.type='hidden'; i.name=n; i.value=v; form.appendChild(i); };
   add('filename', filename); add('mime','application/zip'); add('contentBase64', b64); add('token', token);
   document.body.appendChild(form); form.submit(); document.body.removeChild(form);

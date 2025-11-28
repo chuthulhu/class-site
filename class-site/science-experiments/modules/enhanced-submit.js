@@ -46,7 +46,7 @@ async function submitDirect(files, metadata) {
   
   formData.append('metadata', JSON.stringify(metadata));
   
-  const response = await fetch('/.netlify/functions/submit', {
+  const response = await fetch('/api/submit', {
     method: 'POST',
     headers: {
       'X-Submission-Key': metadata.submissionKey || 'default'
@@ -82,7 +82,7 @@ async function submitViaProxy(files, metadata) {
     metadata: metadata
   };
   
-  const response = await corsBypassFetch('/.netlify/functions/submit', {
+  const response = await corsBypassFetch('/api/submit', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -174,7 +174,7 @@ async function submitSingleFile(file, metadata) {
     formData.append('file', file);
     formData.append('metadata', JSON.stringify(metadata));
     
-    const response = await resilientFetch('/.netlify/functions/submit', {
+    const response = await resilientFetch('/api/submit', {
       method: 'POST',
       headers: {
         'X-Submission-Key': metadata.submissionKey || 'default'
@@ -212,7 +212,7 @@ async function submitFileChunk(chunk, index, totalChunks, metadata) {
   formData.append('chunk', chunk);
   formData.append('metadata', JSON.stringify(chunkMetadata));
   
-  const response = await resilientFetch('/.netlify/functions/submit', {
+  const response = await resilientFetch('/api/submit', {
     method: 'POST',
     headers: {
       'X-Submission-Key': metadata.submissionKey || 'default'
@@ -238,7 +238,7 @@ async function mergeFileChunks(chunkResults, filename, metadata) {
     chunkCount: chunkResults.length
   };
   
-  const response = await resilientFetch('/.netlify/functions/submit', {
+  const response = await resilientFetch('/api/submit', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -276,7 +276,7 @@ export async function uploadToOneDriveDirect(file, accessToken, folderPath = '')
     
     // 프록시를 통한 업로드 시도
     try {
-      const proxyResponse = await corsBypassFetch('/.netlify/functions/proxy', {
+      const proxyResponse = await corsBypassFetch('/api/proxy', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`,

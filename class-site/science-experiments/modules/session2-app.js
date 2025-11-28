@@ -7,7 +7,7 @@ import { bindFieldPreviewsSubset, refreshDynamicPreviews } from './hub-preview.j
 
 const STORAGE_KEY = 'firstLastMileProjectData_session2';
 const SUBMIT_META_KEY = 'submit_meta_session2';
-const SUBMISSION_ENDPOINT = '/.netlify/functions/submit'; // (payload builder에서 사용)
+const SUBMISSION_ENDPOINT = '/api/submit'; // (payload builder에서 사용)
 
 const SUBMISSION_KEY_HEADER = 'X-Submission-Key';
 const SUBMISSION_KEY_VALUE = 'S-2025-github2025subject';

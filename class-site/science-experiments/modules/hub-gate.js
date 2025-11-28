@@ -9,7 +9,7 @@ export async function initHubGate(){
   try{ const u=new URL(location.href); const k=u.searchParams.get('key'); if(k) sessionStorage.setItem('teacher_key', k); }catch{}
   const teacherKey = sessionStorage.getItem('teacher_key') || '';
   try {
-    const res = await fetch('/.netlify/functions/time',{cache:'no-store'});
+    const res = await fetch('/api/time',{cache:'no-store'});
     if(!res.ok) throw new Error('time fetch failed');
     const data = await res.json();
     const nowUTC = typeof data?.now==='number'?data.now:Date.parse(data?.iso||'');

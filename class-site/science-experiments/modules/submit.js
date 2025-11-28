@@ -1,5 +1,5 @@
 // submit.js - Netlify Function 제출 (간단 1차)
-export async function submitData({ endpoint='/.netlify/functions/submit', payload }) {
+export async function submitData({ endpoint='/api/submit', payload }) {
   const res = await fetch(endpoint, {
     method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload)
   });

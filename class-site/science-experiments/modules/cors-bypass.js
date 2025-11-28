@@ -36,7 +36,7 @@ export async function corsBypassFetch(url, options = {}) {
  * 프록시 서버를 통한 API 호출
  */
 async function proxyFetch(url, options) {
-  const proxyUrl = '/.netlify/functions/proxy';
+  const proxyUrl = '/api/proxy';
   
   // URL에서 API 타입 추출
   let apiType = 'webhook'; // 기본값
@@ -150,7 +150,7 @@ export async function uploadToOneDrive(fileBlob, filename, accessToken) {
     const formData = new FormData();
     formData.append('file', fileBlob, filename);
     
-    const proxyResponse = await fetch('/.netlify/functions/proxy', {
+    const proxyResponse = await fetch('/api/proxy', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`

@@ -1,4 +1,4 @@
-// class-site/netlify/functions/proxy.js
+// class-site/functions/api/proxy.js
 // 외부 API 호출을 위한 프록시 서버
 // CORS 문제를 완전히 해결
 
@@ -17,30 +17,31 @@ const ALLOWED_APIS = {
   'webhook': 'https://hooks.slack.com'
 };
 
-export const handler = async (event) => {
+export async function onRequest(context) {
+  const { request } = context;
+
   try {
     // OPTIONS 요청 처리 (Preflight)
-    if (event.httpMethod === "OPTIONS") {
-      return {
-        statusCode: 200,
-        headers: CORS_HEADERS,
-        body: ""
-      };
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        status: 200,
+        headers: CORS_HEADERS
+      });
     }
 
     // 요청 파라미터 파싱
-    const { api, endpoint, method = 'GET', headers = {}, body } = JSON.parse(event.body || '{}');
+    const bodyText = await request.text();
+    const { api, endpoint, method = 'GET', headers = {}, body } = bodyText ? JSON.parse(bodyText) : {};
     
     // API 검증
     if (!api || !ALLOWED_APIS[api]) {
-      return {
-        statusCode: 400,
-        headers: CORS_HEADERS,
-        body: JSON.stringify({ 
-          error: "Invalid API", 
-          allowed: Object.keys(ALLOWED_APIS) 
-        })
-      };
+      return new Response(JSON.stringify({ 
+        error: "Invalid API", 
+        allowed: Object.keys(ALLOWED_APIS) 
+      }), {
+        status: 400,
+        headers: CORS_HEADERS
+      });
     }
 
     // 프록시 요청 구성
@@ -61,24 +62,19 @@ export const handler = async (event) => {
 
     const responseData = await response.text();
     
-    return {
-      statusCode: response.status,
+    return new Response(responseData, {
+      status: response.status,
       headers: {
         ...CORS_HEADERS,
         'Content-Type': response.headers.get('content-type') || 'application/json'
-      },
-      body: responseData
-    };
+      }
+    });
 
   } catch (error) {
     console.error('Proxy error:', error);
-    return {
-      statusCode: 500,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: error.message })
-    };
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: CORS_HEADERS
+    });
   }
-};
-
-
-
+}

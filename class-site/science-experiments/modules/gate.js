@@ -7,7 +7,7 @@ export function initGate({ unlockAt }) {
   if(!s1 || !s2) return;
   try { const u=new URL(location.href); const key=u.searchParams.get('key'); if(key) sessionStorage.setItem('teacher_key', key);} catch {}
   const teacherKey = sessionStorage.getItem('teacher_key') || '';
-  fetch('/.netlify/functions/time',{cache:'no-store'})
+  fetch('/api/time',{cache:'no-store'})
     .then(r=>r.json())
     .then(data=>{
       const now = typeof data?.now==='number'?data.now:Date.parse(data?.iso||'');

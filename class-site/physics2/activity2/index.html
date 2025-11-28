@@ -845,7 +845,7 @@
         function showProgress(show){ const c=document.getElementById('progress_container'); if(!c) return; c.classList.toggle('hidden', !show); c.setAttribute('aria-hidden', show?'false':'true'); }
         function setProgress(percent,label=''){ const bar=document.getElementById('progress_bar'); const txt=document.getElementById('progress_text'); if(bar) bar.style.width=`${Math.max(0,Math.min(100,percent))}%`; if(txt) txt.textContent=label||''; }
 
-        const ENDPOINT='/.netlify/functions/submit';
+        const ENDPOINT='/api/submit';
         const SUBMIT_KEY='S-2025-github2025subject';
         const SUBJECT=document.querySelector('meta[name="submission-subject"]')?.content||'물리학II';
         const ACTIVITY_INPUT_DEFAULT=document.querySelector('meta[name="submission-activity"]')?.content||'물리학연관기사탐구';
@@ -1060,7 +1060,7 @@
                         trackServerDownload(token, 3500);
                         const form = document.createElement('form');
                         form.method = 'POST';
-                        form.action = '/.netlify/functions/download';
+                        form.action = '/api/download';
                         form.target = '_blank';
                         const add = (n, v) => { const i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = v; form.appendChild(i); };
                         add('filename', lastMeta.zipFilename);

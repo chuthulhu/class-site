@@ -1,9 +1,10 @@
-// class-site/netlify/functions/submit.js
-// ESM (package.json: { "type": "module" })
+// class-site/functions/api/submit.js
 // Delegated OAuth (선생님 계정) + Microsoft Graph → OneDrive 업로드
 // - 단일/다중 파일 모두 지원
 // - 정책 검증(확장자/용량/총합/간이 스니핑)
 // - ≤10MB: 단일 PUT / >10MB: createUploadSession(청크 8MiB)
+
+import { Buffer } from 'node:buffer';
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -25,18 +26,20 @@ const TOTAL_SUM_LIMIT_MB = 300;
 const SINGLE_PUT_THRESHOLD = 10 * 1024 * 1024; // 10MB
 const CHUNK_SIZE = 8 * 1024 * 1024;            // 8MiB 권장
 
-exports.handler = async (event) => {
+export async function onRequest(context) {
+  const { request, env } = context;
+
   try {
-    if (event.httpMethod === "OPTIONS") {
-      return { statusCode: 200, headers: CORS_HEADERS, body: "" };
+    if (request.method === "OPTIONS") {
+      return new Response(null, { status: 200, headers: CORS_HEADERS });
     }
-    if (event.httpMethod !== "POST") {
+    if (request.method !== "POST") {
       return withCors(405, { ok:false, error: "method not allowed" });
     }
 
     // 1) 인증 키
-    const clientKey = event.headers["x-submission-key"] || event.headers["X-Submission-Key"];
-    const serverKey = process.env.SUBMIT_KEY;
+    const clientKey = request.headers.get("x-submission-key") || request.headers.get("X-Submission-Key");
+    const serverKey = env.SUBMIT_KEY;
     if (!serverKey) return withCors(500, { ok:false, error: "server misconfigured: SUBMIT_KEY not set" });
     if (!clientKey || clientKey !== serverKey) return withCors(401, { ok:false, error: "unauthorized" });
 
@@ -44,15 +47,16 @@ exports.handler = async (event) => {
     const {
       MS_TENANT_ID, MS_CLIENT_ID, MS_CLIENT_SECRET, MS_REFRESH_TOKEN,
       ROOT_FOLDER_PATH = "/과제제출",
-    } = process.env;
+    } = env;
     for (const [k, v] of Object.entries({ MS_TENANT_ID, MS_CLIENT_ID, MS_CLIENT_SECRET, MS_REFRESH_TOKEN })) {
       if (!v) return withCors(500, { ok:false, error: `server misconfigured: ${k} not set` });
     }
 
     // 3) 본문 파싱
-    if (!event.body) return withCors(400, { ok:false, error: "missing fields" });
+    const bodyText = await request.text();
+    if (!bodyText) return withCors(400, { ok:false, error: "missing fields" });
     let payload;
-    try { payload = JSON.parse(event.body); } catch { return withCors(400, { ok:false, error: "invalid json" }); }
+    try { payload = JSON.parse(bodyText); } catch { return withCors(400, { ok:false, error: "invalid json" }); }
 
     const { studentId, subject, activity, section } = payload || {};
     if (!studentId || !subject || !activity || !section) {
@@ -143,12 +147,15 @@ exports.handler = async (event) => {
     console.error(err);
     return withCors(500, { ok:false, error: "internal error" });
   }
-};
+}
 
 /* ============ 유틸/검증 ============ */
 
 function withCors(statusCode, bodyObj) {
-  return { statusCode, headers: { "Content-Type": "application/json", ...CORS_HEADERS }, body: JSON.stringify(bodyObj) };
+  return new Response(JSON.stringify(bodyObj), {
+    status: statusCode,
+    headers: { "Content-Type": "application/json", ...CORS_HEADERS }
+  });
 }
 function normalizeToArray(payload) {
   if (Array.isArray(payload?.files) && payload.files.length) return payload.files;

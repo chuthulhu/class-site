@@ -9,7 +9,7 @@ import { bindFieldPreviewsSubset, refreshDynamicPreviews, wireDynamicPreviewAuto
 const STORAGE_KEY = 'firstLastMileProjectData_session1';
 const SUBMIT_META_KEY = 'submit_meta_session1';
 const MAX_ZIP_BYTES = 8 * 1024 * 1024; // 8MB
-const SUBMISSION_ENDPOINT = '/.netlify/functions/submit';
+const SUBMISSION_ENDPOINT = '/api/submit';
 const SUBMISSION_KEY_HEADER = 'X-Submission-Key';
 const SUBMISSION_KEY_VALUE = 'S-2025-github2025subject';
 
