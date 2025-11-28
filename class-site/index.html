@@ -333,12 +333,12 @@
                     
                     console.log('응답 상태:', response.status);
                     
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                    }
-                    
-                    const result = await response.json();
+                    const result = await response.json().catch(() => ({}));
                     console.log('서버 응답:', result);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${result.error || response.statusText} ${result.receivedMethod ? `(Method: ${result.receivedMethod})` : ''}`);
+                    }
                     
                     if (result.success) {
                         // 로그인 성공
@@ -356,7 +356,7 @@
                             setTimeout(() => successToast.remove(), 2000);
                         }, 100);
                     } else {
-                        // 로그인 실패
+                        // 로그인 실패 (비밀번호 불일치 등)
                         console.log('인증 실패:', result.error);
                         errorMessage.textContent = result.error || '잘못된 암호입니다. 다시 시도해주세요.';
                         errorMessage.classList.remove('hidden');
