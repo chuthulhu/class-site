@@ -7,7 +7,7 @@
     <meta name="submission-subject" content="과학탐구실험2">
     <meta name="submission-activity" content="스마트 기기를 이용하여 주변의 생물 조사하기">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
@@ -1848,15 +1848,17 @@
                 }
                 
                 // 이미지 미리보기 업데이트 (Blob URL 사용)
-                // 이미지 미리보기 업데이트 (Blob URL 사용)
+                // 이미지 미리보기 업데이트 (Base64 사용)
                 const imageInput = document.getElementById(`card${i}_image`);
                 const imagePreviewEl = document.getElementById(`preview_card${i}_image`);
                 if (imageInput && imagePreviewEl) {
                     if (imageInput.files && imageInput.files[0]) {
-                        // 압축된 파일이 있으면 그것을 사용 (PDF 용량 감소 효과)
                         const imageFile = imageInput._compressedFile || imageInput.files[0];
-                        const blobUrl = URL.createObjectURL(imageFile);
-                        imagePreviewEl.innerHTML = `<img src="${blobUrl}" alt="생물 사진">`;
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            imagePreviewEl.innerHTML = `<img src="${e.target.result}" alt="생물 사진">`;
+                        };
+                        reader.readAsDataURL(imageFile);
                     } else {
                         imagePreviewEl.innerHTML = '<div class="no-image-placeholder">📷</div>';
                     }
@@ -2021,7 +2023,7 @@
         function showProgress(show){ const c=document.getElementById('progress_container'); if(!c) return; c.classList.toggle('hidden', !show); c.setAttribute('aria-hidden', show?'false':'true'); }
         function setProgress(percent,label=''){ const bar=document.getElementById('progress_bar'); const txt=document.getElementById('progress_text'); if(bar) bar.style.width=`${Math.max(0,Math.min(100,percent))}%`; if(txt) txt.textContent=label||''; }
 
-        const ENDPOINT='/api/submit';
+        const ENDPOINT='https://pdf.physichu.kr/submit';
         const SUBMIT_KEY='S-2025-github2025subject';
         const SUBJECT=document.querySelector('meta[name="submission-subject"]')?.content||'과학탐구실험2';
         const ACTIVITY_INPUT_DEFAULT=document.querySelector('meta[name="submission-activity"]')?.content||'스마트기기생물조사';
@@ -2075,409 +2077,89 @@
             return { grade, klass, number, name }; 
         }
 
-        async function blobToBase64(blob){ 
-            return await new Promise((resolve,reject)=>{ 
-                const reader=new FileReader(); 
-                reader.onload=()=>{ 
-                    const result=reader.result||''; 
-                    const commaIdx=String(result).indexOf(','); 
-                    const b64=commaIdx>=0?String(result).slice(commaIdx+1):String(result); 
-                    resolve(b64); 
-                }; 
-                reader.onerror=()=>reject(reader.error); 
-                reader.readAsDataURL(blob); 
-            }); 
-        }
-        
-        function bytesFromBase64(b64){ const len=b64.length; const pad=(b64.endsWith('==')?2:(b64.endsWith('=')?1:0)); return Math.floor((len*3)/4)-pad; }
-
-        function triggerBlobDownload(blob, filename){ 
-            try{ 
-                const a=document.createElement('a'); 
-                a.href=URL.createObjectURL(blob); 
-                a.download=filename; 
-                document.body.appendChild(a); 
-                a.click(); 
-                document.body.removeChild(a); 
-                URL.revokeObjectURL(a.href); 
-                showToast('ZIP 파일이 다운로드되었습니다.'); 
-                return true; 
-            }catch(_){ return false; } 
-        }
-        
-        async function saveWithPicker(blob, filename){ 
-            try{ 
-                const opts={ suggestedName: filename, types:[{ description:'ZIP file', accept:{'application/zip':['.zip']} }] }; 
-                const handle=await window.showSaveFilePicker(opts); 
-                const writable=await handle.createWritable(); 
-                await writable.write(blob); 
-                await writable.close(); 
-                return true; 
-            }catch(_){ return false; } 
-        }
-        
-        // --- Helpers for iOS detection & download/share ---
-        function isIOS() {
-            const ua = navigator.userAgent || navigator.vendor || '';
-            const iOSDevice = /iPad|iPhone|iPod/.test(ua);
-            const iPadOSDesktopUA = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
-            return iOSDevice || iPadOSDesktopUA;
-        }
-
-        function detectInApp(){ 
-            const uaRaw=navigator.userAgent||navigator.vendor||''; 
-            const ua=uaRaw.toLowerCase(); 
-            const isIOS=/iphone|ipad|ipod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1); 
-            const isAndroid=/android/.test(ua); 
-            const isSamsung=/samsungbrowser/i.test(uaRaw); 
-            const isKakao=/kakaotalk/.test(ua); 
-            const isNaver=/naver/.test(ua); 
-            const isFB=/fban|fbav|fb_iab/.test(ua); 
-            const isIG=/instagram/.test(ua); 
-            const isLine=/ line\//.test(ua); 
-            const isIOSWebView=isIOS && !!window.webkit && !!window.webkit.messageHandlers && !/safari/i.test(uaRaw); 
-            const isInApp=isKakao||isNaver||isFB||isIG||isLine||isIOSWebView; 
-            let app = null;
-            if (isKakao) app = 'kakao'; else if (isNaver) app = 'naver'; else if (isIG) app = 'instagram'; else if (isFB) app = 'facebook'; else if (isLine) app = 'line'; else if (isIOSWebView) app = 'ios-webview';
-            return { isInApp, app, isIOS, isAndroid, isSamsung }; 
-        }
-
-        async function openIOSShare() {
+        async function submitReport() {
+            const btn = dom.downloadZipBtn;
+            const originalText = btn.textContent;
+            
             try {
-                if (!lastZipBlob || !lastMeta?.zipFilename) {
-                    showToast('공유할 파일이 없습니다.');
-                    return;
-                }
-                const zipFile = new File([lastZipBlob], lastMeta.zipFilename, { type: 'application/zip' });
-                if (navigator.canShare && navigator.canShare({ files: [zipFile] }) && typeof navigator.share === 'function') {
-                    await navigator.share({ files: [zipFile], title: lastMeta.zipFilename, text: '파일 앱에서 저장 위치를 선택하세요.' });
-                    showToast('공유 시트가 열렸습니다. "파일에 저장"을 선택하세요.');
-                } else {
-                    triggerBlobDownload(lastZipBlob, lastMeta.zipFilename);
-                }
-            } catch (e) {
-                triggerBlobDownload(lastZipBlob, lastMeta.zipFilename);
-            } finally {
-                if (dom.iosHelpModal) dom.iosHelpModal.classList.add('hidden');
-            }
-        }
+                // 1. Validate
+                const studentInfo = validateForm();
+                if (!studentInfo) return;
 
-        async function attemptLocalDownloadAndVerify(zipFilename){ 
-            const env=detectInApp(); 
-            if (env.isInApp){ 
-                setStatus('로컬 다운로드가 제한되어 서버 다운로드로 전환합니다.'); 
-                if (dom.inappModal) showModal(dom.inappModal, dom.downloadZipBtn);
-                try { serverDownloadLastZip(); } catch(_) {}
-                return; 
-            } 
-            if (isIOS()){ 
-                setStatus('iOS 저장 안내를 표시합니다.'); 
-                if (dom.iosHelpModal) showModal(dom.iosHelpModal, dom.downloadZipBtn);
-                return; 
-            }
-            let localSaved=false; 
-            let usedPicker=false; 
-            if (window.showSaveFilePicker && lastZipBlob){ 
-                usedPicker=true; 
-                localSaved=await saveWithPicker(lastZipBlob, zipFilename); 
-            }
-            if (!localSaved && lastZipBlob){ 
-                try{ 
-                    localSaved=triggerBlobDownload(lastZipBlob, zipFilename)===true; 
-                }catch(_){ localSaved=false; } 
-            }
-            if (env.isAndroid || env.isSamsung){ 
-                if (!usedPicker) localSaved=false; 
-            }
-            if (localSaved){ 
-                setStatus('✅ 로컬 다운로드가 완료되었습니다.'); 
-                showToast('로컬 다운로드 완료'); 
-            } else { 
-                setStatus('로컬 다운로드 실패 또는 제한됨, 서버에서 다운로드합니다.'); 
-                if (dom.inappModal) showModal(dom.inappModal, dom.downloadZipBtn);
-                try { serverDownloadLastZip(); } catch(_) {}
-            }
-        }
-
-        function trackServerDownload(token, timeoutMs=5000){ 
-            const deadline=Date.now()+timeoutMs; 
-            const key=`download_ok_${encodeURIComponent(token)}=`; 
-            const timer=setInterval(()=>{ 
-                const found=document.cookie.includes(key); 
-                if (found){ 
-                    clearInterval(timer); 
-                    setStatus('✅ 로컬 저장(서버 첨부) 확인되었습니다.'); 
-                    showToast('다운로드 완료 확인'); 
-                } else if (Date.now()>deadline){ 
-                    clearInterval(timer); 
-                } 
-            }, 300); 
-        }
-
-        let __inappRetryCount = 0;
-        const __inappRetryMax = 2;
-        function setInappRetryVisibility(show) {
-            if (!dom.inappRetryBtn) return;
-            dom.inappRetryBtn.classList.toggle('hidden', !show);
-        }
-        function serverDownloadLastZip(isManualRetry = false) {
-            try {
-                if (!lastZipBlob || !lastMeta?.zipFilename) {
-                    showToast('다운로드할 파일이 없습니다.');
-                    return;
-                }
-                blobToBase64(lastZipBlob).then((b64) => {
-                    try {
-                        const token = `${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
-                        trackServerDownload(token, 3500);
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = '/api/download';
-                        form.target = '_blank';
-                        const add = (n, v) => { const i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = v; form.appendChild(i); };
-                        add('filename', lastMeta.zipFilename);
-                        add('mime', 'application/zip');
-                        add('contentBase64', b64);
-                        add('token', token);
-                        document.body.appendChild(form);
-                        form.submit();
-                        document.body.removeChild(form);
-                        showToast('서버에서 다운로드를 시작합니다.');
-                        __inappRetryCount = 0;
-                        setInappRetryVisibility(false);
-                        if (dom.inappModal) hideModal(dom.inappModal);
-                    } catch (e) {
-                        throw e;
-                    }
-                }).catch(() => {
-                    throw new Error('base64 변환 실패');
-                });
-            } catch (_) {
-                __inappRetryCount += 1;
-                if (__inappRetryCount <= __inappRetryMax) {
-                    setInappRetryVisibility(true);
-                    showToast(`서버 다운로드에 실패했습니다. 재시도 가능 (${__inappRetryCount}/${__inappRetryMax})`);
-                } else {
-                    setInappRetryVisibility(false);
-                    showToast('서버 다운로드에 반복 실패했습니다. 잠시 후 다시 시도하세요.');
-                }
-            }
-        }
-
-        let lastZipBlob=null; 
-        let lastMeta=null;
-
-        async function handleZipDownloadAndSubmit(){ 
-            try{
-                setStatus('학생 정보 검증 중…'); 
-                dom.retryUploadBtn.dataset.show=''; 
-                dom.retryUploadBtn.classList.add('hidden'); 
-                const form=validateForm(); 
-                if(!form) return; 
-                showProgress(true); 
-                setProgress(10,'문서 생성 준비...');
-                const section=calcSectionCode(form.grade, form.klass); 
-                const studentId=calcStudentId(form.grade, form.klass, form.number); 
-                const docTitle='과학탐구실험2 수행평가4 - 스마트 기기를 이용하여 주변의 생물 조사하기';
-                const fmt=new Intl.DateTimeFormat('ko-KR',{ timeZone:'Asia/Seoul', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
-                const parts=Object.fromEntries(fmt.formatToParts(new Date()).map(p=>[p.type,p.value])); 
-                const timestamp=`${parts.year}${parts.month}${parts.day}_${parts.hour}${parts.minute}${parts.second}`;
-                const baseName=`${studentId}_${form.name}_${docTitle}_${timestamp}`; 
-                const htmlFilename=`${baseName}.html`; 
-                const zipFilename=`${baseName}.zip`;
-                setStatus('ZIP 파일 생성 중…'); 
-                setProgress(25,'ZIP 생성 중...'); 
-                // 모든 섹션의 내용을 수집하여 하나의 문서로 구성
-                const sections = document.querySelectorAll('.printable-area.report-page');
-                
-                // 임시 컨테이너 생성하여 내용 복사
-                const tempContainer = document.createElement('div');
-                
-                // 각 섹션 처리
-                for (let i = 0; i < sections.length; i++) {
-                    const section = sections[i];
-                    const clonedSection = section.cloneNode(true);
-                    
-                    // 생물 카드 이미지 처리 (Base64 임베딩)
-                    if (i > 0) { // 첫 번째 섹션(표지) 제외
-                        const cardImages = clonedSection.querySelectorAll('.card-image img');
-                        // 현재 섹션에 포함된 카드 이미지들을 찾아서 처리
-                        // 주의: 섹션과 카드의 매핑이 필요함. 
-                        // 여기서는 간단히 DOM 구조상 이미지를 찾아서 매칭되는 input의 파일로 교체
-                        
-                        // 실제 원본 DOM의 해당 섹션에서 이미지 input들을 찾음
-                        const originalImages = section.querySelectorAll('.card-image img');
-                        
-                        for (let j = 0; j < cardImages.length; j++) {
-                            const img = cardImages[j];
-                            // 원본 이미지의 src가 blob인지 확인 (이미지가 있는 경우)
-                            if (img.src && img.src.startsWith('blob:')) {
-                                // 해당 이미지가 몇 번째 카드인지 식별 필요
-                                // preview_card{N}_image ID를 가진 부모를 찾거나, 
-                                // DOM 순서대로 매칭 (카드 1~5 순서가 보장된다면)
-                                
-                                // 가장 확실한 방법: ID로 매칭
-                                const parentId = img.parentElement.id; // preview_card1_image
-                                if (parentId && parentId.startsWith('preview_card')) {
-                                    const cardIndex = parentId.replace('preview_card', '').replace('_image', '');
-                                    const imageInput = document.getElementById(`card${cardIndex}_image`);
-                                    
-                                    if (imageInput && (imageInput.files[0] || imageInput._compressedFile)) {
-                                        try {
-                                            // 압축된 파일이 있으면 우선 사용
-                                            const imageFile = imageInput._compressedFile || imageInput.files[0];
-                                            
-                                            // 이미지 파일을 Base64로 변환
-                                            const base64 = await blobToBase64(imageFile);
-                                            img.src = `data:${imageFile.type};base64,${base64}`;
-                                        } catch (e) {
-                                            console.error(`이미지 변환 실패 (카드 ${cardIndex}):`, e);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-                    tempContainer.appendChild(clonedSection);
-                    
-                    // 마지막 섹션이 아니면 페이지 브레이크 추가
-                    if (i < sections.length - 1) {
-                        const breakEl = document.createElement('div');
-                        breakEl.className = 'page-break-before';
-                        tempContainer.appendChild(breakEl);
-                    }
-                }
-                
-                const reportContent = `<div class="printable-area report-page">${tempContainer.innerHTML}</div>`;
-                const docHtml=generateDocHtml(baseName, reportContent);
-                const zip=new JSZip(); 
-                zip.file(htmlFilename, docHtml);
-                console.log('HTML 파일 추가 완료:', htmlFilename); 
-                
-                // 이미지 파일들을 ZIP에 추가
-                let imageCount = 0;
-                for (let i = 1; i <= 5; i++) {
-                    const imageInput = document.getElementById(`card${i}_image`);
-                    if (imageInput && imageInput.files && imageInput.files[0]) {
-                        try {
-                            imageCount++;
-                            // 압축된 파일이 있으면 우선 사용, 없으면 원본 파일 사용
-                            const imageFile = imageInput._compressedFile || imageInput.files[0];
-                            
-                            // 파일명 안전성 검사
-                            const safeFileName = imageFile.name.replace(/[^a-zA-Z0-9가-힣._-]/g, '_');
-                            const fileName = `생물카드${i}_${safeFileName}`;
-                            
-                            // 파일 크기 확인 (5MB 제한)
-                            if (imageFile.size > 5 * 1024 * 1024) {
-                                console.warn(`이미지 파일 ${i}이 너무 큽니다: ${imageFile.size} bytes`);
-                                continue;
-                            }
-                            
-                            zip.file(fileName, imageFile);
-                            console.log(`이미지 파일 추가: ${fileName} (${imageFile.size} bytes, 압축됨: ${!!imageInput._compressedFile})`);
-                        } catch (imageError) {
-                            console.error(`이미지 파일 ${i} 처리 중 오류:`, imageError);
-                        }
-                    }
-                }
-                
-                if (imageCount > 0) {
-                    setProgress(35, `이미지 ${imageCount}개 추가 중...`);
-                }
-                
-                const zipBlob=await zip.generateAsync({type:'blob', compression:'DEFLATE', compressionOptions:{level:6}}); 
-                lastZipBlob=zipBlob; 
-                lastMeta={ studentId, name:form.name, zipFilename, section };
-                const sizeBytes=zipBlob.size;
-                console.log('ZIP 생성 완료:', { sizeBytes, imageCount, zipFilename }); 
-                if (sizeBytes>8*1024*1024){ 
-                    setStatus('업로드 실패: ZIP 용량 초과 (8MB)'); 
-                    showToast('ZIP 용량이 8MB를 초과합니다.'); 
-                    dom.retryUploadBtn.dataset.show='1'; 
-                    dom.retryUploadBtn.classList.remove('hidden'); 
-                    return; 
-                }
-                setStatus('저장준비중입니다. 잠시 기다려 주세요'); 
-                setProgress(45,'업로드 준비...'); 
-                const b64=await blobToBase64(zipBlob);
-                if (!zipFilename.toLowerCase().endsWith('.zip')){ 
-                    setStatus('업로드 실패: 지원하지 않는 파일 형식'); 
-                    showToast('ZIP 파일만 업로드할 수 있습니다.'); 
-                    return; 
-                }
-                const activity=(ACTIVITY_INPUT_DEFAULT||'').trim();
-                if(!activity){ 
-                    setStatus('활동 폴더명이 비어 있습니다. 메타 또는 입력값을 지정하세요.'); 
-                    showToast('활동 폴더명을 입력하거나 메타를 설정하세요.'); 
-                    return; 
-                }
-                const payload={ studentId:studentId, subject:SUBJECT, activity:activity, section:section, files:[{ filename:zipFilename, contentBase64:b64, mime:'application/zip' }] };
-                console.log('서버 제출 시작:', { studentId, subject: SUBJECT, activity, section, zipFilename, payloadSize: JSON.stringify(payload).length });
-                setProgress(60,'업로드 중...'); 
-                const res=await fetch(ENDPOINT,{ method:'POST', headers:{ 'Content-Type':'application/json', 'X-Submission-Key':SUBMIT_KEY }, body:JSON.stringify(payload) });
-                const text=await res.text(); 
-                let data={}; 
-                try{ data=JSON.parse(text); }catch(_){ data={ raw:text }; }
-                if (!res.ok){ 
-                    console.error('Submit failed:', { status: res.status, statusText: res.statusText, data, payload });
-                    const errorMsg=data.error||data.detail||data.message||res.statusText||`HTTP ${res.status}`; 
-                    throw new Error(`업로드 실패: ${errorMsg}`); 
-                }
-                const uploadedFile=data.files?.[0]; 
-                const filePath=uploadedFile?.name||zipFilename; 
-                const fullPath=`/과제제출/${SUBJECT}/${activity}/${section}/${studentId}/${filePath}`;
-                setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 다운로드 확인 중…`); 
-                setProgress(85,'다운로드 준비...');
-                attemptLocalDownloadAndVerify(zipFilename); 
-                setProgress(100,'완료'); 
-                setTimeout(()=>showProgress(false),1500);
-            }catch(err){ 
-                const errorMessage=err?.message||err||'알 수 없는 오류'; 
-                setStatus(`❌ 제출 실패: ${errorMessage}`); 
-                showToast(`제출 실패: ${errorMessage}`); 
-                setProgress(0,''); 
-                showProgress(false); 
-            }
-        }
-
-        async function retryLastUpload(){
-            try{
-                if(!lastZipBlob||!lastMeta){ showToast('재시도할 항목이 없습니다.'); return; }
-                setStatus('저장준비중입니다. 잠시 기다려 주세요');
+                // 2. UI Loading State
+                btn.disabled = true;
+                btn.textContent = '⏳ 제출 중...';
+                setStatus('서버에 보고서를 제출하고 있습니다...');
                 showProgress(true);
-                setProgress(45,'업로드 준비...');
-                const b64=await blobToBase64(lastZipBlob);
-                const sizeBytes=bytesFromBase64(b64);
-                if(sizeBytes>8*1024*1024){ setStatus('업로드 실패: ZIP 용량 초과 (8MB)'); showToast('ZIP 파일 용량이 8MB를 초과합니다.'); return; }
-                const activity=(ACTIVITY_INPUT_DEFAULT||'').trim();
-                if(!activity){ setStatus('활동 폴더명이 비어 있습니다. 메타 또는 입력값을 지정하세요.'); showToast('활동 폴더명을 입력하거나 메타를 설정하세요.'); return; }
-                const payload={ studentId:lastMeta.studentId, subject:SUBJECT, activity:activity, section:lastMeta.section, files:[{ filename:lastMeta.zipFilename, contentBase64:b64, mime:'application/zip' }] };
-                setProgress(60,'업로드 중...');
-                const res=await fetch(ENDPOINT,{ method:'POST', headers:{ 'Content-Type':'application/json', 'X-Submission-Key':SUBMIT_KEY }, body:JSON.stringify(payload) });
-                const text=await res.text();
-                let data={};
-                try{ data=JSON.parse(text); }catch(_){ data={ raw:text }; }
-                if(!res.ok){ 
-                    console.error('Retry submit failed:', { status: res.status, statusText: res.statusText, data, payload });
-                    const reason=data.error||data.detail||data.message||res.statusText||'업로드 실패'; 
-                    setStatus(`제출 실패: ${reason}`); 
-                    showToast(`제출 실패: ${reason}`); 
-                    return; 
+                setProgress(10, '데이터 준비 중...');
+
+                // 3. Prepare Data
+                // Get the printable content
+                // Note: suhaeng4 has multiple pages (cover + content).
+                // We need to grab all .printable-area.report-page
+                const sections = document.querySelectorAll('.printable-area.report-page');
+                let contentHtml = '';
+                
+                // Wrap sections in containers and add page breaks
+                sections.forEach((section, index) => {
+                    // Skip the first section (cover) if needed, but usually we want it.
+                    // The previous logic skipped cover for "content" but maybe we want full report?
+                    // Previous logic: `const contentSections = Array.from(allSections).slice(1);` for PREVIEW.
+                    // But for SUBMISSION, we probably want the whole thing or same as preview?
+                    // Let's assume we want the whole thing for the PDF.
+                    // Actually, the previous `handleZipDownloadAndSubmit` logic did:
+                    // `const sections = document.querySelectorAll('.printable-area.report-page');`
+                    // And looped through ALL of them.
+                    
+                    contentHtml += '<div class="section-container">';
+                    contentHtml += section.innerHTML;
+                    contentHtml += '</div>';
+                    
+                    if (index < sections.length - 1) {
+                        contentHtml += '<div class="page-break-before"></div>';
+                    }
+                });
+                
+                // Wrap in the doc template
+                const fullHtml = generateDocHtml(getReportFilename(), contentHtml);
+
+                const payload = {
+                    htmlContent: fullHtml,
+                    studentInfo: studentInfo,
+                    apiKey: SUBMIT_KEY,
+                    subject: SUBJECT,
+                    activity: ACTIVITY_INPUT_DEFAULT
+                };
+
+                setProgress(30, '서버로 전송 중...');
+
+                // 4. Send to Server
+                const response = await fetch(ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server responded with ${response.status}`);
                 }
-                const uploadedFile=data.files?.[0];
-                const filePath=uploadedFile?.name||lastMeta.zipFilename;
-                const fullPath=`/과제제출/${SUBJECT}/${activity}/${lastMeta.section}/${lastMeta.studentId}/${filePath}`;
-                setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 다운로드 확인 중…`);
-                setProgress(85,'다운로드 준비...');
-                attemptLocalDownloadAndVerify(lastMeta.zipFilename);
-                setProgress(100,'완료');
-                setTimeout(()=>showProgress(false),1500);
-            }catch(err){
-                const errorMessage=err?.message||err||'알 수 없는 오류';
-                setStatus(`❌ 제출 실패: ${errorMessage}`);
-                showToast(`제출 실패: ${errorMessage}`);
+
+                const result = await response.json();
+                
+                setProgress(100, '제출 완료!');
+                setStatus(`✅ 제출 성공! (ID: ${result.submissionId || 'Unknown'})`);
+                alert('과제 제출이 완료되었습니다!');
+
+            } catch (error) {
+                console.error('Submission failed:', error);
+                setStatus(`❌ 제출 실패: ${error.message}`);
+                alert(`제출에 실패했습니다.\n${error.message}`);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+                setTimeout(() => showProgress(false), 3000);
             }
         }
     });
