@@ -1,24 +1,33 @@
-export async function onRequestOptions(context) {
-    return new Response(null, {
-        status: 204,
-        headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'Access-Control-Allow-Methods': 'POST, OPTIONS',
-            'Access-Control-Max-Age': '86400'
-        }
-    });
-}
-
-export async function onRequestPost(context) {
+export async function onRequest(context) {
     const { request, env } = context;
 
+    // CORS 헤더 설정
     const headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
         'Content-Type': 'application/json'
     };
+
+    // OPTIONS 요청 처리 (CORS preflight)
+    if (request.method === 'OPTIONS') {
+        return new Response(null, {
+            status: 200,
+            headers
+        });
+    }
+
+    // POST 요청만 허용
+    if (request.method !== 'POST') {
+        return new Response(JSON.stringify({ 
+            error: 'Method not allowed', 
+            receivedMethod: request.method,
+            url: request.url
+        }), {
+            status: 405,
+            headers
+        });
+    }
 
     try {
         // 요청 본문 파싱
@@ -64,7 +73,8 @@ export async function onRequestPost(context) {
         console.error('인증 오류:', error);
         return new Response(JSON.stringify({ 
             success: false, 
-            error: '서버 오류가 발생했습니다' 
+            error: '서버 오류가 발생했습니다',
+            details: error.message
         }), {
             status: 500,
             headers
