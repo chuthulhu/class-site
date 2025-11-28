@@ -333,12 +333,13 @@
                     
                     console.log('응답 상태:', response.status);
                     
-                    const result = await response.json().catch(() => ({}));
-                    console.log('서버 응답:', result);
-                    
                     if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${result.error || response.statusText} ${result.receivedMethod ? `(Method: ${result.receivedMethod})` : ''}`);
+                        const errorText = await response.text();
+                        throw new Error(`HTTP ${response.status}: ${response.statusText} (${errorText})`);
                     }
+                    
+                    const result = await response.json();
+                    console.log('서버 응답:', result);
                     
                     if (result.success) {
                         // 로그인 성공
