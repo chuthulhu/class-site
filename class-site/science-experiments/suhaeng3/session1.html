@@ -609,67 +609,7 @@
             }
         }
 
-        function trackServerDownload(token, timeoutMs=5000){ const deadline=Date.now()+timeoutMs; const key=`download_ok_${encodeURIComponent(token)}=`; const timer=setInterval(()=>{ const found=document.cookie.includes(key); if (found){ clearInterval(timer); setStatus('✅ 로컬 저장(서버 첨부) 확인되었습니다.'); showToast('다운로드 완료 확인'); } else if (Date.now()>deadline){ clearInterval(timer); } }, 300); }
 
-        function serverDownloadLastZip(){ try{ if (!lastZipBlob || !lastMeta?.zipFilename){ showToast('다운로드할 파일이 없습니다.'); return; } blobToBase64(lastZipBlob).then((b64)=>{ const token=`${Date.now()}_${Math.random().toString(36).slice(2,8)}`; trackServerDownload(token, 3500); const form=document.createElement('form'); form.method='POST'; form.action='/api/download'; form.target='_blank'; const add=(n,v)=>{ const i=document.createElement('input'); i.type='hidden'; i.name=n; i.value=v; form.appendChild(i); }; add('filename', lastMeta.zipFilename); add('mime', 'application/zip'); add('contentBase64', b64); add('token', token); document.body.appendChild(form); form.submit(); document.body.removeChild(form); showToast('서버에서 다운로드를 시작합니다.'); }).catch(()=>{ throw new Error('base64 변환 실패'); }); }catch(_){ showToast('서버 다운로드에 실패했습니다.'); }
-        }
-
-        let lastZipBlob=null; let lastMeta=null;
-
-        async function handleZipDownloadAndSubmit(){ try{
-            setStatus('학생 정보 검증 중…'); dom.retryUploadBtn.dataset.show=''; dom.retryUploadBtn.classList.add('hidden'); const form=validateForm(); if(!form) return; showProgress(true); setProgress(10,'문서 생성 준비...');
-            const section=calcSectionCode(form.grade, form.klass); const studentId=calcStudentId(form.grade, form.klass, form.number); const docTitle='스마트 모빌리티 허브 아이디어 제안서 (1차시)';
-            const fmt=new Intl.DateTimeFormat('ko-KR',{ timeZone:'Asia/Seoul', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
-            const parts=Object.fromEntries(fmt.formatToParts(new Date()).map(p=>[p.type,p.value])); const timestamp=`${parts.year}${parts.month}${parts.day}_${parts.hour}${parts.minute}${parts.second}`;
-            const baseName=`${studentId}_${form.name}_${docTitle}_${timestamp}`; const htmlFilename=`${baseName}.html`; const zipFilename=`${baseName}.zip`;
-            setStatus('ZIP 파일 생성 중…'); setProgress(25,'ZIP 생성 중...'); const reportContent=document.getElementById('report-content').innerHTML; const docHtml=generateDocHtml(baseName, reportContent);
-            const zip=new JSZip(); zip.file(htmlFilename, docHtml); const zipBlob=await zip.generateAsync({type:'blob', compression:'DEFLATE', compressionOptions:{level:6}}); lastZipBlob=zipBlob; lastMeta={ studentId, name:form.name, zipFilename, section };
-            const sizeBytes=zipBlob.size; if (sizeBytes>8*1024*1024){ setStatus('업로드 실패: ZIP 용량 초과 (8MB)'); showToast('ZIP 용량이 8MB를 초과합니다.'); dom.retryUploadBtn.dataset.show='1'; dom.retryUploadBtn.classList.remove('hidden'); return; }
-            setStatus('저장준비중입니다. 잠시 기다려 주세요'); setProgress(45,'업로드 준비...'); const b64=await blobToBase64(zipBlob);
-            if (!zipFilename.toLowerCase().endsWith('.zip')){ setStatus('업로드 실패: 지원하지 않는 파일 형식'); showToast('ZIP 파일만 업로드할 수 있습니다.'); return; }
-            const activity=(ACTIVITY_INPUT_DEFAULT||'').trim();
-            if(!activity){ setStatus('활동 폴더명이 비어 있습니다. 메타 또는 입력값을 지정하세요.'); showToast('활동 폴더명을 입력하거나 메타를 설정하세요.'); return; }
-            const payload={ studentId:studentId, subject:SUBJECT, activity:activity, section:section, files:[{ filename:zipFilename, contentBase64:b64, mime:'application/zip' }] };
-            setProgress(60,'업로드 중...'); const res=await fetch(ENDPOINT,{ method:'POST', headers:{ 'Content-Type':'application/json', 'X-Submission-Key':SUBMIT_KEY }, body:JSON.stringify(payload) });
-            const text=await res.text(); let data={}; try{ data=JSON.parse(text); }catch(_){ data={ raw:text }; }
-            if (!res.ok){ const errorMsg=data.error||data.detail||data.message||res.statusText||`HTTP ${res.status}`; throw new Error(`업로드 실패: ${errorMsg}`); }
-            const uploadedFile=data.files?.[0]; const filePath=uploadedFile?.name||zipFilename; const fullPath=`/과제제출/${SUBJECT}/${activity}/${section}/${studentId}/${filePath}`;
-            setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 다운로드 확인 중…`); setProgress(85,'다운로드 준비...');
-            attemptLocalDownloadAndVerify(zipFilename); setProgress(100,'완료'); setTimeout(()=>showProgress(false),1500);
-        }catch(err){ const errorMessage=err?.message||err||'알 수 없는 오류'; setStatus(`❌ 제출 실패: ${errorMessage}`); showToast(`제출 실패: ${errorMessage}`); setProgress(0,''); showProgress(false); } }
-
-        async function retryLastUpload(){
-            try{
-                if(!lastZipBlob||!lastMeta){ showToast('재시도할 항목이 없습니다.'); return; }
-                setStatus('저장준비중입니다. 잠시 기다려 주세요');
-                showProgress(true);
-                setProgress(45,'업로드 준비...');
-                const b64=await blobToBase64(lastZipBlob);
-                const sizeBytes=bytesFromBase64(b64);
-                if(sizeBytes>8*1024*1024){ setStatus('업로드 실패: ZIP 용량 초과 (8MB)'); showToast('ZIP 파일 용량이 8MB를 초과합니다.'); return; }
-                const activity=(ACTIVITY_INPUT_DEFAULT||'').trim();
-                if(!activity){ setStatus('활동 폴더명이 비어 있습니다. 메타 또는 입력값을 지정하세요.'); showToast('활동 폴더명을 입력하거나 메타를 설정하세요.'); return; }
-                const payload={ studentId:lastMeta.studentId, subject:SUBJECT, activity:activity, section:lastMeta.section, files:[{ filename:lastMeta.zipFilename, contentBase64:b64, mime:'application/zip' }] };
-                setProgress(60,'업로드 중...');
-                const res=await fetch(ENDPOINT,{ method:'POST', headers:{ 'Content-Type':'application/json', 'X-Submission-Key':SUBMIT_KEY }, body:JSON.stringify(payload) });
-                const text=await res.text();
-                let data={};
-                try{ data=JSON.parse(text); }catch(_){ data={ raw:text }; }
-                if(!res.ok){ const reason=data.error||data.detail||data.message||res.statusText||'업로드 실패'; setStatus(`제출 실패: ${reason}`); showToast(`제출 실패: ${reason}`); return; }
-                const uploadedFile=data.files?.[0];
-                const filePath=uploadedFile?.name||lastMeta.zipFilename;
-                const fullPath=`/과제제출/${SUBJECT}/${activity}/${lastMeta.section}/${lastMeta.studentId}/${filePath}`;
-                setStatus(`✅ 제출 완료! 저장 경로: ${fullPath} — 다운로드 확인 중…`);
-                setProgress(85,'다운로드 준비...');
-                attemptLocalDownloadAndVerify(lastMeta.zipFilename);
-                setProgress(100,'완료');
-                setTimeout(()=>showProgress(false),1500);
-            }catch(err){
-                const errorMessage=err?.message||err||'알 수 없는 오류';
-                setStatus(`❌ 제출 실패: ${errorMessage}`);
-                showToast(`제출 실패: ${errorMessage}`);
-            }
-        }
     });
     </script>
 </body>

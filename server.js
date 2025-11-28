@@ -76,8 +76,10 @@ async function getAccessToken() {
         params.append('client_secret', process.env.MS_CLIENT_SECRET);
         params.append('refresh_token', tokens.refresh_token);
         params.append('grant_type', 'refresh_token');
-        params.append('scope', 'Files.ReadWrite.All offline_access');
+        params.append('scope', 'Files.ReadWrite offline_access');
 
+        // Use /common endpoint to support both Org and Personal accounts
+        // Note: App Registration in Azure must be set to "Accounts in any organizational directory and personal Microsoft accounts"
         const response = await axios.post('https://login.microsoftonline.com/common/oauth2/v2.0/token', params);
         
         const newTokens = response.data;
@@ -183,6 +185,30 @@ app.post('/submit', async (req, res) => {
         // Check if running on Linux (likely Oracle Cloud)
         if (process.platform === 'linux') {
             launchOptions.executablePath = '/usr/bin/chromium-browser';
+        } else if (process.platform === 'win32') {
+            // Try to find Chrome on Windows
+            const possiblePaths = [
+                'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+                'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+                path.join(process.env.LOCALAPPDATA || '', 'Google\\Chrome\\Application\\chrome.exe'),
+                path.join(process.env.PROGRAMFILES || '', 'Google\\Chrome\\Application\\chrome.exe'),
+                path.join(process.env['PROGRAMFILES(X86)'] || '', 'Google\\Chrome\\Application\\chrome.exe')
+            ];
+            
+            const fsSync = require('fs');
+            let found = false;
+            for (const p of possiblePaths) {
+                console.log(`Checking for Chrome at: ${p}`);
+                if (p && fsSync.existsSync(p)) {
+                    launchOptions.executablePath = p;
+                    console.log(`Found Chrome at: ${p}`);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                console.error('Chrome not found in standard locations. Please install Chrome or set executablePath manually.');
+            }
         }
 
         browser = await puppeteer.launch(launchOptions);

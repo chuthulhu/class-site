@@ -1584,7 +1584,10 @@
         if (dom.accordions) dom.accordions.forEach(button => button.addEventListener('click', toggleAccordion));
         dom.allInputs.forEach(input => input.addEventListener('input', updatePreviewAndSave));
 
-        if (dom.downloadZipBtn) dom.downloadZipBtn.addEventListener('click', handleZipDownloadAndSubmit);
+        if (dom.downloadZipBtn) {
+            dom.downloadZipBtn.textContent = '📝 과제 제출하기';
+            dom.downloadZipBtn.addEventListener('click', submitReport);
+        }
         if (dom.printBtn) dom.printBtn.addEventListener('click', printReport);
         if (dom.previewNewTabBtn) dom.previewNewTabBtn.addEventListener('click', openPreviewInNewTab);
         if (dom.retryUploadBtn) dom.retryUploadBtn.addEventListener('click', retryLastUpload);
@@ -1989,6 +1992,8 @@
             setTimeout(()=>{ document.title=originalTitle; }, 500); 
         }
         
+
+
         function openPreviewInNewTab(){ 
             try{ 
                 // 첫 번째 제목섹션을 제외하고 나머지 섹션들만 선택
