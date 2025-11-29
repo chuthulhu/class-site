@@ -212,11 +212,14 @@ app.post('/submit', async (req, res) => {
 
     // Set content
     await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+    
+    // Set viewport to A4 size (approx 96 DPI) to ensure correct rendering
+    await page.setViewport({ width: 794, height: 1123 });
 
     // Generate PDF
     const pdfBuffer = await page.pdf({
       format: 'A4',
-      printBackground: true,
+      printBackground: false, // User requested no background
       margin: { top: '1cm', right: '1cm', bottom: '1cm', left: '1cm' }
     });
 

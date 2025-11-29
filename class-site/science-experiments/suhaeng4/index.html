@@ -2162,14 +2162,10 @@
                 // PDF 다운로드 처리
                 if (result.pdfBase64) {
                     try {
-                        // Base64 string to Blob
-                        const byteCharacters = atob(result.pdfBase64);
-                        const byteNumbers = new Array(byteCharacters.length);
-                        for (let i = 0; i < byteCharacters.length; i++) {
-                            byteNumbers[i] = byteCharacters.charCodeAt(i);
-                        }
-                        const byteArray = new Uint8Array(byteNumbers);
-                        const pdfBlob = new Blob([byteArray], { type: 'application/pdf' });
+                        // Base64 string to Blob using fetch (more robust for large strings)
+                        const pdfDataUrl = `data:application/pdf;base64,${result.pdfBase64}`;
+                        const res = await fetch(pdfDataUrl);
+                        const pdfBlob = await res.blob();
                         
                         // Create download link
                         const downloadUrl = URL.createObjectURL(pdfBlob);
@@ -2184,7 +2180,7 @@
                         alert('과제 제출이 완료되었습니다!\nPDF 파일이 자동으로 다운로드됩니다.');
                     } catch (downloadError) {
                         console.error('PDF download failed:', downloadError);
-                        alert('과제 제출은 완료되었으나 PDF 다운로드에 실패했습니다.');
+                        alert(`과제 제출은 완료되었으나 PDF 다운로드에 실패했습니다.\n에러: ${downloadError.message}`);
                     }
                 } else {
                     alert('과제 제출이 완료되었습니다!');
