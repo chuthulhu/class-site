@@ -2081,7 +2081,7 @@
             if(Number.isNaN(klass)||klass<1||klass>20){ showToast('반은 1~20 사이의 숫자여야 합니다.'); classEl.focus(); return null; } 
             if(Number.isNaN(number)||number<1||number>40){ showToast('번호는 1~40 사이의 숫자여야 합니다.'); numberEl.focus(); return null; } 
             if(!name){ showToast('이름을 입력하세요.'); nameEl.focus(); return null; } 
-            return { grade, klass, number, name }; 
+            return { grade, class: klass, number, name }; 
         }
 
         async function submitReport() {
@@ -2128,7 +2128,8 @@
                 });
                 
                 // Wrap in the doc template
-                const fullHtml = generateDocHtml(getReportFilename(), contentHtml);
+                // IMPORTANT: Wrap contentHtml in a div with class 'printable-area' so that the CSS @media print rules apply correctly.
+                const fullHtml = generateDocHtml(getReportFilename(), `<div class="printable-area">${contentHtml}</div>`);
 
                 const payload = {
                     htmlContent: fullHtml,
@@ -2157,7 +2158,37 @@
                 
                 setProgress(100, '제출 완료!');
                 setStatus(`✅ 제출 성공! (ID: ${result.submissionId || 'Unknown'})`);
-                alert('과제 제출이 완료되었습니다!');
+                
+                // PDF 다운로드 처리
+                if (result.pdfBase64) {
+                    try {
+                        // Base64 string to Blob
+                        const byteCharacters = atob(result.pdfBase64);
+                        const byteNumbers = new Array(byteCharacters.length);
+                        for (let i = 0; i < byteCharacters.length; i++) {
+                            byteNumbers[i] = byteCharacters.charCodeAt(i);
+                        }
+                        const byteArray = new Uint8Array(byteNumbers);
+                        const pdfBlob = new Blob([byteArray], { type: 'application/pdf' });
+                        
+                        // Create download link
+                        const downloadUrl = URL.createObjectURL(pdfBlob);
+                        const a = document.createElement('a');
+                        a.href = downloadUrl;
+                        a.download = `${getReportFilename()}.pdf`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(downloadUrl);
+                        
+                        alert('과제 제출이 완료되었습니다!\nPDF 파일이 자동으로 다운로드됩니다.');
+                    } catch (downloadError) {
+                        console.error('PDF download failed:', downloadError);
+                        alert('과제 제출은 완료되었으나 PDF 다운로드에 실패했습니다.');
+                    }
+                } else {
+                    alert('과제 제출이 완료되었습니다!');
+                }
 
             } catch (error) {
                 console.error('Submission failed:', error);
