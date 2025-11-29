@@ -869,6 +869,12 @@
 
         const storageKey = 'firstLastMileProjectData';
 
+        const ENDPOINT='https://pdf.physichu.kr/submit';
+        const SUBMIT_KEY='S-2025-github2025subject';
+        const SUBJECT=document.querySelector('meta[name="submission-subject"]')?.content||'과학탐구실험1';
+        const ACTIVITY_INPUT_DEFAULT=document.querySelector('meta[name="submission-activity"]')?.content||'자유낙하와수평투사';
+        const SUBMIT_META_KEY='submit_meta_scienceExperiment1';
+
         // --- Event Listeners ---
         dom.tabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
         dom.accordions.forEach(button => button.addEventListener('click', toggleAccordion));
@@ -886,7 +892,7 @@
         dom.downloadZipBtn.addEventListener('click', submitReport);
         if (dom.printBtn) dom.printBtn.addEventListener('click', printReport);
         if (dom.previewNewTabBtn) dom.previewNewTabBtn.addEventListener('click', openPreviewInNewTab);
-        if (dom.retryUploadBtn) dom.retryUploadBtn.addEventListener('click', retryLastUpload);
+
 
         // iOS Help Modal events
     if (dom.iosHelpCloseBtn) dom.iosHelpCloseBtn.addEventListener('click', () => hideModal(dom.iosHelpModal));
