@@ -1597,6 +1597,24 @@
         if (dom.printBtn) dom.printBtn.addEventListener('click', printReport);
         if (dom.previewNewTabBtn) dom.previewNewTabBtn.addEventListener('click', openPreviewInNewTab);
 
+        // iOS Share Function
+        async function openIOSShare() {
+            if (lastZipBlob && navigator.share) {
+                try {
+                    const file = new File([lastZipBlob], lastMeta?.zipFilename || 'report.zip', { type: 'application/zip' });
+                    await navigator.share({
+                        files: [file],
+                        title: '과제 제출 파일',
+                        text: '과제 제출 파일을 공유합니다.'
+                    });
+                } catch (err) {
+                    console.error('Share failed:', err);
+                }
+            } else {
+                alert('공유 기능을 사용할 수 없거나 공유할 파일이 없습니다.');
+            }
+        }
+
         if (dom.clearBtn) dom.clearBtn.addEventListener('click', handleClearAll);
         if (dom.manualSaveBtn) dom.manualSaveBtn.addEventListener('click', () => saveToBrowser('저장되었습니다!'));
         if (dom.manualLoadBtn) dom.manualLoadBtn.addEventListener('click', () => { loadFromBrowser(); showToast('불러왔습니다!'); });
