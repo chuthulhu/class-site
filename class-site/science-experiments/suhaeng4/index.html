@@ -351,17 +351,16 @@
                 border: none;
             }
 
-            /* 각 섹션마다 새 페이지에서 시작 */
-            .content-section {
-                page-break-before: always;
-                margin-top: 0;
-            }
 
             .content-section:first-child {
                 page-break-before: auto;
                 /* 첫 번째 섹션은 페이지 브레이크 없음 */
             }
 
+            /* .content-section {
+                page-break-before: always;
+                margin-top: 0;
+            } */
             .page-break-before {
                 page-break-before: always;
             }
@@ -372,12 +371,12 @@
         }
 
         .section-container {
-            border: 2px solid #E5E7EB;
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 32px;
-            background-color: #FAFAFA;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: none;
+            border-radius: 0px;
+            padding: 0px;
+            margin-bottom: 0px;
+            background-color: #ffffff;
+            box-shadow: none;
         }
 
         .section-container:last-child {
