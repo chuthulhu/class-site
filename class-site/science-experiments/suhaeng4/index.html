@@ -1927,7 +1927,9 @@
 
             const storageKey = 'scienceExperiment2ReportData';
 
-            const ENDPOINT = 'https://pdf.physichu.kr/submit';
+            const ENDPOINT = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+                ? 'http://localhost:3000/submit'
+                : 'https://pdf.physichu.kr/submit';
             const SUBMIT_KEY = 'S-2025-github2025subject';
             const SUBJECT = document.querySelector('meta[name="submission-subject"]')?.content || '과학탐구실험2';
             const ACTIVITY_INPUT_DEFAULT = document.querySelector('meta[name="submission-activity"]')?.content || '스마트기기생물조사';
