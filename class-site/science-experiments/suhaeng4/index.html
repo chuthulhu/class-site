@@ -2695,13 +2695,23 @@
                                 }
 
                                 // Standard Base64 string
-                                const byteCharacters = atob(base64);
-                                const byteNumbers = new Array(byteCharacters.length);
-                                for (let i = 0; i < byteCharacters.length; i++) {
-                                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                                // Remove any whitespace (newlines, spaces) that might have been added
+                                const cleanBase64 = base64.replace(/\s/g, '');
+
+                                try {
+                                    const byteCharacters = atob(cleanBase64);
+                                    const byteNumbers = new Array(byteCharacters.length);
+                                    for (let i = 0; i < byteCharacters.length; i++) {
+                                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                                    }
+                                    const byteArray = new Uint8Array(byteNumbers);
+                                    return new Blob([byteArray], { type: mimeType });
+                                } catch (e) {
+                                    console.error('atob failed. Base64 length:', cleanBase64.length);
+                                    console.error('First 100 chars:', cleanBase64.substring(0, 100));
+                                    console.error('Last 100 chars:', cleanBase64.substring(cleanBase64.length - 100));
+                                    throw e;
                                 }
-                                const byteArray = new Uint8Array(byteNumbers);
-                                return new Blob([byteArray], { type: mimeType });
                             };
 
                             const pdfBlob = base64ToBlob(result.pdfBase64);
