@@ -351,7 +351,7 @@
             }
             
             .section-container {
-                border: 1px solid #000;
+                border: none;
                 box-shadow: none;
                 background-color: white;
                 page-break-inside: avoid;
@@ -1653,6 +1653,19 @@
 
         // 아코디언 메뉴를 기본적으로 모두 펼칩니다.
         if (dom.accordions) dom.accordions.forEach(button => setAccordionState(button, true));
+
+        // In-App Browser Detection
+        function detectInApp() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            const isKakaotalk = /KAKAOTALK/i.test(ua);
+            const isInstagram = /Instagram/i.test(ua);
+            const isFacebook = /FBAN|FBAV/i.test(ua);
+            const isNaver = /NAVER/i.test(ua);
+            return {
+                isInApp: isKakaotalk || isInstagram || isFacebook || isNaver,
+                isKakaotalk, isInstagram, isFacebook, isNaver
+            };
+        }
 
         // Hide PDF print button only on iOS and in-app browsers (Android에서는 노출)
         const __env = detectInApp();

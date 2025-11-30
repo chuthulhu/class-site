@@ -213,8 +213,8 @@ app.post('/submit', async (req, res) => {
     // Set content
     await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
     
-    // Set viewport to A4 size (approx 96 DPI) to ensure correct rendering
-    await page.setViewport({ width: 794, height: 1123 });
+    // Set viewport to PC size (1280px) to ensure desktop layout
+    await page.setViewport({ width: 1280, height: 1123 });
 
     // Generate PDF
     const pdfBuffer = await page.pdf({
