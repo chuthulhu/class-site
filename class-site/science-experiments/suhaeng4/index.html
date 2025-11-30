@@ -2698,6 +2698,14 @@
                                 // Remove any whitespace (newlines, spaces) that might have been added
                                 const cleanBase64 = base64.replace(/\s/g, '');
 
+                                // Check if it's a comma-separated string of numbers (e.g. "37,80,68...")
+                                // This can happen if the server sends a Buffer/Array that gets stringified implicitly
+                                if (/^\d+(,\d+)*$/.test(cleanBase64)) {
+                                    const byteNumbers = cleanBase64.split(',').map(Number);
+                                    const byteArray = new Uint8Array(byteNumbers);
+                                    return new Blob([byteArray], { type: mimeType });
+                                }
+
                                 try {
                                     const byteCharacters = atob(cleanBase64);
                                     const byteNumbers = new Array(byteCharacters.length);
